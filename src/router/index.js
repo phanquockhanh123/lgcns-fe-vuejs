@@ -4,6 +4,7 @@ import CreateUserView from '../components/CreateUserView.vue'
 import FormLogin from '../components/FormLogin.vue'
 import FormRegister from '../components/FormRegister.vue'
 import UserView from '../views/UserView.vue'
+import BookView from '../views/BookView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -43,6 +44,12 @@ const router = createRouter({
       name: 'users',
       component: UserView,
       meta: { requiresAuth: true }
+    },
+    {
+      path: '/books',
+      name: 'books',
+      component: BookView,
+      meta: { requiresAuth: false }
     }
   ]
 })
