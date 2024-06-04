@@ -12,6 +12,9 @@
                         <router-link to="/" class="nav-link active">Home</router-link>
                     </li>
                     <li class="nav-item">
+                        <router-link to="/categories" class="nav-link">Categories</router-link>
+                    </li>
+                    <li class="nav-item">
                         <router-link to="/users" class="nav-link">User</router-link>
                     </li>
                      <li class="nav-item">

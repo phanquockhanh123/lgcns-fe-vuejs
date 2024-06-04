@@ -54,12 +54,6 @@
         </tr>
       </tbody>
     </table>
-    <!-- Add the Bootstrap-Vue pagination component -->
-    <b-pagination
-      v-model="currentPage"
-      :total-rows="totalItems"
-      :per-page="itemsPerPage"
-    ></b-pagination>
   </main>
 </template>
 

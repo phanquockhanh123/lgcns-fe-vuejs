@@ -5,6 +5,9 @@ import FormLogin from '../components/FormLogin.vue'
 import FormRegister from '../components/FormRegister.vue'
 import UserView from '../views/UserView.vue'
 import BookView from '../views/BookView.vue'
+import CategoryView from '../views/CategoryView.vue'
+import CreateCategoryView from '../components/CreateCategoryView.vue'
+import UpdateCategoryView from '../components/UpdateCategoryView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -49,7 +52,25 @@ const router = createRouter({
       path: '/books',
       name: 'books',
       component: BookView,
-      meta: { requiresAuth: false }
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/categories',
+      name: 'categories',
+      component: CategoryView,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/categories/create',
+      name: 'create_categories',
+      component: CreateCategoryView,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/categories/update/:id',
+      name: 'update_categories',
+      component: UpdateCategoryView,
+      meta: { requiresAuth: true }
     }
   ]
 })
