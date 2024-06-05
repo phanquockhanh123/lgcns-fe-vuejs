@@ -7,7 +7,7 @@
         <div class="top">
           <span
             >Have an account?
-            <router-link to="/login">Sign Up</router-link></span
+            <router-link to="/login">Sign In</router-link></span
           >
           <header>Sign Up</header>
         </div>
@@ -18,7 +18,12 @@
               class="input-field"
               v-model="user.firstName"
               placeholder="Firstname"
+              @blur="validateField('firstName')"
+              style="border-color: red"
             />
+            <span class="text-error" v-if="errors.firstName">{{
+              errors.firstName
+            }}</span>
             <i class="bx bx-user"></i>
           </div>
           <div class="input-box">
@@ -27,7 +32,11 @@
               class="input-field"
               v-model="user.lastName"
               placeholder="Lastname"
+              @blur="validateField('lastName')"
             />
+            <span class="text-error" v-if="errors.lastName">{{
+              errors.lastName
+            }}</span>
             <i class="bx bx-user"></i>
           </div>
         </div>
@@ -37,7 +46,9 @@
             class="input-field"
             v-model="user.email"
             placeholder="Email"
+            @blur="validateField('email')"
           />
+          <span class="text-error" v-if="errors.email">{{ errors.email }}</span>
           <i class="bx bx-envelope"></i>
         </div>
         <div class="input-box">
@@ -46,7 +57,11 @@
             class="input-field"
             v-model="user.password"
             placeholder="Password"
+            @blur="validateField('password')"
           />
+          <span class="text-error" v-if="errors.password">{{
+            errors.password
+          }}</span>
           <i class="bx bx-lock-alt"></i>
         </div>
         <div class="input-box">
@@ -55,7 +70,11 @@
             class="input-field"
             v-model="user.address"
             placeholder="Address"
+            @blur="validateField('address')"
           />
+          <span class="text-error" v-if="errors.address">{{
+            errors.address
+          }}</span>
           <i class="bx bx-lock-alt"></i>
         </div>
         <div class="input-box">
@@ -84,7 +103,13 @@ export default {
         address: "",
         password: "",
       },
-      error: null,
+      errors: {
+        firstName: "",
+        lastName: "",
+        email: "",
+        address: "",
+        password: "",
+      },
     };
   },
   methods: {
@@ -111,6 +136,44 @@ export default {
       } catch (error) {
         this.error = "Invalid input.";
         console.error("An error occurred:", error);
+      }
+    },
+    validateField(field) {
+      if (field === "password") {
+        if (!this.user.password) {
+          this.errors.password = "Password is required";
+        } else if (this.user.password.length < 3) {
+          this.errors.password = "Password must be at least 3 characters";
+        } else {
+          this.errors.password = "";
+        }
+      } else if (field === "email") {
+        const emailPattern = /^[^\s@]+@gmail\.com$/;
+        if (!this.user.email) {
+          this.errors.email = "Email is required";
+        } else if (!emailPattern.test(this.user.email)) {
+          this.errors.email = "Email is not valid";
+        } else {
+          this.errors.email = "";
+        }
+      } else if (field === "firstName") {
+        if (!this.user.firstName) {
+          this.errors.firstName = "First name is required";
+        } else {
+          this.errors.firstName = "";
+        }
+      } else if (field === "lastName") {
+        if (!this.user.lastName) {
+          this.errors.lastName = "Last name is required";
+        } else {
+          this.errors.lastName = "";
+        }
+      } else if (field === "address") {
+        if (!this.user.address) {
+          this.errors.address = "Address is required";
+        } else {
+          this.errors.address = "";
+        }
       }
     },
   },
@@ -331,6 +394,12 @@ header {
 
 .two label a:hover {
   text-decoration: underline;
+}
+
+span.text-error {
+  font-size: small;
+  color: red;
+  margin-left: 15px;
 }
 
 @media only screen and (max-width: 786px) {

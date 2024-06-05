@@ -14,22 +14,27 @@
           <input
             type="text"
             class="input-field"
-            v-model="email"
+            v-model="form.email"
             placeholder="Email"
+            @blur="validateField('email')"
           />
+          <span class="text-error" v-if="errors.email">{{ errors.email }}</span>
           <i class="bx bx-user"></i>
         </div>
         <div class="input-box">
           <input
             type="password"
             class="input-field"
-            v-model="password"
+            v-model="form.password"
             placeholder="Password"
+            @blur="validateField('password')"
           />
+          <span class="text-error" v-if="errors.password">{{
+            errors.password
+          }}</span>
           <i class="bx bx-lock-alt"></i>
         </div>
 
-        <p v-if="error">{{ error }}</p>
         <div class="input-box">
           <input
             type="submit"
@@ -49,18 +54,22 @@ export default {
   name: "FormLogin",
   data() {
     return {
-      email: "",
-      password: "",
-      error: "",
+      form: {
+        email: "",
+        password: "",
+      },
+      errors: {
+        email: "",
+        password: "",
+      },
     };
   },
   methods: {
     async signIn() {
-      this.error = null;
       try {
         const res = await axios.post("/auth/login", {
-          email: this.email,
-          password: this.password,
+          email: this.form.email,
+          password: this.form.password,
         });
 
         if (res.data.statusCode == 200) {
@@ -75,6 +84,26 @@ export default {
       } catch (error) {
         this.error = "Invalid email or password.";
         console.error("An error occurred:", error);
+      }
+    },
+    validateField(field) {
+      if (field === "password") {
+        if (!this.form.password) {
+          this.errors.password = "password is required";
+        } else if (this.form.password.length < 3) {
+          this.errors.password = "password must be at least 3 characters";
+        } else {
+          this.errors.password = "";
+        }
+      } else if (field === "email") {
+        const emailPattern = /^[^\s@]+@gmail\.com$/;
+        if (!this.form.email) {
+          this.errors.email = "Email is required";
+        } else if (!emailPattern.test(this.form.email)) {
+          this.errors.email = "Email is not valid";
+        } else {
+          this.errors.email = "";
+        }
       }
     },
   },
@@ -300,6 +329,12 @@ header {
 
 .two label a:hover {
   text-decoration: underline;
+}
+
+span.text-error {
+  font-size: small;
+  color: red;
+  margin-left: 15px;
 }
 
 @media only screen and (max-width: 786px) {
