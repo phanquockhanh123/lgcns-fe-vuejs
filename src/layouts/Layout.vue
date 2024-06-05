@@ -2,15 +2,8 @@
   <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <div class="container-fluid">
       <router-link to="/" class="nav-link active">DASH BOARD</router-link>
-      <button
-        class="navbar-toggler"
-        type="button"
-        data-bs-toggle="collapse"
-        data-bs-target="#navbarNav"
-        aria-controls="navbarNav"
-        aria-expanded="false"
-        aria-label="Toggle navigation"
-      >
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbarNav">
@@ -19,9 +12,7 @@
             <router-link to="/" class="nav-link active">Home</router-link>
           </li>
           <li class="nav-item">
-            <router-link to="/categories" class="nav-link"
-              >Categories</router-link
-            >
+            <router-link to="/categories" class="nav-link">Categories</router-link>
           </li>
           <li class="nav-item">
             <router-link to="/books" class="nav-link">Books</router-link>
@@ -30,17 +21,17 @@
             <router-link to="/login" class="nav-link">Login</router-link>
           </li>
           <li class="nav-item" v-else>
-            <router-link to="#" @click.prevent="logout" class="nav-link"
-              >Logout</router-link
-            >
+            <router-link to="#" @click.prevent="logout" class="nav-link">Logout</router-link>
           </li>
         </ul>
       </div>
     </div>
   </nav>
+  <div class="col-sm-12 p-2">
+    <router-view></router-view>
+  </div>
 </template>
 <script>
-import axios from "axios";
 
 export default {
   name: "NavBar",
@@ -49,17 +40,9 @@ export default {
   },
   methods: {
     async logout() {
-      try {
-        const res = await axios.post("/auth/logout");
-        if (res.data.status != 403) {
-          localStorage.removeItem("token");
-          console.log("Register successful:", res.data);
-          this.$router.push("/login");
-        }
-      } catch (error) {
-        this.error = "Invalid input.";
-        console.error("An error occurred:", error);
-      }
+      localStorage.removeItem("token");
+
+      this.$router.push("/login");
     },
   },
   computed: {

@@ -8,56 +8,62 @@ import CreateCategoryView from "../views/categories/CreateCategoryView.vue";
 import UpdateCategoryView from "../views/categories/UpdateCategoryView.vue";
 import CreateBookView from "../views/books/CreateBookView.vue";
 import UpdateBookView from "../views/books/UpdateBookView.vue";
-import NavBar from "../layouts/NavBar.vue";
+import Layout from "../layouts/Layout.vue";
 
 const routes = [
   {
     path: "/",
-    name: "home",
-    component: HomeView,
+    component: Layout,
     meta: { requiresAuth: true },
+    children: [
+      {
+        path: "/books",
+        name: "books",
+        component: BookView,
+        meta: { requiresAuth: true },
+      },
+      {
+        path: "/books/create",
+        name: "createBooks",
+        component: CreateBookView,
+        meta: { requiresAuth: true },
+      },
+      {
+        path: "/books/update/:id",
+        name: "updateBooks",
+        component: UpdateBookView,
+        meta: { requiresAuth: true },
+      },
+      {
+        path: "/categories",
+        name: "categories",
+        component: CategoryView,
+        meta: { requiresAuth: true },
+      },
+      {
+        path: "/categories/create",
+        name: "createCategories",
+        component: CreateCategoryView,
+        meta: { requiresAuth: true },
+      },
+      {
+        path: "/categories/update/:id",
+        name: "update_categories",
+        component: UpdateCategoryView,
+        meta: { requiresAuth: true },
+      },
+    ]
   },
   {
     path: "/login",
     name: "login",
-    component: FormLogin,
-    meta: { requiresAuth: false },
+    component: FormLogin
   },
   {
     path: "/register",
     name: "register",
     component: FormRegister,
     meta: { requiresAuth: false },
-  },
-  {
-    path: "/books",
-    name: "books",
-    component: BookView,
-    meta: { requiresAuth: true },
-  },
-  {
-    path: "/books/create",
-    name: "createBooks",
-    component: CreateBookView,
-    meta: { requiresAuth: true },
-  },
-  {
-    path: "/categories",
-    name: "categories",
-    component: CategoryView,
-    meta: { requiresAuth: true },
-  },
-  {
-    path: "/categories/create",
-    name: "createCategories",
-    component: CreateCategoryView,
-    meta: { requiresAuth: true },
-  },
-  {
-    path: "/categories/update/:id",
-    name: "update_categories",
-    component: UpdateCategoryView,
-    meta: { requiresAuth: true },
   },
 ];
 

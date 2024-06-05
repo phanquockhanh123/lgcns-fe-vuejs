@@ -55,7 +55,7 @@ export default {
   methods: {
     async createCategory() {
       this.token = localStorage.getItem("token");
-
+      console.log(this.token)
       if (this.token != "") {
         axios
           .post("/admin/categories", this.category)
