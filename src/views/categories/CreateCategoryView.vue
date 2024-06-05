@@ -29,11 +29,7 @@
       >
         Submit
       </button>
-      <button
-        type="submit"
-        class="btn ms-2"
-        @click.prevent="backHome"
-      >
+      <button type="submit" class="btn ms-2" @click.prevent="backHome">
         Back
       </button>
     </form>
@@ -42,12 +38,10 @@
 
 <script>
 import axios from "axios";
-import NavBar from "../../components/NavBar.vue";
 
 export default {
   name: "CreateCategoryView",
   components: {
-    NavBar
   },
   data() {
     return {
@@ -64,15 +58,7 @@ export default {
 
       if (this.token != "") {
         axios
-          .post(
-            "http://localhost:8081/api/v1/admin/categories",
-            this.category,
-            {
-              headers: {
-                Authorization: `Bearer ${this.token}`,
-              },
-            }
-          )
+          .post("/admin/categories", this.category)
           .then((response) => {
             // JSON responses are automatically parsed.
             if (response.data.code == 1000) {
@@ -87,7 +73,6 @@ export default {
     backHome() {
       this.$router.push("/categories");
     },
-   
   },
 };
 </script>

@@ -40,12 +40,10 @@
 
 <script>
 import axios from "axios";
-import NavBar from "../../components/NavBar.vue";
 
 export default {
   name: "UpdateCategoryView",
   components: {
-    NavBar,
   },
   data() {
     return {
@@ -66,11 +64,7 @@ export default {
 
       if (this.token != "") {
         axios
-          .get(`http://localhost:8081/api/v1/admin/categories/${id}`, {
-            headers: {
-              Authorization: `Bearer ${this.token}`,
-            },
-          })
+          .get(`/admin/categories/${id}`)
           .then((response) => {
             // JSON responses are automatically parsed.
             console.log(response.data);
@@ -89,13 +83,8 @@ export default {
         let id = this.$route.params.id;
         await axios
           .put(
-            `http://localhost:8081/api/v1/admin/categories/${id}`,
-            this.category,
-            {
-              headers: {
-                Authorization: `Bearer ${this.token}`,
-              },
-            }
+            `/admin/categories/${id}`,
+            this.category
           )
           .then((response) => {
             // JSON responses are automatically parsed.

@@ -1,370 +1,402 @@
 <template>
-    <div class="wrapper">
-        <!----------------------------- Form box ----------------------------------->
-        <div class="form-box">
-
-            <!------------------- registration form -------------------------->
-            <div class="register-container" id="register">
-                <div class="top">
-                    <span>Have an account? <router-link to="/login">Sign Up</router-link></span>
-                    <header>Sign Up</header>
-                </div>
-                <div class="two-forms">
-                    <div class="input-box">
-                        <input type="text" class="input-field" v-model="user.firstName" placeholder="Firstname">
-                        <i class="bx bx-user"></i>
-                    </div>
-                    <div class="input-box">
-                        <input type="text" class="input-field" v-model="user.lastName"  placeholder="Lastname">
-                        <i class="bx bx-user"></i>
-                    </div>
-                </div>
-                <div class="input-box">
-                    <input type="text" class="input-field" v-model="user.email"  placeholder="Email">
-                    <i class="bx bx-envelope"></i>
-                </div>
-                <div class="input-box">
-                    <input type="password" class="input-field" v-model="user.password"  placeholder="Password">
-                    <i class="bx bx-lock-alt"></i>
-                </div>
-                <div class="input-box">
-                    <input type="text" class="input-field" v-model="user.address"  placeholder="Address">
-                    <i class="bx bx-lock-alt"></i>
-                </div>
-                <div class="input-box">
-                    <input type="submit" class="submit" @click.prevent="register" value="Register">
-                </div>
-            </div>
+  <div class="wrapper">
+    <!----------------------------- Form box ----------------------------------->
+    <div class="form-box">
+      <!------------------- registration form -------------------------->
+      <div class="register-container" id="register">
+        <div class="top">
+          <span
+            >Have an account?
+            <router-link to="/login">Sign Up</router-link></span
+          >
+          <header>Sign Up</header>
         </div>
+        <div class="two-forms">
+          <div class="input-box">
+            <input
+              type="text"
+              class="input-field"
+              v-model="user.firstName"
+              placeholder="Firstname"
+            />
+            <i class="bx bx-user"></i>
+          </div>
+          <div class="input-box">
+            <input
+              type="text"
+              class="input-field"
+              v-model="user.lastName"
+              placeholder="Lastname"
+            />
+            <i class="bx bx-user"></i>
+          </div>
+        </div>
+        <div class="input-box">
+          <input
+            type="text"
+            class="input-field"
+            v-model="user.email"
+            placeholder="Email"
+          />
+          <i class="bx bx-envelope"></i>
+        </div>
+        <div class="input-box">
+          <input
+            type="password"
+            class="input-field"
+            v-model="user.password"
+            placeholder="Password"
+          />
+          <i class="bx bx-lock-alt"></i>
+        </div>
+        <div class="input-box">
+          <input
+            type="text"
+            class="input-field"
+            v-model="user.address"
+            placeholder="Address"
+          />
+          <i class="bx bx-lock-alt"></i>
+        </div>
+        <div class="input-box">
+          <input
+            type="submit"
+            class="submit"
+            @click.prevent="register"
+            value="Register"
+          />
+        </div>
+      </div>
     </div>
+  </div>
 </template>
 <script>
-import axios from 'axios';
+import axios from "axios";
 
 export default {
-    name: "FormRegister",
-    data() {
-        return {
-            user: {
-                firstName: "",
-                lastName: "",
-                email: "",
-                address: "",
-                password: ""
-            },
-            error: null
-        }
-    },
-    methods: {
-        async register() {
-            this.error = null;
-            let dataRegister = {
-                firstName: this.user.firstName,
-                lastName: this.user.lastName,
-                email: this.user.email,
-                address: this.user.address,
-                password: this.user.password,
-                role: "USER"
-            };
-            try {
-                const res = await axios.post('http://localhost:8081/api/v1/auth/signup', dataRegister);
+  name: "FormRegister",
+  data() {
+    return {
+      user: {
+        firstName: "",
+        lastName: "",
+        email: "",
+        address: "",
+        password: "",
+      },
+      error: null,
+    };
+  },
+  methods: {
+    async register() {
+      this.error = null;
+      let dataRegister = {
+        firstName: this.user.firstName,
+        lastName: this.user.lastName,
+        email: this.user.email,
+        address: this.user.address,
+        password: this.user.password,
+        role: "USER",
+      };
+      try {
+        const res = await axios.post("/auth/signup", dataRegister);
 
-                // Handle successful login
-                if (res.data.statusCode == 200) { 
-                    console.log('Register successful:', res.data);
-                    this.$router.push('/login'); // Redirect to /users
-                } else {
-                    alert("Login failed!!")
-                }
-            } catch (error) {
-                this.error = 'Invalid input.';
-                console.error('An error occurred:', error);
-            }
+        // Handle successful login
+        if (res.data.statusCode == 200) {
+          console.log("Register successful:", res.data);
+          this.$router.push("/login"); // Redirect to /users
+        } else {
+          alert("Login failed!!");
         }
+      } catch (error) {
+        this.error = "Invalid input.";
+        console.error("An error occurred:", error);
+      }
     },
-}
+  },
+};
 </script>
 
 <style scoped>
 /* POPPINS FONT */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap");
 
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Poppins', sans-serif;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
 }
 
 .wrapper {
-    background: url("../assets/images/1.jpg");
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-attachment: fixed;
-    overflow: hidden;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 110vh;
-    /* background: rgba(39, 39, 39, 0.4); */
+  background: url("../../assets/images/1.jpg");
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 110vh;
+  /* background: rgba(39, 39, 39, 0.4); */
 }
 
 .nav {
-    position: fixed;
-    top: 0;
-    display: flex;
-    justify-content: space-around;
-    width: 100%;
-    height: 100px;
-    line-height: 100px;
-    background: linear-gradient(rgba(39, 39, 39, 0.6), transparent);
-    z-index: 100;
+  position: fixed;
+  top: 0;
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+  height: 100px;
+  line-height: 100px;
+  background: linear-gradient(rgba(39, 39, 39, 0.6), transparent);
+  z-index: 100;
 }
 
 .nav-logo p {
-    color: white;
-    font-size: 25px;
-    font-weight: 600;
+  color: white;
+  font-size: 25px;
+  font-weight: 600;
 }
 
 .nav-menu ul {
-    display: flex;
+  display: flex;
 }
 
 .nav-menu ul li {
-    list-style-type: none;
+  list-style-type: none;
 }
 
 .nav-menu ul li .link {
-    text-decoration: none;
-    font-weight: 500;
-    color: #fff;
-    padding-bottom: 15px;
-    margin: 0 25px;
+  text-decoration: none;
+  font-weight: 500;
+  color: #fff;
+  padding-bottom: 15px;
+  margin: 0 25px;
 }
 
 .link:hover,
 .active {
-    border-bottom: 2px solid #fff;
+  border-bottom: 2px solid #fff;
 }
 
 .nav-button .btn {
-    width: 130px;
-    height: 40px;
-    font-weight: 500;
-    background: rgba(255, 255, 255, 0.4);
-    border: none;
-    border-radius: 30px;
-    cursor: pointer;
-    transition: .3s ease;
+  width: 130px;
+  height: 40px;
+  font-weight: 500;
+  background: rgba(255, 255, 255, 0.4);
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+  transition: 0.3s ease;
 }
 
 .btn:hover {
-    background: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.3);
 }
 
 .btn.white-btn {
-    background: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.7);
 }
 
 .btn.btn.white-btn:hover {
-    background: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.5);
 }
 
 .nav-menu-btn {
-    display: none;
+  display: none;
 }
 
 .form-box {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 512px;
-    height: 420px;
-    /* overflow: hidden; */
-    z-index: 2;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 512px;
+  height: 420px;
+  /* overflow: hidden; */
+  z-index: 2;
 }
 
 .login-container {
-    position: absolute;
-    left: 4px;
-    width: 500px;
-    display: flex;
-    flex-direction: column;
-    transition: .5s ease-in-out;
+  position: absolute;
+  left: 4px;
+  width: 500px;
+  display: flex;
+  flex-direction: column;
+  transition: 0.5s ease-in-out;
 }
 
 .register-container {
-    position: absolute;
-    width: 500px;
-    display: flex;
-    flex-direction: column;
-    transition: .5s ease-in-out;
+  position: absolute;
+  width: 500px;
+  display: flex;
+  flex-direction: column;
+  transition: 0.5s ease-in-out;
 }
 
 .top span {
-    color: #fff;
-    font-size: small;
-    padding: 10px 0;
-    display: flex;
-    justify-content: center;
+  color: #fff;
+  font-size: small;
+  padding: 10px 0;
+  display: flex;
+  justify-content: center;
 }
 
 .top span a {
-    font-weight: 500;
-    color: #fff;
-    margin-left: 5px;
+  font-weight: 500;
+  color: #fff;
+  margin-left: 5px;
 }
 
 header {
-    color: #fff;
-    font-size: 30px;
-    text-align: center;
-    padding: 10px 0 30px 0;
+  color: #fff;
+  font-size: 30px;
+  text-align: center;
+  padding: 10px 0 30px 0;
 }
 
 .two-forms {
-    display: flex;
-    gap: 10px;
+  display: flex;
+  gap: 10px;
 }
 
 .input-field {
-    font-size: 15px;
-    background: rgba(255, 255, 255, 0.2);
-    color: #fff;
-    height: 50px;
-    width: 100%;
-    padding: 0 10px 0 45px;
-    border: none;
-    border-radius: 30px;
-    outline: none;
-    transition: .2s ease;
-    margin-top: 10px;
+  font-size: 15px;
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  height: 50px;
+  width: 100%;
+  padding: 0 10px 0 45px;
+  border: none;
+  border-radius: 30px;
+  outline: none;
+  transition: 0.2s ease;
+  margin-top: 10px;
 }
 
 .input-field:hover,
 .input-field:focus {
-    background: rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.25);
 }
 
 ::-webkit-input-placeholder {
-    color: #fff;
+  color: #fff;
 }
 
 .input-box i {
-    position: relative;
-    top: -35px;
-    left: 17px;
-    color: #fff;
+  position: relative;
+  top: -35px;
+  left: 17px;
+  color: #fff;
 }
 
 .submit {
-    font-size: 15px;
-    font-weight: 500;
-    color: black;
-    height: 45px;
-    width: 100%;
-    border: none;
-    border-radius: 30px;
-    outline: none;
-    background: rgba(255, 255, 255, 0.7);
-    cursor: pointer;
-    transition: .3s ease-in-out;
-    margin-top: 10px;
+  font-size: 15px;
+  font-weight: 500;
+  color: black;
+  height: 45px;
+  width: 100%;
+  border: none;
+  border-radius: 30px;
+  outline: none;
+  background: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  transition: 0.3s ease-in-out;
+  margin-top: 10px;
 }
 
 .submit:hover {
-    background: rgba(255, 255, 255, 0.5);
-    box-shadow: 1px 5px 7px 1px rgba(0, 0, 0, 0.2);
+  background: rgba(255, 255, 255, 0.5);
+  box-shadow: 1px 5px 7px 1px rgba(0, 0, 0, 0.2);
 }
 
 .two-col {
-    display: flex;
-    justify-content: space-between;
-    color: #fff;
-    font-size: small;
-    margin-top: 10px;
+  display: flex;
+  justify-content: space-between;
+  color: #fff;
+  font-size: small;
+  margin-top: 10px;
 }
 
 .two-col .one {
-    display: flex;
-    gap: 5px;
+  display: flex;
+  gap: 5px;
 }
 
 .two label a {
-    text-decoration: none;
-    color: #fff;
+  text-decoration: none;
+  color: #fff;
 }
 
 .two label a:hover {
-    text-decoration: underline;
+  text-decoration: underline;
 }
 
 @media only screen and (max-width: 786px) {
-    .nav-button {
-        display: none;
-    }
+  .nav-button {
+    display: none;
+  }
 
-    .nav-menu.responsive {
-        top: 100px;
-    }
+  .nav-menu.responsive {
+    top: 100px;
+  }
 
-    .nav-menu {
-        position: absolute;
-        top: -800px;
-        display: flex;
-        justify-content: center;
-        background: rgba(255, 255, 255, 0.2);
-        width: 100%;
-        height: 90vh;
-        backdrop-filter: blur(20px);
-        transition: .3s;
-    }
+  .nav-menu {
+    position: absolute;
+    top: -800px;
+    display: flex;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.2);
+    width: 100%;
+    height: 90vh;
+    backdrop-filter: blur(20px);
+    transition: 0.3s;
+  }
 
-    .nav-menu ul {
-        flex-direction: column;
-        text-align: center;
-    }
+  .nav-menu ul {
+    flex-direction: column;
+    text-align: center;
+  }
 
-    .nav-menu-btn {
-        display: block;
-    }
+  .nav-menu-btn {
+    display: block;
+  }
 
-    .nav-menu-btn i {
-        font-size: 25px;
-        color: #fff;
-        padding: 10px;
-        background: rgba(255, 255, 255, 0.2);
-        border-radius: 50%;
-        cursor: pointer;
-        transition: .3s;
-    }
+  .nav-menu-btn i {
+    font-size: 25px;
+    color: #fff;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: 0.3s;
+  }
 
-    .nav-menu-btn i:hover {
-        background: rgba(255, 255, 255, 0.15);
-    }
+  .nav-menu-btn i:hover {
+    background: rgba(255, 255, 255, 0.15);
+  }
 }
 
 @media only screen and (max-width: 540px) {
-    .wrapper {
-        min-height: 100vh;
-    }
+  .wrapper {
+    min-height: 100vh;
+  }
 
-    .form-box {
-        width: 100%;
-        height: 500px;
-    }
+  .form-box {
+    width: 100%;
+    height: 500px;
+  }
 
-    .register-container,
-    .login-container {
-        width: 100%;
-        padding: 0 20px;
-    }
+  .register-container,
+  .login-container {
+    width: 100%;
+    padding: 0 20px;
+  }
 
-    .register-container .two-forms {
-        flex-direction: column;
-        gap: 0;
-    }
+  .register-container .two-forms {
+    flex-direction: column;
+    gap: 0;
+  }
 }
 </style>
