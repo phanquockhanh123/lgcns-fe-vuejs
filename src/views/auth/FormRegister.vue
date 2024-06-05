@@ -19,7 +19,6 @@
               v-model="user.firstName"
               placeholder="Firstname"
               @blur="validateField('firstName')"
-              style="border-color: red"
             />
             <span class="text-error" v-if="errors.firstName">{{
               errors.firstName
