@@ -10,7 +10,9 @@
           v-model="category.name"
           id="firnamestName"
           aria-describedby="name"
+          @blur="validateField('name')"
         />
+        <span class="text-error" v-if="errors.name">{{ errors.name }}</span>
       </div>
       <div class="mb-3">
         <label for="description" class="form-label">Description</label>
@@ -37,42 +39,72 @@
 </template>
 
 <script>
-import axios from "axios";
+import axiosInterceptor from "../../service/AxiosInteceptorToken";
+import { toast } from "vue3-toastify";
+import "vue3-toastify/dist/index.css";
 
 export default {
   name: "CreateCategoryView",
-  components: {
-  },
+  components: {},
   data() {
     return {
       category: {
         name: "",
         description: "",
       },
-      token: localStorage.getItem("token"),
+      errors: {
+        name: "",
+      },
     };
   },
   methods: {
     async createCategory() {
-      this.token = localStorage.getItem("token");
-      console.log(this.token)
-      if (this.token != "") {
-        axios
+      this.errors = [];
+      this.validateField("name");
+
+      if (this.errors.name == "") {
+        axiosInterceptor
           .post("/admin/categories", this.category)
           .then((response) => {
             // JSON responses are automatically parsed.
             if (response.data.code == 1000) {
-              this.$router.push("/categories");
+              toast.success("Create category successfully!", {
+                autoClose: 1000,
+              });
+
+              setTimeout(() => {
+                this.$router.push("/categories");
+              }, 2000);
             }
           })
           .catch((e) => {
             console.log(e);
           });
+      } else {
+        alert("You must handle all error!")
+        console.log("Form has validation errors. Please correct them.");
       }
     },
     backHome() {
       this.$router.push("/categories");
     },
+    validateField(field) {
+      if (field === "name") {
+        if (!this.category.name) {
+          this.errors.name = "Category name is required";
+        } else {
+          this.errors.name = "";
+        }
+      }
+    },
   },
 };
 </script>
+
+<style scoped>
+span.text-error {
+  font-size: small;
+  color: red;
+  margin-left: 15px;
+}
+</style>

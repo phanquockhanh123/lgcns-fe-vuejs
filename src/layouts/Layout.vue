@@ -2,17 +2,28 @@
   <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <div class="container-fluid">
       <router-link to="/" class="nav-link active">DASH BOARD</router-link>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#navbarNav"
+        aria-controls="navbarNav"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav">
           <li class="nav-item">
-            <router-link to="/dashboard" class="nav-link active">Home</router-link>
+            <router-link to="/dashboard" class="nav-link active"
+              >Home</router-link
+            >
           </li>
           <li class="nav-item">
-            <router-link to="/categories" class="nav-link">Categories</router-link>
+            <router-link to="/categories" class="nav-link"
+              >Categories</router-link
+            >
           </li>
           <li class="nav-item">
             <router-link to="/books" class="nav-link">Books</router-link>
@@ -21,7 +32,9 @@
             <router-link to="/login" class="nav-link">Login</router-link>
           </li>
           <li class="nav-item" v-else>
-            <router-link to="#" @click.prevent="logout" class="nav-link">Logout</router-link>
+            <router-link to="#" @click.prevent="logout" class="nav-link"
+              >Logout</router-link
+            >
           </li>
         </ul>
       </div>
@@ -32,6 +45,8 @@
   </div>
 </template>
 <script>
+import { toast } from "vue3-toastify";
+import "vue3-toastify/dist/index.css";
 
 export default {
   name: "NavBar",
@@ -39,10 +54,15 @@ export default {
     return {};
   },
   methods: {
-    async logout() {
-      localStorage.removeItem("token");
+    logout() {
+      toast.success("You will logout after 3 seconds!!", {
+        autoClose: 1000,
+      });
 
-      this.$router.push("/login");
+      setTimeout(() => {
+        localStorage.removeItem("token");
+        this.$router.push("/login");
+      }, 2000);
     },
   },
   computed: {

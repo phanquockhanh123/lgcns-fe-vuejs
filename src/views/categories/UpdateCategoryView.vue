@@ -39,7 +39,7 @@
 </template>
 
 <script>
-import axios from "axios";
+import axiosInterceptor from "../../service/AxiosInteceptorToken";
 
 export default {
   name: "UpdateCategoryView",
@@ -51,7 +51,7 @@ export default {
         name: "",
         description: "",
       },
-      token: localStorage.getItem("token"),
+      token: "",
     };
   },
   mounted() {
@@ -63,7 +63,7 @@ export default {
       let id = this.$route.params.id;
 
       if (this.token != "") {
-        axios
+        axiosInterceptor
           .get(`/admin/categories/${id}`)
           .then((response) => {
             // JSON responses are automatically parsed.
@@ -81,7 +81,7 @@ export default {
 
       if (this.token != "") {
         let id = this.$route.params.id;
-        await axios
+        await axiosInterceptor
           .put(
             `/admin/categories/${id}`,
             this.category

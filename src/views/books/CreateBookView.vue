@@ -12,9 +12,7 @@
           aria-describedby="title"
           @blur="validateField('title')"
         />
-        <span class="text-error" v-if="errors.title">{{
-              errors.title
-            }}</span>
+        <span class="text-error" v-if="errors.title">{{ errors.title }}</span>
       </div>
       <div class="mb-3">
         <label for="categoryId" class="form-label">Category ID</label>
@@ -27,8 +25,8 @@
           @blur="validateField('categoryId')"
         />
         <span class="text-error" v-if="errors.categoryId">{{
-              errors.categoryId
-            }}</span>
+          errors.categoryId
+        }}</span>
       </div>
       <div class="mb-3">
         <label for="price" class="form-label">Price</label>
@@ -40,9 +38,7 @@
           aria-describedby="price"
           @blur="validateField('price')"
         />
-        <span class="text-error" v-if="errors.price">{{
-              errors.price
-            }}</span>
+        <span class="text-error" v-if="errors.price">{{ errors.price }}</span>
       </div>
       <div class="mb-3">
         <label for="author" class="form-label">Author</label>
@@ -53,11 +49,8 @@
           id="author"
           aria-describedby="author"
           @blur="validateField('author')"
-          
         />
-        <span class="text-error" v-if="errors.author">{{
-              errors.author
-            }}</span>
+        <span class="text-error" v-if="errors.author">{{ errors.author }}</span>
       </div>
       <div class="mb-3">
         <label for="isbn" class="form-label">Isbn</label>
@@ -69,9 +62,7 @@
           aria-describedby="isbn"
           @blur="validateField('isbn')"
         />
-        <span class="text-error" v-if="errors.isbn">{{
-              errors.isbn
-            }}</span>
+        <span class="text-error" v-if="errors.isbn">{{ errors.isbn }}</span>
       </div>
       <div class="mb-3">
         <label for="description" class="form-label">Description</label>
@@ -94,13 +85,13 @@
 </template>
 
 <script>
-import axios from "axios";
+import axiosInterceptor from "../../service/AxiosInteceptorToken";
+import { toast } from "vue3-toastify";
+import "vue3-toastify/dist/index.css";
 
 export default {
   name: "CreateBookView",
-  components: {
-    
-  },
+  components: {},
   data() {
     return {
       book: {
@@ -117,27 +108,45 @@ export default {
         isbn: "",
         author: "",
         title: "",
-        description: "",
       },
       token: "",
     };
   },
   methods: {
     async createBook() {
-      this.token = localStorage.getItem("token");
-
-      if (this.token != "") {
-        axios
+      this.errors = [];
+      this.validateField("categoryId");
+      this.validateField("price");
+      this.validateField("title");
+      this.validateField("author");
+      this.validateField("isbn");
+      if (
+        this.errors.title == "" ||
+        this.errors.author == "" ||
+        this.errors.price == "" ||
+        this.errors.isbn == "" ||
+        this.errors.categoryId == ""
+      ) {
+        axiosInterceptor
           .post("/admin/books", this.book)
           .then((response) => {
             // JSON responses are automatically parsed.
             if (response.data != "") {
-              this.$router.push("/books");
+              toast.success("Create books successfully!", {
+                autoClose: 1000,
+              });
+
+              setTimeout(() => {
+                this.$router.push("/books");
+              }, 2000);
             }
           })
           .catch((e) => {
             console.log(e);
           });
+      } else {
+        alert("You must handle all error!");
+        console.log("Form has validation errors. Please correct them.");
       }
     },
     backHome() {
@@ -179,7 +188,7 @@ export default {
           this.errors.isbn = "";
         }
       }
-    }
+    },
   },
 };
 </script>

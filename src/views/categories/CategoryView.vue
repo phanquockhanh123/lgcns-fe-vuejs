@@ -18,11 +18,6 @@
         >
           <template #headerCell="{ column }"> </template>
           <template #bodyCell="{ column, index, record }">
-            <template v-if="column.key === 'created'">
-              <a-space>
-                {{ formattedDatetime(record.created) }}
-              </a-space>
-            </template>
             <template v-if="column.key === 'action'">
               <a-space>
                 <router-link :to="{ path: '/categories/update/' + record.id }">
@@ -70,8 +65,10 @@ import {
   DeleteOutlined,
   PlusOutlined,
 } from "@ant-design/icons-vue";
-import axios from "axios";
+import axiosInterceptor from "../../service/AxiosInteceptorToken";
 import moment from "moment";
+import { toast } from "vue3-toastify";
+import "vue3-toastify/dist/index.css";
 
 export default {
   name: "CategoryView",
@@ -103,11 +100,6 @@ export default {
           key: "description",
         },
         {
-          title: "Created",
-          dataIndex: "created",
-          key: "created",
-        },
-        {
           title: "Action",
           dataIndex: "action",
           key: "action",
@@ -117,7 +109,7 @@ export default {
       pageInfo: {
         content: [],
         pageIndex: 1,
-        pageSize: 3,
+        pageSize: 5,
         totalElements: 0,
         totalPages: 0,
       },
@@ -148,7 +140,7 @@ export default {
       this.loading = true;
 
       try {
-        const response = await axios.get("/admin/categories", {
+        const response = await axiosInterceptor.get("/admin/categories", {
           params: {
             page: this.pageInfo.pageIndex - 1,
             size: this.pageInfo.pageSize,
@@ -167,7 +159,10 @@ export default {
     },
     async deleteCategory() {
       try {
-        await axios.delete(`/admin/categories/${this.categoryIdToDelete}`);
+        toast.success(`Delete category successfully with category id ! ${this.categoryIdToDelete}`, {
+          autoClose: 1000,
+        });
+        await axiosInterceptor.delete(`/admin/categories/${this.categoryIdToDelete}`);
         this.getCategoriesList();
         this.isModalVisible = false;
       } catch (error) {

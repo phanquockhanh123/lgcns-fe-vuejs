@@ -79,7 +79,7 @@
 </template>
 
 <script>
-import axios from "axios";
+import axiosInterceptor from "../../service/AxiosInteceptorToken";
 
 export default {
   name: "UpdateBookView",
@@ -108,7 +108,7 @@ export default {
       let id = this.$route.params.id;
 
       if (this.token != "") {
-        axios
+        axiosInterceptor
           .get(`/admin/books/${id}`)
           .then((response) => {
             // JSON responses are automatically parsed.
@@ -131,7 +131,7 @@ export default {
 
       if (this.token != "") {
         let id = this.$route.params.id;
-        await axios
+        await axiosInterceptor
           .put(
             `/admin/books/${id}`,
             this.book

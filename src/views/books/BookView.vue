@@ -44,7 +44,6 @@
           :pagination="false"
           :columns="columns"
           class="table"
-          
         >
           <template #headerCell="{ column }"> </template>
           <template #bodyCell="{ column, index, record }">
@@ -95,8 +94,10 @@ import {
   DeleteOutlined,
   PlusOutlined,
 } from "@ant-design/icons-vue";
-import axios from "axios";
+import axiosInterceptor from "../../service/AxiosInteceptorToken";
 import moment from "moment";
+import { toast } from "vue3-toastify";
+import "vue3-toastify/dist/index.css";
 
 export default {
   name: "BookView",
@@ -157,11 +158,10 @@ export default {
           key: "action",
         },
       ],
-      token: localStorage.getItem("token"),
       pageInfo: {
         content: [],
         pageIndex: 1,
-        pageSize: 3,
+        pageSize: 5,
         totalElements: 0,
         totalPages: 0,
       },
@@ -206,7 +206,7 @@ export default {
 
       console.log(dataParams);
       try {
-        const response = await axios.get("/admin/books", {
+        const response = await axiosInterceptor.get("/admin/books", {
           params: dataParams,
         });
         this.listBooks = response.data.data;
@@ -222,7 +222,10 @@ export default {
     },
     async deleteBook() {
       try {
-        await axios.delete(`/admin/books/${this.bookIdToDelete}`);
+        toast.success("Delete book successfully!", {
+          autoClose: 1000,
+        });
+        await axiosInterceptor.delete(`/admin/books/${this.bookIdToDelete}`);
         this.getBooksList();
         this.isModalVisible = false;
       } catch (error) {

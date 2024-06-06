@@ -89,7 +89,7 @@
   </div>
 </template>
 <script>
-import axios from "axios";
+import axiosInterceptor from "../../service/AxiosInteceptorToken";
 
 export default {
   name: "FormRegister",
@@ -123,7 +123,7 @@ export default {
         role: "USER",
       };
       try {
-        const res = await axios.post("/auth/signup", dataRegister);
+        const res = await axiosInterceptor.post("/auth/signup", dataRegister);
 
         // Handle successful login
         if (res.data.statusCode == 200) {

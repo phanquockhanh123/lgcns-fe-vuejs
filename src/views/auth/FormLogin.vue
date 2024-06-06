@@ -50,6 +50,10 @@
 </template>
 <script>
 import axios from "axios";
+import axiosInterceptor from "../../service/AxiosInteceptorToken";
+import { toast } from "vue3-toastify";
+import "vue3-toastify/dist/index.css";
+
 export default {
   name: "FormLogin",
   data() {
@@ -67,7 +71,7 @@ export default {
   methods: {
     async signIn() {
       try {
-        const res = await axios.post("/auth/login", {
+        const res = await axiosInterceptor.post("/auth/login", {
           email: this.form.email,
           password: this.form.password,
         });
@@ -75,9 +79,15 @@ export default {
         if (res.data.statusCode == 200) {
           // Handle successful login
           console.log("Login successful:", res.data);
+
+          toast.success("Login success!", {
+            autoClose: 1000,
+          });
           // Store the token
           localStorage.setItem("token", res.data.token);
-          this.$router.push("/"); // Redirect to /users
+          setTimeout(() => {
+            this.$router.push("/");
+          }, 2000); // Redirect to /
         } else {
           alert("Login failed!!");
         }
