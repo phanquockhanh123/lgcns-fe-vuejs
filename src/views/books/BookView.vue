@@ -204,7 +204,6 @@ export default {
         dataParams.author = this.search.author;
       }
 
-      console.log(dataParams);
       try {
         const response = await axiosInterceptor.get("/admin/books", {
           params: dataParams,

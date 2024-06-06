@@ -95,6 +95,8 @@
 </template>
 <script>
 import axiosInterceptor from "../../service/AxiosInteceptorToken";
+import { toast } from "vue3-toastify";
+import "vue3-toastify/dist/index.css";
 
 export default {
   name: "FormRegister",
@@ -132,8 +134,15 @@ export default {
 
         // Handle successful login
         if (res.data.statusCode == 200) {
+          toast.success("Login success!", {
+            autoClose: 1000,
+          });
+
+
           console.log("Register successful:", res.data);
-          this.$router.push("/login"); // Redirect to /users
+          setTimeout(() => {
+            this.$router.push("/login");
+          }, 2000); // Redirect to /users
         } else {
           alert("Register failed!!");
         }

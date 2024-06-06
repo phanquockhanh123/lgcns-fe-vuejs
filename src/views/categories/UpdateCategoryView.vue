@@ -40,11 +40,12 @@
 
 <script>
 import axiosInterceptor from "../../service/AxiosInteceptorToken";
+import { toast } from "vue3-toastify";
+import "vue3-toastify/dist/index.css";
 
 export default {
   name: "UpdateCategoryView",
-  components: {
-  },
+  components: {},
   data() {
     return {
       category: {
@@ -82,15 +83,18 @@ export default {
       if (this.token != "") {
         let id = this.$route.params.id;
         await axiosInterceptor
-          .put(
-            `/admin/categories/${id}`,
-            this.category
-          )
+          .put(`/admin/categories/${id}`, this.category)
           .then((response) => {
             // JSON responses are automatically parsed.
-            console.log(response.data);
+
+            toast.success("Update categories success!", {
+              autoClose: 1000,
+            });
+
             if (response.data.code == 1000) {
-              this.$router.push("/categories");
+              setTimeout(() => {
+                this.$router.push("/categories");
+              }, 2000);
             }
           })
           .catch((e) => {

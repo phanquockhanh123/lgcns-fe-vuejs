@@ -32,9 +32,7 @@
             <router-link to="/login" class="nav-link">Login</router-link>
           </li>
           <li class="nav-item" v-else>
-            <router-link to="#" @click.prevent="logout" class="nav-link"
-              >Logout</router-link
-            >
+            <a href="" @click.prevent="logout" class="nav-link">Logout</a>
           </li>
         </ul>
       </div>
@@ -55,6 +53,7 @@ export default {
   },
   methods: {
     logout() {
+
       toast.success("You will logout after 3 seconds!!", {
         autoClose: 1000,
       });

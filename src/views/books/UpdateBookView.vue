@@ -112,7 +112,6 @@ export default {
           .get(`/admin/books/${id}`)
           .then((response) => {
             // JSON responses are automatically parsed.
-            console.log(response.data);
             this.book.title = response.data.title;
             this.book.author = response.data.author;
             this.book.price = response.data.price;
