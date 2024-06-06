@@ -6,7 +6,7 @@
         <label for="title" class="form-label">Title</label>
         <input
           type="text"
-          class="form-control"
+          :class="['form-control', { 'is-invalid': errors.title }]"
           v-model="book.title"
           id="tile"
           aria-describedby="title"
@@ -18,7 +18,7 @@
         <label for="categoryId" class="form-label">Category ID</label>
         <input
           type="text"
-          class="form-control"
+          :class="['form-control', { 'is-invalid': errors.categoryId }]"
           v-model="book.categoryId"
           id="categoryId"
           aria-describedby="categoryId"
@@ -32,7 +32,7 @@
         <label for="price" class="form-label">Price</label>
         <input
           type="text"
-          class="form-control"
+          :class="['form-control', { 'is-invalid': errors.price }]"
           v-model="book.price"
           id="price"
           aria-describedby="price"
@@ -44,7 +44,7 @@
         <label for="author" class="form-label">Author</label>
         <input
           type="text"
-          class="form-control"
+          :class="['form-control', { 'is-invalid': errors.author }]"
           v-model="book.author"
           id="author"
           aria-describedby="author"
@@ -56,7 +56,7 @@
         <label for="isbn" class="form-label">Isbn</label>
         <input
           type="text"
-          class="form-control"
+          :class="['form-control', { 'is-invalid': errors.isbn }]"
           v-model="book.isbn"
           id="isbn"
           aria-describedby="isbn"

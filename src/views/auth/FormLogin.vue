@@ -10,10 +10,11 @@
           >
           <header>Login</header>
         </div>
-        <div class="input-box">
+        <div class="mb-3">
           <input
             type="text"
-            class="input-field"
+            class="form-control"
+            :class="['form-control', { 'is-invalid': errors.email }]"
             v-model="form.email"
             placeholder="Email"
             @blur="validateField('email')"
@@ -21,10 +22,11 @@
           <span class="text-error" v-if="errors.email">{{ errors.email }}</span>
           <i class="bx bx-user"></i>
         </div>
-        <div class="input-box">
+        <div class="mb-3">
           <input
             type="password"
-            class="input-field"
+            class="form-control"
+            :class="['form-control', { 'is-invalid': errors.password }]"
             v-model="form.password"
             placeholder="Password"
             @blur="validateField('password')"
@@ -35,7 +37,7 @@
           <i class="bx bx-lock-alt"></i>
         </div>
 
-        <div class="input-box">
+        <div class="mb-3">
           <input
             type="submit"
             class="submit"
@@ -99,9 +101,9 @@ export default {
     validateField(field) {
       if (field === "password") {
         if (!this.form.password) {
-          this.errors.password = "password is required";
+          this.errors.password = "Password is required";
         } else if (this.form.password.length < 3) {
-          this.errors.password = "password must be at least 3 characters";
+          this.errors.password = "Password must be at least 3 characters";
         } else {
           this.errors.password = "";
         }
@@ -269,22 +271,21 @@ header {
   gap: 10px;
 }
 
-.input-field {
+input.form-control {
   font-size: 15px;
   background: rgba(255, 255, 255, 0.2);
   color: #fff;
   height: 50px;
   width: 100%;
   padding: 0 10px 0 45px;
-  border: none;
   border-radius: 30px;
   outline: none;
   transition: 0.2s ease;
   margin-top: 10px;
 }
 
-.input-field:hover,
-.input-field:focus {
+input.form-control:hover,
+input.form-control:focus {
   background: rgba(255, 255, 255, 0.25);
 }
 

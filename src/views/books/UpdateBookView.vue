@@ -80,12 +80,12 @@
 
 <script>
 import axiosInterceptor from "../../service/AxiosInteceptorToken";
+import { toast } from "vue3-toastify";
+import "vue3-toastify/dist/index.css";
 
 export default {
   name: "UpdateBookView",
-  components: {
-    
-  },
+  components: {},
   data() {
     return {
       book: {
@@ -127,26 +127,26 @@ export default {
       }
     },
     async updateBook() {
-      this.token = localStorage.getItem("token");
+      let id = this.$route.params.id;
 
-      if (this.token != "") {
-        let id = this.$route.params.id;
-        await axiosInterceptor
-          .put(
-            `/admin/books/${id}`,
-            this.book
-          )
-          .then((response) => {
-            // JSON responses are automatically parsed.
-            console.log(response.data);
-            if (response.data != "") {
-              this.$router.push("/books");
-            }
-          })
-          .catch((e) => {
-            console.log(e);
+      await axiosInterceptor
+        .put(`/admin/books/${id}`, this.book)
+        .then((response) => {
+          // JSON responses are automatically parsed.
+          console.log(response.data);
+          toast.success("Update book success!", {
+            autoClose: 1000,
           });
-      }
+
+          if (response.data != "") {
+            setTimeout(() => {
+              this.$router.push("/books");
+            }, 2000);
+          }
+        })
+        .catch((e) => {
+          console.log(e);
+        });
     },
   },
 };

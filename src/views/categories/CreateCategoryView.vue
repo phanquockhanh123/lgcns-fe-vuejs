@@ -6,7 +6,7 @@
         <label for="name" class="form-label">Name</label>
         <input
           type="text"
-          class="form-control"
+          :class="['form-control', { 'is-invalid': errors.name }]"
           v-model="category.name"
           id="firnamestName"
           aria-describedby="name"

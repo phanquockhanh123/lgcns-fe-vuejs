@@ -15,10 +15,11 @@
           <div class="input-box">
             <input
               type="text"
-              class="input-field"
+              class="form-control"
               v-model="user.firstName"
               placeholder="Firstname"
               @blur="validateField('firstName')"
+              :class="['form-control', { 'is-invalid': errors.firstName }]"
             />
             <span class="text-error" v-if="errors.firstName">{{
               errors.firstName
@@ -28,10 +29,11 @@
           <div class="input-box">
             <input
               type="text"
-              class="input-field"
+              class="form-control"
               v-model="user.lastName"
               placeholder="Lastname"
               @blur="validateField('lastName')"
+              :class="['form-control', { 'is-invalid': errors.lastName }]"
             />
             <span class="text-error" v-if="errors.lastName">{{
               errors.lastName
@@ -42,10 +44,11 @@
         <div class="input-box">
           <input
             type="text"
-            class="input-field"
+            class="form-control"
             v-model="user.email"
             placeholder="Email"
             @blur="validateField('email')"
+            :class="['form-control', { 'is-invalid': errors.email }]"
           />
           <span class="text-error" v-if="errors.email">{{ errors.email }}</span>
           <i class="bx bx-envelope"></i>
@@ -53,10 +56,11 @@
         <div class="input-box">
           <input
             type="password"
-            class="input-field"
+            class="form-control"
             v-model="user.password"
             placeholder="Password"
             @blur="validateField('password')"
+            :class="['form-control', { 'is-invalid': errors.password }]"
           />
           <span class="text-error" v-if="errors.password">{{
             errors.password
@@ -66,10 +70,11 @@
         <div class="input-box">
           <input
             type="text"
-            class="input-field"
+            class="form-control"
             v-model="user.address"
             placeholder="Address"
             @blur="validateField('address')"
+            :class="['form-control', { 'is-invalid': errors.address }]"
           />
           <span class="text-error" v-if="errors.address">{{
             errors.address
@@ -130,7 +135,7 @@ export default {
           console.log("Register successful:", res.data);
           this.$router.push("/login"); // Redirect to /users
         } else {
-          alert("Login failed!!");
+          alert("Register failed!!");
         }
       } catch (error) {
         this.error = "Invalid input.";
@@ -323,22 +328,21 @@ header {
   gap: 10px;
 }
 
-.input-field {
+input.form-control {
   font-size: 15px;
   background: rgba(255, 255, 255, 0.2);
   color: #fff;
   height: 50px;
   width: 100%;
   padding: 0 10px 0 45px;
-  border: none;
   border-radius: 30px;
   outline: none;
   transition: 0.2s ease;
   margin-top: 10px;
 }
 
-.input-field:hover,
-.input-field:focus {
+input.form-control:hover,
+input.form-control:focus {
   background: rgba(255, 255, 255, 0.25);
 }
 
