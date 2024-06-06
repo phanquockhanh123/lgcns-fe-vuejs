@@ -14,15 +14,10 @@
         />
       </div>
       <div class="mb-3">
-        <label for="categoryId" class="form-label">Category ID</label>
-        <input
-          type="text"
-          class="form-control"
-          v-model="book.categoryId"
-          id="categoryId"
-          aria-describedby="categoryId"
-          value="{{ book.categoryId }}"
-        />
+        <label for="categoryId" class="form-label">Category</label>
+        <select class="form-select" aria-label="Select category" v-model="book.categoryId" @change="handleSelectionChange">
+          <option v-for="item in this.listCategory" :key="item.id" :value="item.id">{{ item.name }}</option>
+        </select>
       </div>
       <div class="mb-3">
         <label for="price" class="form-label">Price</label>
@@ -97,10 +92,12 @@ export default {
         description: "",
       },
       token: "",
+      listCategory: []
     };
   },
   mounted() {
     this.getBook();
+    this.getCategories();
   },
   methods: {
     getBook() {
@@ -147,6 +144,19 @@ export default {
           console.log(e);
         });
     },
+    async getCategories() {
+      await axiosInterceptor
+        .get("/admin/categories")
+        .then((response) => {
+          // JSON responses are automatically parsed.
+          if (response.data != "") {
+            this.listCategory = response.data.data;
+          }
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+    }
   },
 };
 </script>

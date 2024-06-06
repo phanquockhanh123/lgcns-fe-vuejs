@@ -63,6 +63,11 @@
                 </a-button>
               </a-space>
             </template>
+            <template v-if="column.key === 'created'">
+              <a-space>
+                {{ formattedDatetime(record.created) }}
+              </a-space>
+            </template>
           </template>
         </a-table>
         <a-modal
@@ -123,9 +128,9 @@ export default {
           key: "id",
         },
         {
-          title: "Category ID",
-          dataIndex: "categoryId",
-          key: "categoryId",
+          title: "Category",
+          dataIndex: "categoryName",
+          key: "categoryName",
         },
         {
           title: "Title",
@@ -148,9 +153,9 @@ export default {
           key: "isbn",
         },
         {
-          title: "Description",
-          dataIndex: "description",
-          key: "description",
+          title: "Created",
+          dataIndex: "created",
+          key: "created",
         },
         {
           title: "Action",
@@ -207,7 +212,7 @@ export default {
       }
 
       try {
-        const response = await axiosInterceptor.get("/admin/books", {
+        const response = await axiosInterceptor.get("/admin/books/search", {
           params: dataParams,
         });
         this.listBooks = response.data.data;
