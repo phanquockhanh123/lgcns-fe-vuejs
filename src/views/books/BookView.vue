@@ -198,10 +198,12 @@ export default {
 
       if (this.search.title != "" && this.search.title != null) {
         dataParams.title = this.search.title;
+        dataParams.page = 0;
       }
 
       if (this.search.author != "" && this.search.author != null) {
         dataParams.author = this.search.author;
+        dataParams.page = 0;
       }
 
       try {
