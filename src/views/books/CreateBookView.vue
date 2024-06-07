@@ -4,41 +4,73 @@
     <form>
       <div class="mb-3">
         <label for="title" class="form-label">Title</label>
-        <input type="text" :class="['form-control', { 'is-invalid': errors.title }]" v-model="book.title" id="tile"
-          aria-describedby="title" @blur="validateField('title')" />
+        <input
+          type="text"
+          :class="['form-control', { 'is-invalid': errors.title }]"
+          v-model="book.title"
+          id="tile"
+          aria-describedby="title"
+          @blur="validateField('title')"
+        />
         <span class="text-error" v-if="errors.title">{{ errors.title }}</span>
       </div>
       <div class="mb-3">
         <label for="categoryId" class="form-label">Category</label>
-        <select class="form-select" aria-label="Select category" v-model="book.categoryId"
-          @change="handleSelectionChange">
-          <option v-for="item in this.listCategory" :key="item.id" :value="item.id">{{ item.name }}</option>
+        <select
+          class="form-select"
+          aria-label="Select category"
+          v-model="book.categoryId"
+          @change="handleSelectionChange"
+        >
+          <option
+            v-for="item in this.listCategory"
+            :key="item.id"
+            :value="item.id"
+          >
+            {{ item.name }}
+          </option>
         </select>
       </div>
       <div class="mb-3">
         <label for="price" class="form-label">Price</label>
-        <input type="text" :class="['form-control', { 'is-invalid': errors.price }]" v-model="book.price" id="price"
-          aria-describedby="price" @blur="validateField('price')" />
+        <input
+          type="text"
+          :class="['form-control', { 'is-invalid': errors.price }]"
+          v-model="book.price"
+          id="price"
+          aria-describedby="price"
+          @blur="validateField('price')"
+        />
         <span class="text-error" v-if="errors.price">{{ errors.price }}</span>
       </div>
       <div class="mb-3">
         <label for="author" class="form-label">Author</label>
-        <input type="text" :class="['form-control', { 'is-invalid': errors.author }]" v-model="book.author" id="author"
-          aria-describedby="author" @blur="validateField('author')" />
+        <input
+          type="text"
+          :class="['form-control', { 'is-invalid': errors.author }]"
+          v-model="book.author"
+          id="author"
+          aria-describedby="author"
+          @blur="validateField('author')"
+        />
         <span class="text-error" v-if="errors.author">{{ errors.author }}</span>
       </div>
       <div class="mb-3">
-        <label for="isbn" class="form-label">Isbn</label>
-        <input type="text" :class="['form-control', { 'is-invalid': errors.isbn }]" v-model="book.isbn" id="isbn"
-          aria-describedby="isbn" @blur="validateField('isbn')" />
-        <span class="text-error" v-if="errors.isbn">{{ errors.isbn }}</span>
-      </div>
-      <div class="mb-3">
         <label for="description" class="form-label">Description</label>
-        <input type="text" class="form-control" v-model="book.description" id="description"
-          aria-describedby="description" />
+        <input
+          type="text"
+          class="form-control"
+          v-model="book.description"
+          id="description"
+          aria-describedby="description"
+        />
       </div>
-      <button type="submit" class="btn btn-primary" @click.prevent="createBook" :disabled="isSubmitting">
+      <button
+        type="submit"
+        class="btn btn-primary"
+        @click.prevent="createBook"
+        :disabled="isSubmitting"
+      >
         Submit
       </button>
       <button type="submit" class="btn ms-2" @click.prevent="backHome">
@@ -61,7 +93,6 @@ export default {
       book: {
         categoryId: "",
         price: "",
-        isbn: "",
         author: "",
         title: "",
         description: "",
@@ -74,13 +105,13 @@ export default {
       },
       token: "",
       listCategory: [],
-      isSubmitting: false
+      isSubmitting: false,
     };
   },
   methods: {
     async createBook() {
       if (this.isSubmitting) {
-        return; // Prevent multiple submissions
+        return;
       }
 
       this.errors = [];
@@ -89,12 +120,11 @@ export default {
       this.validateField("price");
       this.validateField("title");
       this.validateField("author");
-      this.validateField("isbn");
+
       if (
         this.errors.title == "" ||
         this.errors.author == "" ||
-        this.errors.price == "" ||
-        this.errors.isbn == ""
+        this.errors.price == ""
       ) {
         axiosInterceptor
           .post("/admin/books", this.book)
@@ -122,7 +152,7 @@ export default {
       }
     },
     handleSelectionChange() {
-      console.log('Selected Category ID:', this.book.categoryId);
+      console.log("Selected Category ID:", this.book.categoryId);
     },
     backHome() {
       this.$router.push("/books");
@@ -148,12 +178,6 @@ export default {
         } else {
           this.errors.price = "";
         }
-      } else if (field === "isbn") {
-        if (!this.book.isbn) {
-          this.errors.isbn = "Isbn is required";
-        } else {
-          this.errors.isbn = "";
-        }
       }
     },
     async getCategories() {
@@ -168,11 +192,11 @@ export default {
         .catch((e) => {
           console.log(e);
         });
-    }
+    },
   },
   mounted() {
     this.getCategories();
-  }
+  },
 };
 </script>
 
@@ -181,5 +205,24 @@ span.text-error {
   font-size: small;
   color: red;
   margin-left: 15px;
+}
+.btn-loading {
+  pointer-events: none;
+  opacity: 0.7;
+  position: relative;
+}
+
+.btn-loading::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid transparent;
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  transform: translate(-50%, -50%);
 }
 </style>

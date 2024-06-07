@@ -3,6 +3,18 @@
     <h1>Update Category</h1>
     <form>
       <div class="mb-3">
+        <label for="isbn" class="form-label">Isbn</label>
+        <input
+          type="text"
+          class="form-control"
+          v-model="book.isbn"
+          id="isbn"
+          aria-describedby="isbn"
+          value="{{ book.isbn }}"
+          :disabled="true"
+        />
+      </div>
+      <div class="mb-3">
         <label for="title" class="form-label">Title</label>
         <input
           type="text"
@@ -39,17 +51,6 @@
           id="author"
           aria-describedby="author"
           value="{{ book.author }}"
-        />
-      </div>
-      <div class="mb-3">
-        <label for="isbn" class="form-label">Isbn</label>
-        <input
-          type="text"
-          class="form-control"
-          v-model="book.isbn"
-          id="isbn"
-          aria-describedby="isbn"
-          value="{{ book.isbn }}"
         />
       </div>
       <div class="mb-3">

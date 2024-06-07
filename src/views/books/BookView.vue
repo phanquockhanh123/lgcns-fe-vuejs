@@ -23,7 +23,7 @@
           aria-describedby="author"
         />
       </div>
-      <div class="mt-4 mb-3">
+      <div class="mb-3 me-3">
         <a-button class="btn btn-primary" @click.prevent="getBooksList"
           >Search</a-button
         >
@@ -37,13 +37,14 @@
       </div>
     </div>
     <div class="row">
-      <div class="col-12 table-responsive">
+      <div class="col-12 ">
         <a-table
           :dataSource="listBooks"
           :loading="loading"
           :pagination="false"
           :columns="columns"
           class="table"
+          :scroll="{ x: 1500, y: 850 }"
         >
           <template #headerCell="{ column }"> </template>
           <template #bodyCell="{ column, index, record }">
@@ -83,7 +84,7 @@
           v-model:pageSize="pageInfo.pageSize"
           :total="pageInfo.totalElements"
           show-size-changer
-          :page-size-options="['5', '10', '20', '50']"
+          :page-size-options="['10', '20', '50', '100']"
           :locale="{ items_per_page: '/ trang' }"
           @show-size-change="onShowSizeChange"
           @change="updatePageSize"
@@ -128,6 +129,11 @@ export default {
           key: "id",
         },
         {
+          title: "Isbn",
+          dataIndex: "isbn",
+          key: "isbn",
+        },
+        {
           title: "Category",
           dataIndex: "categoryName",
           key: "categoryName",
@@ -148,11 +154,6 @@ export default {
           key: "price",
         },
         {
-          title: "Isbn",
-          dataIndex: "isbn",
-          key: "isbn",
-        },
-        {
           title: "Created",
           dataIndex: "created",
           key: "created",
@@ -166,7 +167,7 @@ export default {
       pageInfo: {
         content: [],
         pageIndex: 1,
-        pageSize: 5,
+        pageSize: 10,
         totalElements: 0,
         totalPages: 0,
       },
@@ -192,6 +193,9 @@ export default {
       this.pageInfo.pageIndex = pageIndex;
       this.pageInfo.pageSize = pageSize;
       this.getBooksList();
+    },
+    tableScroll() {
+      return this.screenWidth > 1300 ? { x: 1300 } : {};
     },
     async getBooksList() {
       this.loading = true;
@@ -251,4 +255,7 @@ export default {
 
 <style scoped>
 /* Add any scoped styles here */
+.table-responsive { 
+  
+}
 </style>
