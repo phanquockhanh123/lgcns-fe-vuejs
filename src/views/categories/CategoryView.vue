@@ -8,19 +8,20 @@
       </div>
     </div>
     <div class="row">
-      <div class="col-12 table-responsive">
+      <div>
         <a-table
           :dataSource="listCategories"
           :loading="loading"
           :pagination="false"
           :columns="columns"
           class="table"
+          :rowSelection="rowSelection"
         >
           <template #headerCell="{ column }"> </template>
           <template #bodyCell="{ column, index, record }">
             <template v-if="column.key === 'action'">
               <a-space>
-                <router-link :to="{ path: '/categories/update/' + record.id }">
+                <router-link :to="{ path: '/categories/create/' + record.id }">
                   <a-button type="primary">
                     <EditOutlined />
                   </a-button>
@@ -83,6 +84,7 @@ export default {
       categoryIdToDelete: null,
       loading: false,
       listCategories: [],
+      selectedRowKeys: [],
       columns: [
         {
           title: "ID",
@@ -121,9 +123,21 @@ export default {
   mounted() {
     this.getCategoriesList();
   },
+  computed: {
+    rowSelection() {
+      return {
+        selectedRowKeys: this.selectedRowKeys,
+        onChange: this.onSelectChange,
+      };
+    }
+  },
   methods: {
     formattedDatetime(date) {
       return moment(date).format("YYYY-MM-DD HH:mm:ss");
+    },
+    onSelectChange(selectedRowKeys) {
+      this.selectedRowKeys = selectedRowKeys;
+      console.log(selectedRowKeys);
     },
     onShowSizeChange() {
       this.handleChange(this.pageInfo.pageIndex, this.pageInfo.pageSize);
@@ -135,6 +149,9 @@ export default {
       this.pageInfo.pageIndex = pageIndex;
       this.pageInfo.pageSize = pageSize;
       this.getCategoriesList();
+    },
+    isSelected(book) {
+      return this.selectedBook && this.selectedBook.id === book.id;
     },
     async getCategoriesList() {
       this.loading = true;
@@ -154,7 +171,7 @@ export default {
       } finally {
         setTimeout(() => {
           this.loading = false;
-        });
+        }, 2000);
       }
     },
     async deleteCategory() {

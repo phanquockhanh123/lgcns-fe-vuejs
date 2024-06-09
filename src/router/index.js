@@ -5,9 +5,7 @@ import FormRegister from "../views/auth/FormRegister.vue";
 import BookView from "../views/books/BookView.vue";
 import CategoryView from "../views/categories/CategoryView.vue";
 import CreateCategoryView from "../views/categories/CreateCategoryView.vue";
-import UpdateCategoryView from "../views/categories/UpdateCategoryView.vue";
 import CreateBookView from "../views/books/CreateBookView.vue";
-import UpdateBookView from "../views/books/UpdateBookView.vue";
 import Layout from "../layouts/Layout.vue";
 
 const routes = [
@@ -29,15 +27,9 @@ const routes = [
         meta: { requiresAuth: true },
       },
       {
-        path: "/books/create",
+        path: "/books/create/:id?",
         name: "createBooks",
         component: CreateBookView,
-        meta: { requiresAuth: true },
-      },
-      {
-        path: "/books/update/:id",
-        name: "updateBooks",
-        component: UpdateBookView,
         meta: { requiresAuth: true },
       },
       {
@@ -47,15 +39,9 @@ const routes = [
         meta: { requiresAuth: true },
       },
       {
-        path: "/categories/create",
+        path: "/categories/create/:id?",
         name: "createCategories",
         component: CreateCategoryView,
-        meta: { requiresAuth: true },
-      },
-      {
-        path: "/categories/update/:id",
-        name: "update_categories",
-        component: UpdateCategoryView,
         meta: { requiresAuth: true },
       },
     ]

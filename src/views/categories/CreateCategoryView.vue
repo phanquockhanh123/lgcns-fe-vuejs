@@ -1,34 +1,19 @@
 <template>
   <div>
-    <h1>Create Category</h1>
+    <h1>Category</h1>
     <form>
       <div class="mb-3">
         <label for="name" class="form-label">Name</label>
-        <input
-          type="text"
-          :class="['form-control', { 'is-invalid': errors.name }]"
-          v-model="category.name"
-          id="firnamestName"
-          aria-describedby="name"
-          @blur="validateField('name')"
-        />
+        <input type="text" :class="['form-control', { 'is-invalid': errors.name }]" v-model="category.name"
+          id="firnamestName" aria-describedby="name" @blur="validateField('name')" value="{{ category.name }}" />
         <span class="text-error" v-if="errors.name">{{ errors.name }}</span>
       </div>
       <div class="mb-3">
         <label for="description" class="form-label">Description</label>
-        <input
-          type="text"
-          class="form-control"
-          v-model="category.description"
-          id="description"
-          aria-describedby="description"
-        />
+        <input type="text" class="form-control" v-model="category.description" id="description"
+          aria-describedby="description" value="{{ category.description }}" />
       </div>
-      <button
-        type="submit"
-        class="btn btn-primary"
-        @click.prevent="createCategory"
-      >
+      <button type="submit" class="btn btn-primary" @click.prevent="createCategory" :disabled="isSubmitting">
         Submit
       </button>
       <button type="submit" class="btn ms-2" @click.prevent="backHome">
@@ -55,6 +40,7 @@ export default {
       errors: {
         name: "",
       },
+      isSubmitting: false
     };
   },
   methods: {
@@ -62,27 +48,66 @@ export default {
       this.errors = [];
       this.validateField("name");
 
-      if (this.errors.name == "") {
-        axiosInterceptor
-          .post("/admin/categories", this.category)
-          .then((response) => {
-            // JSON responses are automatically parsed.
-            if (response.data.code == 1000) {
-              toast.success("Create category successfully!", {
-                autoClose: 1000,
-              });
+      if (this.isSubmitting) {
+        return;
+      }
 
+      this.isSubmitting = true;
+
+      if (this.errors.name == "") {
+        let id = this.$route.params.id;
+
+        if (id == "") {
+          axiosInterceptor
+            .post("/admin/categories", this.category)
+            .then((response) => {
+              // JSON responses are automatically parsed.
+              if (response.data.code == 1000) {
+                toast.success("Create category successfully!", {
+                  autoClose: 1000,
+                });
+
+                setTimeout(() => {
+                  this.$router.push("/categories");
+                }, 2000);
+              }
+            })
+            .catch((e) => {
+              console.log(e);
+            })
+            .finally(() => {
               setTimeout(() => {
-                this.$router.push("/categories");
-              }, 2000);
-            }
-          })
-          .catch((e) => {
-            console.log(e);
-          });
+                this.isSubmitting = false;
+              }, 2000)
+            });
+        } else {
+          axiosInterceptor
+            .put(`/admin/categories/${id}`, this.category)
+            .then((response) => {
+              // JSON responses are automatically parsed.
+              if (response.data.code == 1000) {
+                toast.success("Update category successfully!", {
+                  autoClose: 1000,
+                });
+
+                setTimeout(() => {
+                  this.$router.push("/categories");
+                }, 2000);
+              }
+            })
+            .catch((e) => {
+              console.log(e);
+            })
+            .finally(() => {
+              setTimeout(() => {
+                this.isSubmitting = false;
+              }, 2000)
+            });
+        }
       } else {
         alert("You must handle all error!")
         console.log("Form has validation errors. Please correct them.");
+        this.isSubmitting = false;
       }
     },
     backHome() {
@@ -97,6 +122,26 @@ export default {
         }
       }
     },
+    getCategory() {
+      let id = this.$route.params.id;
+      console.log(id)
+      if (id != "") {
+        axiosInterceptor
+          .get(`/admin/categories/${id}`)
+          .then((response) => {
+            // JSON responses are automatically parsed.
+            console.log(response.data);
+            this.category.name = response.data.name;
+            this.category.description = response.data.description;
+          })
+          .catch((e) => {
+            console.log(e);
+          });
+      }
+    },
+  },
+  mounted() {
+    this.getCategory();
   },
 };
 </script>

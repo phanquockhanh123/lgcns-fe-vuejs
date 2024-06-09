@@ -4,62 +4,41 @@
     <div class="d-flex mb-3 w-100">
       <div class="mb-3 me-3">
         <label for="title" class="form-label">Title</label>
-        <input
-          type="text"
-          class="form-control"
-          v-model="search.title"
-          id="tile"
-          aria-describedby="title"
-          required
-        />
+        <a-input v-model:value="search.title" placeholder="Title" />
       </div>
       <div class="mb-3 me-3">
         <label for="author" class="form-label">Author</label>
-        <input
-          type="text"
-          class="form-control"
-          v-model="search.author"
-          id="author"
-          aria-describedby="author"
-        />
+        <a-input v-model:value="search.author" placeholder="Title" />
       </div>
       <div class="mb-3 me-3">
-        <a-button class="btn btn-primary" @click.prevent="getBooksList"
-          >Search</a-button
-        >
+        <label for="categoryId" class="form-label">Category</label>
+        <a-select v-model:value="searchCateIds" mode="tags" style="width: 100%" placeholder="Tags Category"
+          :options="listCategory" :max-tag-count="3"></a-select>
+      </div>
+      <div class="mb-3 me-3">
+        <a-button class="btn btn-primary" @click.prevent="getBooksList">Search</a-button>
+      </div>
+      <div class="row mb-3">
+        <div class="col-12 d-flex justify-content-end">
+          <router-link to="/books/create"><a-button>Create</a-button></router-link>
+        </div>
       </div>
     </div>
-    <div class="row mb-3">
-      <div class="col-12 d-flex justify-content-end">
-        <router-link to="/books/create"
-          ><a-button>Create</a-button></router-link
-        >
-      </div>
-    </div>
+
     <div class="row">
       <div class="col-12 ">
-        <a-table
-          :dataSource="listBooks"
-          :loading="loading"
-          :pagination="false"
-          :columns="columns"
-          class="table"
-          :scroll="{ x: 1500, y: 850 }"
-        >
+        <a-table :dataSource="listBooks" :loading="loading" :pagination="false" :columns="columns" class="table"
+          :scroll="{ x: 1500, y: 850 }">
           <template #headerCell="{ column }"> </template>
           <template #bodyCell="{ column, index, record }">
             <template v-if="column.key === 'action'">
               <a-space>
-                <router-link :to="{ path: '/books/update/' + record.id }">
+                <router-link :to="{ path: '/books/create/' + record.id }">
                   <a-button type="primary">
                     <EditOutlined />
                   </a-button>
                 </router-link>
-                <a-button
-                  type="primary"
-                  danger
-                  @click.prevent="confirmDelete(record.id)"
-                >
+                <a-button type="primary" danger @click.prevent="confirmDelete(record.id)">
                   <DeleteOutlined />
                 </a-button>
               </a-space>
@@ -71,24 +50,12 @@
             </template>
           </template>
         </a-table>
-        <a-modal
-          v-model:visible="isModalVisible"
-          title="Delete Category"
-          @ok="deleteBook"
-          @cancel="handleCancel"
-        >
+        <a-modal v-model:visible="isModalVisible" title="Delete Category" @ok="deleteBook" @cancel="handleCancel">
           <p>Are you sure you want to delete this books?</p>
         </a-modal>
-        <a-pagination
-          v-model:current="pageInfo.pageIndex"
-          v-model:pageSize="pageInfo.pageSize"
-          :total="pageInfo.totalElements"
-          show-size-changer
-          :page-size-options="['10', '20', '50', '100']"
-          :locale="{ items_per_page: '/ trang' }"
-          @show-size-change="onShowSizeChange"
-          @change="updatePageSize"
-        />
+        <a-pagination v-model:current="pageInfo.pageIndex" v-model:pageSize="pageInfo.pageSize"
+          :total="pageInfo.totalElements" show-size-changer :page-size-options="['10', '20', '50', '100']"
+          :locale="{ items_per_page: '/ trang' }" @show-size-change="onShowSizeChange" @change="updatePageSize" />
       </div>
     </div>
   </a-card>
@@ -118,10 +85,12 @@ export default {
       bookIdToDelete: null,
       loading: false,
       listBooks: [],
+      listCategory: [],
       search: {
         title: "",
-        author: "",
+        author: ""
       },
+      searchCateIds: [],
       columns: [
         {
           title: "ID",
@@ -173,13 +142,28 @@ export default {
       },
     };
   },
-  created() {
-    this.getBooksList();
-  },
   mounted() {
     this.getBooksList();
+    this.getCategories();
   },
   methods: {
+    async getCategories() {
+      await axiosInterceptor
+        .get("/admin/categories")
+        .then((response) => {
+          // JSON responses are automatically parsed.
+          if (response.data != "") {
+            const rs = response.data.data;
+            this.listCategory = rs.map(item => ({
+              value: item.id,
+              label: item.name
+            }));
+          }
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+    },
     formattedDatetime(date) {
       return moment(date).format("YYYY-MM-DD HH:mm:ss");
     },
@@ -206,14 +190,17 @@ export default {
       };
 
       if (this.search.title != "" && this.search.title != null) {
-        dataParams.title = this.search.title;
-        dataParams.page = 0;
+        dataParams.title = this.search.title.trim();
       }
 
       if (this.search.author != "" && this.search.author != null) {
-        dataParams.author = this.search.author;
-        dataParams.page = 0;
+        dataParams.author = this.search.author.trim();
       }
+
+      if (this.searchCateIds != "" && this.searchCateIds.length > 0) {
+        dataParams.cateIds = this.searchCateIds.join(",");
+      }
+      dataParams.page = 0;
 
       try {
         const response = await axiosInterceptor.get("/admin/books/search", {
@@ -255,7 +242,12 @@ export default {
 
 <style scoped>
 /* Add any scoped styles here */
-.table-responsive { 
-  
+.custom-scroll {
+  max-height: 800px;
+  /* set the maximum height */
+  overflow-y: auto;
+  /* enable vertical scrolling */
+  width: 200px;
+  /* set a fixed width */
 }
 </style>

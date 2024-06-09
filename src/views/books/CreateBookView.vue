@@ -1,76 +1,41 @@
 <template>
   <div>
-    <h1>Create Book</h1>
+    <h1>Book</h1>
     <form>
       <div class="mb-3">
         <label for="title" class="form-label">Title</label>
-        <input
-          type="text"
-          :class="['form-control', { 'is-invalid': errors.title }]"
-          v-model="book.title"
-          id="tile"
-          aria-describedby="title"
-          @blur="validateField('title')"
-        />
+        <input type="text" :class="['form-control', { 'is-invalid': errors.title }]" v-model="book.title" id="tile"
+          aria-describedby="title" @blur="validateField('title')" value="{{ book.title }}" />
         <span class="text-error" v-if="errors.title">{{ errors.title }}</span>
       </div>
       <div class="mb-3">
         <label for="categoryId" class="form-label">Category</label>
-        <select
-          class="form-select"
-          aria-label="Select category"
-          v-model="book.categoryId"
-          @change="handleSelectionChange"
-        >
-          <option
-            v-for="item in this.listCategory"
-            :key="item.id"
-            :value="item.id"
-          >
+        <select class="form-select" aria-label="Select category" v-model="book.categoryId"
+          @change="handleSelectionChange">
+          <option disabled value="">Select a category</option>
+          <option v-for="item in this.listCategory" :key="item.id" :value="item.id" >
             {{ item.name }}
           </option>
         </select>
       </div>
       <div class="mb-3">
         <label for="price" class="form-label">Price</label>
-        <input
-          type="text"
-          :class="['form-control', { 'is-invalid': errors.price }]"
-          v-model="book.price"
-          id="price"
-          aria-describedby="price"
-          @blur="validateField('price')"
-        />
+        <input type="text" :class="['form-control', { 'is-invalid': errors.price }]" v-model="book.price" id="price"
+          aria-describedby="price" @blur="validateField('price')" value="{{ book.price }}" />
         <span class="text-error" v-if="errors.price">{{ errors.price }}</span>
       </div>
       <div class="mb-3">
         <label for="author" class="form-label">Author</label>
-        <input
-          type="text"
-          :class="['form-control', { 'is-invalid': errors.author }]"
-          v-model="book.author"
-          id="author"
-          aria-describedby="author"
-          @blur="validateField('author')"
-        />
+        <input type="text" :class="['form-control', { 'is-invalid': errors.author }]" v-model="book.author" id="author"
+          aria-describedby="author" @blur="validateField('author')" value="{{ book.author }}" />
         <span class="text-error" v-if="errors.author">{{ errors.author }}</span>
       </div>
       <div class="mb-3">
         <label for="description" class="form-label">Description</label>
-        <input
-          type="text"
-          class="form-control"
-          v-model="book.description"
-          id="description"
-          aria-describedby="description"
-        />
+        <input type="text" class="form-control" v-model="book.description" id="description"
+          aria-describedby="description" value="{{ book.description }}" />
       </div>
-      <button
-        type="submit"
-        class="btn btn-primary"
-        @click.prevent="createBook"
-        :disabled="isSubmitting"
-      >
+      <button type="submit" class="btn btn-primary" @click.prevent="createBook" :disabled="isSubmitting">
         Submit
       </button>
       <button type="submit" class="btn ms-2" @click.prevent="backHome">
@@ -91,7 +56,6 @@ export default {
   data() {
     return {
       book: {
-        categoryId: "",
         price: "",
         author: "",
         title: "",
@@ -99,7 +63,6 @@ export default {
       },
       errors: {
         price: "",
-        isbn: "",
         author: "",
         title: "",
       },
@@ -110,45 +73,70 @@ export default {
   },
   methods: {
     async createBook() {
+      let id = this.$route.params.id;
+
       if (this.isSubmitting) {
         return;
       }
 
-      this.errors = [];
       this.isSubmitting = true;
 
-      this.validateField("price");
-      this.validateField("title");
-      this.validateField("author");
-
       if (
-        this.errors.title == "" ||
-        this.errors.author == "" ||
-        this.errors.price == ""
+        this.errors.title == "" &&
+        this.errors.author == "" &&
+        this.errors.price == "" &&
+        this.book.title != "" &&
+        this.book.author != "" &&
+        this.book.price != ""
       ) {
-        axiosInterceptor
-          .post("/admin/books", this.book)
-          .then((response) => {
-            // JSON responses are automatically parsed.
-            if (response.data != "") {
-              toast.success("Create books successfully!", {
+        if (id == "") {
+          axiosInterceptor
+            .post("/admin/books", this.book)
+            .then((response) => {
+              // JSON responses are automatically parsed.
+              if (response.data != "") {
+                toast.success("Create books successfully!", {
+                  autoClose: 1000,
+                });
+
+                setTimeout(() => {
+                  this.$router.push("/books");
+                }, 2000);
+              }
+            })
+            .catch((e) => {
+              console.log(e);
+            })
+            .finally(() => {
+              setTimeout(() => {
+                this.isSubmitting = false;
+              }, 2000)
+            });
+        } else {
+          await axiosInterceptor
+            .put(`/admin/books/${id}`, this.book)
+            .then((response) => {
+              // JSON responses are automatically parsed.
+              console.log(response.data);
+              toast.success("Update book success!", {
                 autoClose: 1000,
               });
 
-              setTimeout(() => {
-                this.$router.push("/books");
-              }, 2000);
-            }
-          })
-          .catch((e) => {
-            console.log(e);
-          })
-          .finally(() => {
-            this.isSubmitting = false;
-          });
+              if (response.data != "") {
+                setTimeout(() => {
+                  this.$router.push("/books");
+                }, 2000);
+              }
+            })
+            .catch((e) => {
+              console.log(e);
+            });
+        }
+
       } else {
         alert("You must handle all error!");
         console.log("Form has validation errors. Please correct them.");
+        this.isSubmitting = false;
       }
     },
     handleSelectionChange() {
@@ -193,9 +181,31 @@ export default {
           console.log(e);
         });
     },
+    getBook() {
+      let id = this.$route.params.id;
+
+      if (id != "") {
+        axiosInterceptor
+          .get(`/admin/books/${id}`)
+          .then((response) => {
+            // JSON responses are automatically parsed.
+            this.book.title = response.data.title;
+            this.book.author = response.data.author;
+            this.book.price = response.data.price;
+            this.book.isbn = response.data.isbn;
+            this.book.price = response.data.price;
+            this.book.categoryId = response.data.categoryId;
+            this.book.description = response.data.description;
+          })
+          .catch((e) => {
+            console.log(e);
+          });
+      }
+    },
   },
   mounted() {
     this.getCategories();
+    this.getBook();
   },
 };
 </script>
@@ -206,6 +216,7 @@ span.text-error {
   color: red;
   margin-left: 15px;
 }
+
 .btn-loading {
   pointer-events: none;
   opacity: 0.7;
