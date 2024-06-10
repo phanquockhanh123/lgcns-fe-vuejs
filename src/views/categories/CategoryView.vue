@@ -16,9 +16,11 @@
           :columns="columns"
           class="table"
           :rowSelection="rowSelection"
+          :scroll="{ x: 1500, y: 650 }"
+          rowKey="id"
         >
-          <template #headerCell="{ column }"> </template>
-          <template #bodyCell="{ column, index, record }">
+          <template #headerCell="{ column }"> </template> 
+          <template #bodyCell="{ column, index, record }"> 
             <template v-if="column.key === 'action'">
               <a-space>
                 <router-link :to="{ path: '/categories/create/' + record.id }">
@@ -66,10 +68,13 @@ import {
   DeleteOutlined,
   PlusOutlined,
 } from "@ant-design/icons-vue";
+
+
 import axiosInterceptor from "../../service/AxiosInteceptorToken";
 import moment from "moment";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
+import CreateCategoryViewVue from './CreateCategoryView.vue';
 
 export default {
   name: "CategoryView",
@@ -111,33 +116,28 @@ export default {
       pageInfo: {
         content: [],
         pageIndex: 1,
-        pageSize: 5,
+        pageSize: 10,
         totalElements: 0,
         totalPages: 0,
       },
+      rowSelection: {
+        onChange: this.onSelectChange,
+      },
     };
-  },
-  created() {
-    this.getCategoriesList();
   },
   mounted() {
     this.getCategoriesList();
-  },
-  computed: {
-    rowSelection() {
-      return {
-        selectedRowKeys: this.selectedRowKeys,
-        onChange: this.onSelectChange,
-      };
-    }
   },
   methods: {
     formattedDatetime(date) {
       return moment(date).format("YYYY-MM-DD HH:mm:ss");
     },
-    onSelectChange(selectedRowKeys) {
+    onSelectChange(selectedRowKeys, selectedRows) {
+      console.log("Selected Row Keys: ", selectedRowKeys);
+      console.log("Selected Rows: ", selectedRows);
       this.selectedRowKeys = selectedRowKeys;
-      console.log(selectedRowKeys);
+      const selectedIds = selectedRows.map((row) => row.id);
+      console.log("Selected Book IDs: ", selectedIds);
     },
     onShowSizeChange() {
       this.handleChange(this.pageInfo.pageIndex, this.pageInfo.pageSize);
@@ -148,7 +148,9 @@ export default {
     handleChange(pageIndex, pageSize) {
       this.pageInfo.pageIndex = pageIndex;
       this.pageInfo.pageSize = pageSize;
-      this.getCategoriesList();
+
+      console.log(pageIndex);
+      this.getCategoriesList(pageIndex);
     },
     isSelected(book) {
       return this.selectedBook && this.selectedBook.id === book.id;
@@ -176,10 +178,15 @@ export default {
     },
     async deleteCategory() {
       try {
-        toast.success(`Delete category successfully with category id ! ${this.categoryIdToDelete}`, {
-          autoClose: 1000,
-        });
-        await axiosInterceptor.delete(`/admin/categories/${this.categoryIdToDelete}`);
+        toast.success(
+          `Delete category successfully with category id ! ${this.categoryIdToDelete}`,
+          {
+            autoClose: 1000,
+          }
+        );
+        await axiosInterceptor.delete(
+          `/admin/categories/${this.categoryIdToDelete}`
+        );
         this.getCategoriesList();
         this.isModalVisible = false;
       } catch (error) {

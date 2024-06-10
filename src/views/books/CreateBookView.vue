@@ -1,6 +1,7 @@
 <template>
   <div>
     <h1>Book</h1>
+    <span class="text-error" v-if="errors.message">{{ errors.message }}</span>
     <form>
       <div class="mb-3">
         <label for="title" class="form-label">Title</label>
@@ -65,6 +66,7 @@ export default {
         price: "",
         author: "",
         title: "",
+        message: ""
       },
       token: "",
       listCategory: [],
@@ -94,7 +96,8 @@ export default {
             .post("/admin/books", this.book)
             .then((response) => {
               // JSON responses are automatically parsed.
-              if (response.data != "") {
+
+              if (response.data.success == true) {
                 toast.success("Create books successfully!", {
                   autoClose: 1000,
                 });
@@ -106,6 +109,7 @@ export default {
             })
             .catch((e) => {
               console.log(e);
+              this.errors.message = e.response.data.message;
             })
             .finally(() => {
               setTimeout(() => {
@@ -117,12 +121,12 @@ export default {
             .put(`/admin/books/${id}`, this.book)
             .then((response) => {
               // JSON responses are automatically parsed.
-              console.log(response.data);
+              console.log(response.data.data);
               toast.success("Update book success!", {
                 autoClose: 1000,
               });
 
-              if (response.data != "") {
+              if (response.data.success == true) {
                 setTimeout(() => {
                   this.$router.push("/books");
                 }, 2000);
@@ -130,6 +134,7 @@ export default {
             })
             .catch((e) => {
               console.log(e);
+              this.errors.message = e.response.data.message;
             });
         }
 
@@ -189,13 +194,13 @@ export default {
           .get(`/admin/books/${id}`)
           .then((response) => {
             // JSON responses are automatically parsed.
-            this.book.title = response.data.title;
-            this.book.author = response.data.author;
-            this.book.price = response.data.price;
-            this.book.isbn = response.data.isbn;
-            this.book.price = response.data.price;
-            this.book.categoryId = response.data.categoryId;
-            this.book.description = response.data.description;
+            this.book.title = response.data.data.title;
+            this.book.author = response.data.data.author;
+            this.book.price = response.data.data.price;
+            this.book.isbn = response.data.data.isbn;
+            this.book.price = response.data.data.price;
+            this.book.categoryId = response.data.data.categoryId;
+            this.book.description = response.data.data.description;
           })
           .catch((e) => {
             console.log(e);

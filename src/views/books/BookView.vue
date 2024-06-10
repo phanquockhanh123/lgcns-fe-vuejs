@@ -12,23 +12,45 @@
       </div>
       <div class="mb-3 me-3">
         <label for="categoryId" class="form-label">Category</label>
-        <a-select v-model:value="searchCateIds" mode="tags" style="width: 100%" placeholder="Tags Category"
-          :options="listCategory" :max-tag-count="3"></a-select>
+        <a-select
+          v-model:value="searchCateIds"
+          mode="tags"
+          style="width: 100%"
+          placeholder="Tags Category"
+          :options="listCategory"
+          :max-tag-count="1"
+        ></a-select>
       </div>
-      <div class="mb-3 me-3">
-        <a-button class="btn btn-primary" @click.prevent="getBooksList">Search</a-button>
+      <div class="mb-3 me-3 button-css-search">
+        <a-button class="btn btn-primary" @click.prevent="getBooksList"
+          >Search</a-button
+        >
       </div>
-      <div class="row mb-3">
-        <div class="col-12 d-flex justify-content-end">
-          <router-link to="/books/create"><a-button>Create</a-button></router-link>
-        </div>
+      <div class="mb-3 me-3 button-css">
+        <router-link to="/books/create" class="btn"
+          ><a-button>Create</a-button></router-link
+        >
+        <a-button
+          class="btn btn-danger"
+          @click="confirmDeleteIds"
+          :disabled="selectedRowKeys.length === 0"
+          >Delete Books</a-button
+        >
       </div>
     </div>
 
     <div class="row">
-      <div class="col-12 ">
-        <a-table :dataSource="listBooks" :loading="loading" :pagination="false" :columns="columns" class="table"
-          :scroll="{ x: 1500, y: 850 }">
+      <div class="col-12">
+        <a-table
+          :dataSource="listBooks"
+          :loading="loading"
+          :pagination="false"
+          :columns="columns"
+          class="table"
+          :scroll="{ x: 1500, y: 850 }"
+          rowKey="id"
+          :rowSelection="rowSelection"
+        >
           <template #headerCell="{ column }"> </template>
           <template #bodyCell="{ column, index, record }">
             <template v-if="column.key === 'action'">
@@ -38,7 +60,11 @@
                     <EditOutlined />
                   </a-button>
                 </router-link>
-                <a-button type="primary" danger @click.prevent="confirmDelete(record.id)">
+                <a-button
+                  type="primary"
+                  danger
+                  @click="confirmDelete(record.id)"
+                >
                   <DeleteOutlined />
                 </a-button>
               </a-space>
@@ -50,12 +76,24 @@
             </template>
           </template>
         </a-table>
-        <a-modal v-model:visible="isModalVisible" title="Delete Category" @ok="deleteBook" @cancel="handleCancel">
-          <p>Are you sure you want to delete this books?</p>
+        <a-modal
+          v-model:visible="isModalVisible"
+          title="Delete Category"
+          @ok="deleteListBookIds"
+          @cancel="handleCancel"
+        >
+          <p>Are you sure you want to delete this books ?</p>
         </a-modal>
-        <a-pagination v-model:current="pageInfo.pageIndex" v-model:pageSize="pageInfo.pageSize"
-          :total="pageInfo.totalElements" show-size-changer :page-size-options="['10', '20', '50', '100']"
-          :locale="{ items_per_page: '/ trang' }" @show-size-change="onShowSizeChange" @change="updatePageSize" />
+        <a-pagination
+          v-model:current="pageInfo.pageIndex"
+          v-model:pageSize="pageInfo.pageSize"
+          :total="pageInfo.totalElements"
+          show-size-changer
+          :page-size-options="['10', '20', '50', '100']"
+          :locale="{ items_per_page: '/ trang' }"
+          @show-size-change="onShowSizeChange"
+          @change="updatePageSize"
+        />
       </div>
     </div>
   </a-card>
@@ -86,9 +124,10 @@ export default {
       loading: false,
       listBooks: [],
       listCategory: [],
+      selectedRowKeys: [],
       search: {
         title: "",
-        author: ""
+        author: "",
       },
       searchCateIds: [],
       columns: [
@@ -140,6 +179,9 @@ export default {
         totalElements: 0,
         totalPages: 0,
       },
+      rowSelection: {
+        onChange: this.onSelectChange,
+      },
     };
   },
   mounted() {
@@ -147,6 +189,13 @@ export default {
     this.getCategories();
   },
   methods: {
+    onSelectChange(selectedRowKeys, selectedRows) {
+      console.log("Selected Row Keys: ", selectedRowKeys);
+      console.log("Selected Rows: ", selectedRows);
+      this.selectedRowKeys = selectedRowKeys;
+      const selectedIds = selectedRows.map((row) => row.id);
+      console.log("Selected Book IDs: ", selectedIds);
+    },
     async getCategories() {
       await axiosInterceptor
         .get("/admin/categories")
@@ -154,9 +203,9 @@ export default {
           // JSON responses are automatically parsed.
           if (response.data != "") {
             const rs = response.data.data;
-            this.listCategory = rs.map(item => ({
+            this.listCategory = rs.map((item) => ({
               value: item.id,
-              label: item.name
+              label: item.name,
             }));
           }
         })
@@ -176,6 +225,7 @@ export default {
     handleChange(pageIndex, pageSize) {
       this.pageInfo.pageIndex = pageIndex;
       this.pageInfo.pageSize = pageSize;
+
       this.getBooksList();
     },
     tableScroll() {
@@ -200,15 +250,15 @@ export default {
       if (this.searchCateIds != "" && this.searchCateIds.length > 0) {
         dataParams.cateIds = this.searchCateIds.join(",");
       }
-      dataParams.page = 0;
 
       try {
         const response = await axiosInterceptor.get("/admin/books/search", {
           params: dataParams,
         });
-        this.listBooks = response.data.data;
-        this.pageInfo.totalElements = response.data.totalElements;
-        this.pageInfo.totalPages = response.data.totalPages;
+        this.listBooks = response.data.data.data;
+
+        this.pageInfo.totalElements = response.data.data.totalElements;
+        this.pageInfo.totalPages = response.data.data.totalPages;
       } catch (error) {
         console.error(error);
       } finally {
@@ -217,24 +267,40 @@ export default {
         });
       }
     },
-    async deleteBook() {
-      try {
-        toast.success("Delete book successfully!", {
-          autoClose: 1000,
-        });
-        await axiosInterceptor.delete(`/admin/books/${this.bookIdToDelete}`);
-        this.getBooksList();
-        this.isModalVisible = false;
-      } catch (error) {
-        console.error(error);
-      }
-    },
     confirmDelete(id) {
-      this.bookIdToDelete = id;
+      this.selectedRowKeys = [id];
+      this.isModalVisible = true;
+    },
+    confirmDeleteIds() {
       this.isModalVisible = true;
     },
     handleCancel() {
       this.isModalVisible = false;
+    },
+    async deleteListBookIds() {
+      try {
+        const response = await axiosInterceptor.delete("/admin/books", {
+          data: {
+            ids: this.selectedRowKeys,
+          },
+        });
+
+        this.isModalVisible = false;
+        this.getBooksList();
+
+        toast.success(
+          `Delete list books successfully with ids{} ${this.selectedRowKeys}`,
+          {
+            autoClose: 1000,
+          }
+        );
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setTimeout(() => {
+          this.loading = false;
+        });
+      }
     },
   },
 };
@@ -249,5 +315,11 @@ export default {
   /* enable vertical scrolling */
   width: 200px;
   /* set a fixed width */
+}
+.mb-3.me-3.button-css {
+  margin-top: 23px;
+}
+.mb-3.me-3.button-css-search {
+  margin-top: 30px;
 }
 </style>
