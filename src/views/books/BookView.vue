@@ -12,59 +12,33 @@
       </div>
       <div class="mb-3 me-3">
         <label for="categoryId" class="form-label">Category</label>
-        <a-select
-          v-model:value="searchCateIds"
-          mode="tags"
-          style="width: 100%"
-          placeholder="Tags Category"
-          :options="listCategory"
-          :max-tag-count="1"
-        ></a-select>
+        <a-select v-model:value="searchCateIds" mode="tags" style="width: 100%" placeholder="Tags Category"
+          :options="listCategory" :max-tag-count="1"></a-select>
       </div>
       <div class="mb-3 me-3 button-css-search">
-        <a-button class="btn btn-primary" @click.prevent="getBooksList"
-          >Search</a-button
-        >
+        <a-button class="btn btn-primary" @click.prevent="getBooksList">Search</a-button>
       </div>
-      <div class="mb-3 me-3 button-css">
-        <router-link to="/books/create" class="btn"
-          ><a-button>Create</a-button></router-link
-        >
-        <a-button
-          class="btn btn-danger"
-          @click="confirmDeleteIds"
-          :disabled="selectedRowKeys.length === 0"
-          >Delete Books</a-button
-        >
+      <div class="mb-3 me-3 button-css d-flex justify-content-end">
+        <a-button type="primary" class="me-3" @click="showDrawer">
+          <PlusOutlined />
+          New account
+        </a-button>
+        <a-button class="btn btn-danger" @click="confirmDeleteIds" :disabled="selectedRowKeys.length === 0">Delete Books</a-button>
       </div>
     </div>
 
     <div class="row">
       <div class="col-12">
-        <a-table
-          :dataSource="listBooks"
-          :loading="loading"
-          :pagination="false"
-          :columns="columns"
-          class="table"
-          :scroll="{ x: 1500, y: 850 }"
-          rowKey="id"
-          :rowSelection="rowSelection"
-        >
+        <a-table :dataSource="listBooks" :loading="loading" :pagination="false" :columns="columns" class="table"
+          :scroll="{ x: 1500, y: 850 }" rowKey="id" :rowSelection="rowSelection">
           <template #headerCell="{ column }"> </template>
           <template #bodyCell="{ column, index, record }">
             <template v-if="column.key === 'action'">
               <a-space>
-                <router-link :to="{ path: '/books/create/' + record.id }">
-                  <a-button type="primary">
-                    <EditOutlined />
-                  </a-button>
-                </router-link>
-                <a-button
-                  type="primary"
-                  danger
-                  @click="confirmDelete(record.id)"
-                >
+                <a-button type="primary" @click="showDrawer(record.id)">
+                  <EditOutlined />
+                </a-button>
+                <a-button type="primary" danger @click="confirmDelete(record.id)">
                   <DeleteOutlined />
                 </a-button>
               </a-space>
@@ -76,27 +50,81 @@
             </template>
           </template>
         </a-table>
-        <a-modal
-          v-model:visible="isModalVisible"
-          title="Delete Category"
-          @ok="deleteListBookIds"
-          @cancel="handleCancel"
-        >
+        <a-modal v-model:visible="isModalVisible" title="Delete Category" @ok="deleteListBookIds"
+          @cancel="handleCancel">
           <p>Are you sure you want to delete this books ?</p>
         </a-modal>
-        <a-pagination
-          v-model:current="pageInfo.pageIndex"
-          v-model:pageSize="pageInfo.pageSize"
-          :total="pageInfo.totalElements"
-          show-size-changer
-          :page-size-options="['10', '20', '50', '100']"
-          :locale="{ items_per_page: '/ trang' }"
-          @show-size-change="onShowSizeChange"
-          @change="updatePageSize"
-        />
+        <a-pagination v-model:current="pageInfo.pageIndex" v-model:pageSize="pageInfo.pageSize"
+          :total="pageInfo.totalElements" show-size-changer :page-size-options="['10', '20', '50', '100']"
+          :locale="{ items_per_page: '/ trang' }" @show-size-change="onShowSizeChange" @change="updatePageSize" />
       </div>
     </div>
   </a-card>
+
+  <!-- A drawer create book view -->
+  <a-drawer title="Create a new book" :width="720" :visible="visible" :body-style="{ paddingBottom: '80px' }"
+    @close="onClose">
+    <a-form :model="book" layout="vertical">
+      <a-row :gutter="16">
+        <a-col :span="24">
+          <a-form-item label="Title" name="title">
+            <a-input v-model:value="book.title" placeholder="Please enter title" />
+          </a-form-item>
+        </a-col>
+      </a-row>
+      <a-row :gutter="16">
+        <a-col :span="12">
+          <a-form-item label="Category Id" name="categoryId">
+            <a-select placeholder="Please a-s an category" v-model:value="book.categoryId">
+              <a-select-option v-for="item in listCategory" :key="item.id" :value="item.id">{{ item.name
+                }}</a-select-option>
+            </a-select>
+          </a-form-item>
+        </a-col>
+        <!-- <a-col :span="12">
+          <a-form-item label="Price" name="price">
+            <a-select placeholder="Please choose the type" v-model:value="form.type">
+              <a-select-option value="private">Private</a-select-option>
+              <a-select-option value="public">Public</a-select-option>
+            </a-select>
+          </a-form-item>
+        </a-col> -->
+      </a-row>
+      <a-row :gutter="16">
+        <a-col :span="12">
+          <a-form-item label="price" name="price">
+            <a-input v-model:value="book.price" placeholder="Please enter price" />
+          </a-form-item>
+        </a-col>
+        <a-col :span="12">
+          <a-form-item label="Author" name="author">
+            <a-input v-model:value="book.author" placeholder="Please enter author" />
+          </a-form-item>
+        </a-col>
+      </a-row>
+      <a-row :gutter="16">
+        <a-col :span="24">
+          <a-form-item label="Description" name="description">
+            <a-textarea v-model:value="book.description" :rows="4" placeholder="please enter description" />
+          </a-form-item>
+        </a-col>
+      </a-row>
+    </a-form>
+    <div :style="{
+          position: 'absolute',
+          right: 0,
+          bottom: 0,
+          width: '100%',
+          borderTop: '1px solid #e9e9e9',
+          padding: '10px 16px',
+          background: '#fff',
+          textAlign: 'right',
+          zIndex: 1,
+        }">
+      <a-button style="margin-right: 8px" @click="onClose">Cancel</a-button>
+      <a-button type="primary" @click="createBook">Submit</a-button>
+    </div>
+  </a-drawer>
 </template>
 
 <script>
@@ -128,6 +156,12 @@ export default {
       search: {
         title: "",
         author: "",
+      },
+      book: {
+        price: "",
+        author: "",
+        title: "",
+        description: "",
       },
       searchCateIds: [],
       columns: [
@@ -182,6 +216,8 @@ export default {
       rowSelection: {
         onChange: this.onSelectChange,
       },
+      visible: false,
+      id: ""
     };
   },
   mounted() {
@@ -189,6 +225,22 @@ export default {
     this.getCategories();
   },
   methods: {
+    showDrawer(id = "") {
+      this.visible = true;
+      if (id != "" && !isNaN(id)) {
+        this.id = id;
+        this.getBook(id)
+      }
+    },
+    onClose() {
+      this.visible = false;
+      this.book.title = "";
+      this.book.author = "";
+      this.book.categoryId = "";
+      this.book.price = "";
+      this.book.description = "";
+      this.id = "";
+    },
     onSelectChange(selectedRowKeys, selectedRows) {
       console.log("Selected Row Keys: ", selectedRowKeys);
       console.log("Selected Rows: ", selectedRows);
@@ -201,11 +253,12 @@ export default {
         .get("/admin/categories")
         .then((response) => {
           // JSON responses are automatically parsed.
-          if (response.data != "") {
-            const rs = response.data.data;
+          if (response.data.data != "") {
+            const rs = response.data.data.data;
+
             this.listCategory = rs.map((item) => ({
-              value: item.id,
-              label: item.name,
+              id: item.id,
+              name: item.name,
             }));
           }
         })
@@ -302,6 +355,84 @@ export default {
         });
       }
     },
+    async createBook() {
+      if (this.isSubmitting) {
+        return;
+      }
+
+      this.isSubmitting = true;
+
+      if (this.id == "") {
+        axiosInterceptor
+          .post("/admin/books", this.book)
+          .then((response) => {
+            // JSON responses are automatically parsed.
+
+            if (response.data.success == true) {
+              toast.success("Create books successfully!", {
+                autoClose: 1000,
+              });
+
+              setTimeout(() => {
+                this.$router.push("/books");
+                this.onClose();
+                this.getBooksList();
+              }, 2000);
+            }
+          })
+          .catch((e) => {
+            console.log(e);
+            this.errors.message = e.response.data.message;
+          })
+          .finally(() => {
+            setTimeout(() => {
+              this.isSubmitting = false;
+            }, 2000)
+          });
+      } else {
+        await axiosInterceptor
+          .put(`/admin/books/${this.id}`, this.book)
+          .then((response) => {
+            // JSON responses are automatically parsed.
+            console.log(response.data.data);
+            toast.success("Update book success!", {
+              autoClose: 1000,
+            });
+
+            if (response.data.success == true) {
+              setTimeout(() => {
+                this.$router.push("/books");
+                this.onClose();
+                this.getBooksList();
+              }, 2000);
+            }
+          })
+          .catch((e) => {
+            console.log(e);
+            this.errors.message = e.response.data.message;
+          });
+      }
+    },
+    getBook(id) {
+
+      if (id != "") {
+        axiosInterceptor
+          .get(`/admin/books/${id}`)
+          .then((response) => {
+            // JSON responses are automatically parsed.
+            this.book.title = response.data.data.title;
+            this.book.author = response.data.data.author;
+            this.book.price = response.data.data.price;
+            this.book.isbn = response.data.data.isbn;
+            this.book.price = response.data.data.price;
+            this.book.categoryId = response.data.data.categoryId;
+            this.book.description = response.data.data.description;
+          })
+          .catch((e) => {
+            console.log(e);
+          });
+      }
+    },
   },
 };
 </script>
@@ -316,9 +447,11 @@ export default {
   width: 200px;
   /* set a fixed width */
 }
+
 .mb-3.me-3.button-css {
   margin-top: 23px;
 }
+
 .mb-3.me-3.button-css-search {
   margin-top: 30px;
 }

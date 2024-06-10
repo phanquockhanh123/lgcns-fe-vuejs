@@ -2,64 +2,71 @@
   <a-card title="List categories" class="w-100">
     <div class="row mb-3">
       <div class="col-12 d-flex justify-content-end">
-        <router-link to="/categories/create"
-          ><a-button>Create</a-button></router-link
-        >
+        <a-button type="primary" @click="showDrawer">
+          <PlusOutlined />
+        </a-button>
       </div>
     </div>
     <div class="row">
       <div>
-        <a-table
-          :dataSource="listCategories"
-          :loading="loading"
-          :pagination="false"
-          :columns="columns"
-          class="table"
-          :rowSelection="rowSelection"
-          :scroll="{ x: 1500, y: 650 }"
-          rowKey="id"
-        >
-          <template #headerCell="{ column }"> </template> 
-          <template #bodyCell="{ column, index, record }"> 
+        <a-table :dataSource="listCategories" :loading="loading" :pagination="false" :columns="columns" class="table"
+          :scroll="{ x: 1500, y: 600 }" rowKey="id">
+          <template #headerCell="{ column }"> </template>
+          <template #bodyCell="{ column, index, record }">
             <template v-if="column.key === 'action'">
               <a-space>
-                <router-link :to="{ path: '/categories/create/' + record.id }">
-                  <a-button type="primary">
-                    <EditOutlined />
-                  </a-button>
-                </router-link>
-                <a-button
-                  type="primary"
-                  danger
-                  @click.prevent="confirmDelete(record.id)"
-                >
+                <a-button type="primary" @click="showDrawer(record.id)">
+                  <EditOutlined />
+                </a-button>
+                <a-button type="primary" danger @click.prevent="confirmDelete(record.id)">
                   <DeleteOutlined />
                 </a-button>
               </a-space>
             </template>
           </template>
         </a-table>
-        <a-modal
-          v-model:visible="isModalVisible"
-          title="Delete Category"
-          @ok="deleteCategory"
-          @cancel="handleCancel"
-        >
+        <a-modal v-model:visible="isModalVisible" title="Delete Category" @ok="deleteCategory" @cancel="handleCancel">
           <p>Are you sure you want to delete this category?</p>
         </a-modal>
-        <a-pagination
-          v-model:current="pageInfo.pageIndex"
-          v-model:pageSize="pageInfo.pageSize"
-          :total="pageInfo.totalElements"
-          show-size-changer
-          :page-size-options="['5', '10', '20', '50']"
-          :locale="{ items_per_page: '/ trang' }"
-          @show-size-change="onShowSizeChange"
-          @change="updatePageSize"
-        />
+        <a-pagination v-model:current="pageInfo.pageIndex" v-model:pageSize="pageInfo.pageSize"
+          :total="pageInfo.totalElements" show-size-changer :page-size-options="['5', '10', '20', '50']"
+          :locale="{ items_per_page: '/ trang' }" @show-size-change="onShowSizeChange" @change="updatePageSize" />
       </div>
     </div>
   </a-card>
+  <a-drawer title="Create a new category" :width="720" :visible="visible" :body-style="{ paddingBottom: '80px' }"
+    @close="onClose">
+    <a-form :model="category" :rules="rules" layout="vertical">
+      <a-row :gutter="16">
+        <a-col :span="24">
+          <a-form-item label="Name" name="name">
+            <a-input v-model:value="category.name" placeholder="Please enter category name" />
+          </a-form-item>
+        </a-col>
+      </a-row>
+      <a-row :gutter="16">
+        <a-col :span="24">
+          <a-form-item label="Description" description="description">
+            <a-textarea v-model:value="category.description" :rows="4" placeholder="please enter url description" />
+          </a-form-item>
+        </a-col>
+      </a-row>
+    </a-form>
+    <div :style="{
+          position: 'absolute',
+          right: 0,
+          bottom: 0,
+          width: '100%',
+          borderTop: '1px solid #e9e9e9',
+          padding: '10px 16px',
+          background: '#fff',
+          textAlign: 'right',
+          zIndex: 1,
+        }">
+      <a-button style="margin-right: 8px" @click="onClose">Cancel</a-button>
+      <a-button type="primary" @click="createCategory" :disabled="isSubmitting">Submit</a-button>
+    </div>
+  </a-drawer>
 </template>
 
 <script>
@@ -74,7 +81,6 @@ import axiosInterceptor from "../../service/AxiosInteceptorToken";
 import moment from "moment";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
-import CreateCategoryViewVue from './CreateCategoryView.vue';
 
 export default {
   name: "CategoryView",
@@ -90,6 +96,13 @@ export default {
       loading: false,
       listCategories: [],
       selectedRowKeys: [],
+      visible: false,
+      isSubmitting: false,
+      category: {
+        name: "",
+        description: "",
+      },
+      id: "",
       columns: [
         {
           title: "ID",
@@ -120,15 +133,103 @@ export default {
         totalElements: 0,
         totalPages: 0,
       },
-      rowSelection: {
-        onChange: this.onSelectChange,
-      },
+      rules: {
+        name: {
+          required: true,
+          message: 'Please enter name',
+        }
+      }
     };
   },
-  mounted() {
-    this.getCategoriesList();
-  },
   methods: {
+    async createCategory() {
+
+      if (this.isSubmitting) {
+        return;
+      }
+
+      this.isSubmitting = true;
+
+      if (this.id != "") {
+        axiosInterceptor
+          .put(`/admin/categories/${this.id}`, this.category)
+          .then((response) => {
+            // JSON responses are automatically parsed.
+            if (response.data.success) {
+              toast.success("Update category successfully!", {
+                autoClose: 1000,
+              });
+
+              setTimeout(() => {
+                this.$router.push("/categories");
+                this.onClose();
+                this.getCategoriesList();
+              }, 2000);
+            }
+          })
+          .catch((e) => {
+            console.log(e);
+          })
+          .finally(() => {
+            setTimeout(() => {
+              this.isSubmitting = false;
+            }, 2000)
+          });
+      } else {
+        axiosInterceptor
+          .post("/admin/categories", this.category)
+          .then((response) => {
+            // JSON responses are automatically parsed.
+            if (response.data.success) {
+              toast.success("Create category successfully!", {
+                autoClose: 1000,
+              });
+
+              setTimeout(() => {
+                this.$router.push("/categories");
+                this.onClose();
+                this.getCategoriesList();
+              }, 2000);
+            }
+          })
+          .catch((e) => {
+            console.log(e);
+          })
+          .finally(() => {
+            setTimeout(() => {
+              this.isSubmitting = false;
+            }, 2000)
+          });
+      }
+    },
+    getCategory(id) {
+      if (id != "") {
+        axiosInterceptor
+          .get(`/admin/categories/${id}`)
+          .then((response) => {
+            // JSON responses are automatically parsed.
+            console.log(response.data);
+            this.category.name = response.data.data.name;
+            this.category.description = response.data.data.description;
+          })
+          .catch((e) => {
+            console.log(e);
+          });
+      }
+    },
+    showDrawer(id = "") {
+      this.visible = true;
+      if (id != "" && !isNaN(id)) {
+        this.id = id;
+        this.getCategory(id)
+      }
+    },
+    onClose() {
+      this.visible = false;
+      this.category.name = "";
+      this.category.description = "";
+      this.id = "";
+    },
     formattedDatetime(date) {
       return moment(date).format("YYYY-MM-DD HH:mm:ss");
     },
@@ -149,8 +250,7 @@ export default {
       this.pageInfo.pageIndex = pageIndex;
       this.pageInfo.pageSize = pageSize;
 
-      console.log(pageIndex);
-      this.getCategoriesList(pageIndex);
+      this.getCategoriesList();
     },
     isSelected(book) {
       return this.selectedBook && this.selectedBook.id === book.id;
@@ -159,15 +259,16 @@ export default {
       this.loading = true;
 
       try {
+        let params = {
+          page: this.pageInfo.pageIndex - 1,
+          size: this.pageInfo.pageSize
+        };
         const response = await axiosInterceptor.get("/admin/categories", {
-          params: {
-            page: this.pageInfo.pageIndex - 1,
-            size: this.pageInfo.pageSize,
-          },
+          params: params
         });
-        this.listCategories = response.data.data;
-        this.pageInfo.totalElements = response.data.totalElements;
-        this.pageInfo.totalPages = response.data.totalPages;
+        this.listCategories = response.data.data.data;
+        this.pageInfo.totalElements = response.data.data.totalElements;
+        this.pageInfo.totalPages = response.data.data.totalPages;
       } catch (error) {
         console.error(error);
       } finally {
@@ -201,9 +302,15 @@ export default {
       this.isModalVisible = false;
     },
   },
+  mounted() {
+    this.getCategoriesList();
+  },
+  computed() {
+
+  }
 };
 </script>
 
 <style scoped>
-/* Add any scoped styles here */
+
 </style>

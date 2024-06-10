@@ -4,7 +4,6 @@ import FormLogin from "../views/auth/FormLogin.vue";
 import FormRegister from "../views/auth/FormRegister.vue";
 import BookView from "../views/books/BookView.vue";
 import CategoryView from "../views/categories/CategoryView.vue";
-import CreateCategoryView from "../views/categories/CreateCategoryView.vue";
 import CreateBookView from "../views/books/CreateBookView.vue";
 import Layout from "../layouts/Layout.vue";
 
@@ -37,13 +36,7 @@ const routes = [
         name: "categories",
         component: CategoryView,
         meta: { requiresAuth: true },
-      },
-      {
-        path: "/categories/create/:id?",
-        name: "createCategories",
-        component: CreateCategoryView,
-        meta: { requiresAuth: true },
-      },
+      }
     ]
   },
   {
