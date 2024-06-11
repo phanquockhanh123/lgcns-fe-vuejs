@@ -28,6 +28,9 @@
           <li class="nav-item">
             <router-link to="/books" class="nav-link">Books</router-link>
           </li>
+          <li class="nav-item">
+            <router-link to="/users" class="nav-link">Users</router-link>
+          </li>
           <li class="nav-item" v-if="isLoggedIn">
             <router-link to="/login" class="nav-link">Login</router-link>
           </li>

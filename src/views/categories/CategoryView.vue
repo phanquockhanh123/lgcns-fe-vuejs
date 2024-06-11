@@ -15,7 +15,7 @@
           :pagination="false"
           :columns="columns"
           class="table"
-          :scroll="{ x: 1500, y: 600 }"
+          :scroll="{ x: 1500, y: 700 }"
           rowKey="id"
         >
           <template #headerCell="{ column }"> </template>
@@ -49,7 +49,7 @@
           v-model:pageSize="pageInfo.pageSize"
           :total="pageInfo.totalElements"
           show-size-changer
-          :page-size-options="['5', '10', '20', '50']"
+          :page-size-options="['10', '20', '50']"
           :locale="{ items_per_page: '/ trang' }"
           @show-size-change="onShowSizeChange"
           @change="updatePageSize"
@@ -177,10 +177,10 @@ export default {
         name: {
           required: true,
           message: "Please enter category name",
-          trigger: 'blur'
+          trigger: "blur",
         },
       },
-      errors: ""
+      errors: "",
     };
   },
   methods: {
@@ -270,9 +270,9 @@ export default {
     },
     onClose() {
       this.visible = false;
+      this.isSubmitting = false;
       this.category.name = "";
       this.category.description = "";
-      this.id = "";
     },
     formattedDatetime(date) {
       return moment(date).format("YYYY-MM-DD HH:mm:ss");
@@ -344,7 +344,7 @@ export default {
     },
     handleCancel() {
       this.isModalVisible = false;
-    }
+    },
   },
   mounted() {
     this.getCategoriesList();

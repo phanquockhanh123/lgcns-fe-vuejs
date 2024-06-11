@@ -8,14 +8,36 @@
       </div>
       <div class="mb-3 me-3">
         <label for="author" class="form-label">Author</label>
-        <a-input v-model:value="search.author" placeholder="Title" />
+        <a-input v-model:value="search.author" placeholder="Author" />
       </div>
       <div class="mb-3 me-3">
-        <label for="categoryId" class="form-label">Category</label>
+        <label for="yearOfPublish" class="form-label">Year From</label>
+        <a-select v-model:value="search.yearFrom" placeholder="Select a year" class="w-full d-flex">
+          <a-select-option value="1975">All years</a-select-option>
+          <a-select-option v-for="year in years" :key="year" :value="year">
+            {{ year }}
+          </a-select-option>
+        </a-select>
+        
+      </div>
+
+      <div class="mb-3 me-3">
+        <label for="yearOfPublish" class="form-label">Year To</label>
+        <a-select v-model:value="search.yearTo" placeholder="Select a year" class="w-full d-flex">
+          <a-select-option value="2024">All years</a-select-option>
+          <a-select-option v-for="year in years" :key="year" :value="year">
+            {{ year }}
+          </a-select-option>
+        </a-select>
+        
+      </div>
+
+      <div class="mb-3 me-3">
+        <label for="categoryId" class="form-label ">Category</label>
         <a-select
           v-model:value="searchCateIds"
           mode="tags"
-          style="width: 100%"
+          style="width: 100%; margin-right: 30px"
           placeholder="Tags Category"
           :options="listCategoriesTag"
           :max-tag-count="1"
@@ -29,7 +51,7 @@
       <div class="mb-3 me-3 button-css d-flex justify-content-end">
         <a-button type="primary" class="me-3" @click="showDrawer">
           <PlusOutlined />
-          New account
+          New book
         </a-button>
         <a-button
           class="btn btn-danger"
@@ -48,7 +70,7 @@
           :pagination="false"
           :columns="columns"
           class="table"
-          :scroll="{ x: 1500, y: 850 }"
+          :scroll="{ x: 1500, y: 650 }"
           rowKey="id"
           :rowSelection="rowSelection"
         >
@@ -101,18 +123,25 @@
   <a-drawer
     title="Create a new book"
     :width="720"
-    
     :visible="visible"
     :body-style="{ paddingBottom: '80px' }"
     @close="onClose"
   >
     <a-form :model="book" :rules="rules" layout="vertical">
       <a-row :gutter="16">
-        <a-col :span="24">
+        <a-col :span="12">
           <a-form-item label="Title" name="title">
             <a-input
               v-model:value="book.title"
               placeholder="Please enter title"
+            />
+          </a-form-item>
+        </a-col>
+        <a-col :span="12">
+          <a-form-item label="Author" name="author">
+            <a-input
+              v-model:value="book.author"
+              placeholder="Please enter author"
             />
           </a-form-item>
         </a-col>
@@ -133,6 +162,19 @@
             </a-select>
           </a-form-item>
         </a-col>
+        <a-col :span="12">
+          <a-form-item label="yearOfPublish" name="year">
+            <a-select
+              placeholder="Please a-s an year of publish"
+              v-model:value="book.year"
+            >
+              <a-select-option
+                v-for="year in years" :key="year" :value="year"
+                >{{ year}}</a-select-option
+              >
+            </a-select>
+          </a-form-item>
+        </a-col>
       </a-row>
       <a-row :gutter="16">
         <a-col :span="12">
@@ -144,13 +186,14 @@
           </a-form-item>
         </a-col>
         <a-col :span="12">
-          <a-form-item label="Author" name="author">
+          <a-form-item label="quantity" name="quantity">
             <a-input
-              v-model:value="book.author"
-              placeholder="Please enter author"
+              v-model:value="book.quantity"
+              placeholder="Please enter quantity"
             />
           </a-form-item>
         </a-col>
+        
       </a-row>
       <a-row :gutter="16">
         <a-col :span="24">
@@ -180,7 +223,7 @@
       }"
     >
       <a-button style="margin-right: 8px" @click="onClose">Cancel</a-button>
-      <a-button type="primary" @click="createBook">Submit</a-button>
+      <a-button type="primary" @click.prevent="createBook">Submit</a-button>
     </div>
   </a-drawer>
 </template>
@@ -212,15 +255,21 @@ export default {
       listCategory: [],
       listCategoriesTag: [],
       selectedRowKeys: [],
+      selectedYear: null,
+      years: [],
       search: {
         title: "",
         author: "",
+        yearFrom: "",
+        yearTo: "",
       },
       book: {
         price: "",
         author: "",
         title: "",
         description: "",
+        year: "",
+        quantity: ""
       },
       errors: {
         message: "",
@@ -246,7 +295,8 @@ export default {
           title: "Category",
           dataIndex: "categoryName",
           key: "categoryName",
-        },,
+        },
+        ,
         {
           title: "Author",
           dataIndex: "author",
@@ -256,6 +306,16 @@ export default {
           title: "Price",
           dataIndex: "price",
           key: "price",
+        },
+        {
+          title: "Quantity",
+          dataIndex: "quantity",
+          key: "quantity",
+        },
+        {
+          title: "Quantity Avail",
+          dataIndex: "quantityAvail",
+          key: "quantityAvail",
         },
         {
           title: "Created",
@@ -296,30 +356,43 @@ export default {
           message: "Please enter book price",
           trigger: "blur",
         },
+        year: {
+          required: true,
+          message: "Please enter year of publish",
+          trigger: "blur",
+        },
+        quantity: {
+          required: true,
+          message: "Please enter quantity",
+          trigger: "blur",
+        },
       },
     };
   },
   mounted() {
     this.getBooksList();
     this.getCategories();
+    this.generateYearList();
   },
   methods: {
     showDrawer(id = "") {
       this.visible = true;
       if (id != "" && !isNaN(id)) {
-        this.id = id;
+        this.id = id; 
         this.getBook(id);
       }
     },
     onClose() {
       this.visible = false;
+      this.isSubmitting = false;
       this.book.title = "";
       this.book.author = "";
       this.book.categoryId = "";
       this.book.price = "";
       this.book.description = "";
-      this.id = "";
-      this.errors.message= "";
+      this.book.year = "";
+      this.book.quantity = "";
+      this.errors.message = "";
     },
     onSelectChange(selectedRowKeys, selectedRows) {
       console.log("Selected Row Keys: ", selectedRowKeys);
@@ -342,7 +415,7 @@ export default {
             }));
 
             this.listCategoriesTag = rs.map((item) => ({
-              name: item.id,
+              value: item.id,
               label: item.name,
             }));
           }
@@ -366,6 +439,14 @@ export default {
 
       this.getBooksList();
     },
+    generateYearList() {
+      const currentYear = new Date().getFullYear();
+      const startYear = currentYear - 20; // Adjust the range as needed
+
+      for (let year = currentYear; year >= startYear; year--) {
+        this.years.push(year);
+      }
+    },
     tableScroll() {
       return this.screenWidth > 1300 ? { x: 1300 } : {};
     },
@@ -387,6 +468,14 @@ export default {
 
       if (this.searchCateIds != "" && this.searchCateIds.length > 0) {
         dataParams.cateIds = this.searchCateIds.join(",");
+      }
+
+      if (this.search.yearFrom != "" && this.search.yearFrom != null) {
+        dataParams.yearFrom = this.search.yearFrom;
+      }
+
+      if (this.search.yearTo != "" && this.search.yearTo != null) {
+        dataParams.yearTo = this.search.yearTo;
       }
 
       try {
@@ -447,7 +536,7 @@ export default {
 
       this.isSubmitting = true;
 
-      console.log(this.id)
+      console.log(this.id);
       if (this.id == "") {
         axiosInterceptor
           .post("/admin/books", this.book)
@@ -469,6 +558,7 @@ export default {
           .catch((e) => {
             console.log(e);
             this.errors.message = e.response.data.data;
+            this.errors.message = e.response.data.message;
           })
           .finally(() => {
             setTimeout(() => {
@@ -497,6 +587,9 @@ export default {
             console.log(e);
             this.errors.message = e.response.data.data;
             this.errors.message = e.response.data.message;
+          })
+          .finally(() => {
+            
           });
       }
     },
@@ -513,6 +606,8 @@ export default {
             this.book.price = response.data.data.price;
             this.book.categoryId = response.data.data.categoryId;
             this.book.description = response.data.data.description;
+            this.book.quantity = response.data.data.quantity;
+            this.book.year = response.data.data.yearOfPublish;
           })
           .catch((e) => {
             console.log(e);
@@ -545,5 +640,8 @@ span.text-error {
   font-size: small;
   color: red;
   margin-left: 15px;
+}
+.mb-3.me-3.button-css.d-flex.justify-content-end {
+    margin-top: 29px;
 }
 </style>
