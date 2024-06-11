@@ -4,7 +4,6 @@ import FormLogin from "../views/auth/FormLogin.vue";
 import FormRegister from "../views/auth/FormRegister.vue";
 import BookView from "../views/books/BookView.vue";
 import CategoryView from "../views/categories/CategoryView.vue";
-import CreateBookView from "../views/books/CreateBookView.vue";
 import Layout from "../layouts/Layout.vue";
 
 const routes = [
@@ -23,12 +22,6 @@ const routes = [
         path: "/books",
         name: "books",
         component: BookView,
-        meta: { requiresAuth: true },
-      },
-      {
-        path: "/books/create/:id?",
-        name: "createBooks",
-        component: CreateBookView,
         meta: { requiresAuth: true },
       },
       {

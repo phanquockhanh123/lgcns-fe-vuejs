@@ -9,8 +9,15 @@
     </div>
     <div class="row">
       <div>
-        <a-table :dataSource="listCategories" :loading="loading" :pagination="false" :columns="columns" class="table"
-          :scroll="{ x: 1500, y: 600 }" rowKey="id">
+        <a-table
+          :dataSource="listCategories"
+          :loading="loading"
+          :pagination="false"
+          :columns="columns"
+          class="table"
+          :scroll="{ x: 1500, y: 600 }"
+          rowKey="id"
+        >
           <template #headerCell="{ column }"> </template>
           <template #bodyCell="{ column, index, record }">
             <template v-if="column.key === 'action'">
@@ -18,53 +25,87 @@
                 <a-button type="primary" @click="showDrawer(record.id)">
                   <EditOutlined />
                 </a-button>
-                <a-button type="primary" danger @click.prevent="confirmDelete(record.id)">
+                <a-button
+                  type="primary"
+                  danger
+                  @click.prevent="confirmDelete(record.id)"
+                >
                   <DeleteOutlined />
                 </a-button>
               </a-space>
             </template>
           </template>
         </a-table>
-        <a-modal v-model:visible="isModalVisible" title="Delete Category" @ok="deleteCategory" @cancel="handleCancel">
+        <a-modal
+          v-model:visible="isModalVisible"
+          title="Delete Category"
+          @ok="deleteCategory"
+          @cancel="handleCancel"
+        >
           <p>Are you sure you want to delete this category?</p>
         </a-modal>
-        <a-pagination v-model:current="pageInfo.pageIndex" v-model:pageSize="pageInfo.pageSize"
-          :total="pageInfo.totalElements" show-size-changer :page-size-options="['5', '10', '20', '50']"
-          :locale="{ items_per_page: '/ trang' }" @show-size-change="onShowSizeChange" @change="updatePageSize" />
+        <a-pagination
+          v-model:current="pageInfo.pageIndex"
+          v-model:pageSize="pageInfo.pageSize"
+          :total="pageInfo.totalElements"
+          show-size-changer
+          :page-size-options="['5', '10', '20', '50']"
+          :locale="{ items_per_page: '/ trang' }"
+          @show-size-change="onShowSizeChange"
+          @change="updatePageSize"
+        />
       </div>
     </div>
   </a-card>
-  <a-drawer title="Create a new category" :width="720" :visible="visible" :body-style="{ paddingBottom: '80px' }"
-    @close="onClose">
+  <a-drawer
+    title="Create a new category"
+    :width="720"
+    :visible="visible"
+    :body-style="{ paddingBottom: '80px' }"
+    @close="onClose"
+  >
     <a-form :model="category" :rules="rules" layout="vertical">
       <a-row :gutter="16">
         <a-col :span="24">
           <a-form-item label="Name" name="name">
-            <a-input v-model:value="category.name" placeholder="Please enter category name" />
+            <a-input
+              v-model:value="category.name"
+              placeholder="Please enter category name"
+            />
           </a-form-item>
         </a-col>
       </a-row>
       <a-row :gutter="16">
         <a-col :span="24">
           <a-form-item label="Description" description="description">
-            <a-textarea v-model:value="category.description" :rows="4" placeholder="please enter url description" />
+            <a-textarea
+              v-model:value="category.description"
+              :rows="4"
+              placeholder="please enter url description"
+            />
           </a-form-item>
         </a-col>
       </a-row>
     </a-form>
-    <div :style="{
-          position: 'absolute',
-          right: 0,
-          bottom: 0,
-          width: '100%',
-          borderTop: '1px solid #e9e9e9',
-          padding: '10px 16px',
-          background: '#fff',
-          textAlign: 'right',
-          zIndex: 1,
-        }">
+    <span class="text-error" v-if="errors">{{ errors }}</span>
+
+    <div
+      :style="{
+        position: 'absolute',
+        right: 0,
+        bottom: 0,
+        width: '100%',
+        borderTop: '1px solid #e9e9e9',
+        padding: '10px 16px',
+        background: '#fff',
+        textAlign: 'right',
+        zIndex: 1,
+      }"
+    >
       <a-button style="margin-right: 8px" @click="onClose">Cancel</a-button>
-      <a-button type="primary" @click="createCategory" :disabled="isSubmitting">Submit</a-button>
+      <a-button type="primary" @click="createCategory" :disabled="isSubmitting"
+        >Submit</a-button
+      >
     </div>
   </a-drawer>
 </template>
@@ -75,7 +116,6 @@ import {
   DeleteOutlined,
   PlusOutlined,
 } from "@ant-design/icons-vue";
-
 
 import axiosInterceptor from "../../service/AxiosInteceptorToken";
 import moment from "moment";
@@ -136,14 +176,15 @@ export default {
       rules: {
         name: {
           required: true,
-          message: 'Please enter name',
-        }
-      }
+          message: "Please enter category name",
+          trigger: 'blur'
+        },
+      },
+      errors: ""
     };
   },
   methods: {
     async createCategory() {
-
       if (this.isSubmitting) {
         return;
       }
@@ -169,11 +210,13 @@ export default {
           })
           .catch((e) => {
             console.log(e);
+            this.errors = e.response.data.message;
+            console.log(this.erros);
           })
           .finally(() => {
             setTimeout(() => {
               this.isSubmitting = false;
-            }, 2000)
+            }, 2000);
           });
       } else {
         axiosInterceptor
@@ -194,11 +237,12 @@ export default {
           })
           .catch((e) => {
             console.log(e);
+            this.errors = e.response.data.message;
           })
           .finally(() => {
             setTimeout(() => {
               this.isSubmitting = false;
-            }, 2000)
+            }, 2000);
           });
       }
     },
@@ -221,7 +265,7 @@ export default {
       this.visible = true;
       if (id != "" && !isNaN(id)) {
         this.id = id;
-        this.getCategory(id)
+        this.getCategory(id);
       }
     },
     onClose() {
@@ -261,10 +305,10 @@ export default {
       try {
         let params = {
           page: this.pageInfo.pageIndex - 1,
-          size: this.pageInfo.pageSize
+          size: this.pageInfo.pageSize,
         };
         const response = await axiosInterceptor.get("/admin/categories", {
-          params: params
+          params: params,
         });
         this.listCategories = response.data.data.data;
         this.pageInfo.totalElements = response.data.data.totalElements;
@@ -300,17 +344,19 @@ export default {
     },
     handleCancel() {
       this.isModalVisible = false;
-    },
+    }
   },
   mounted() {
     this.getCategoriesList();
   },
-  computed() {
-
-  }
+  computed() {},
 };
 </script>
 
 <style scoped>
-
+span.text-error {
+  font-size: small;
+  color: red;
+  margin-left: 15px;
+}
 </style>
