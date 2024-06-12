@@ -1,47 +1,514 @@
 <template>
-  <a-table :columns="columns" :data-source="data" :scroll="{ x: 1500, y: 300 }">
-    <template #bodyCell="{ column }">
-      <template v-if="column.key === 'operation'">
-        <a>action</a>
-      </template>
-    </template>
-  </a-table>
+  <a-card title="List users" class="w-100">
+    <div class="d-flex mb-3 w-100">
+      <!-- <div class="mb-3 me-3 button-css-search">
+        <a-button class="btn btn-primary" @click.prevent="getUsersList"
+          >Search</a-button
+        >
+      </div> -->
+      <div class="mb-3 me-3 button-css d-flex justify-content-end">
+        <a-button type="primary" class="me-3" @click="showDrawer">
+          <PlusOutlined />
+          New users
+        </a-button>
+        <a-button
+          class="btn btn-danger"
+          @click="confirmDeleteIds"
+          :disabled="selectedRowKeys.length === 0"
+          >Delete Users</a-button
+        >
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-12">
+        <a-table
+          :dataSource="listUsers"
+          :loading="loading"
+          :pagination="false"
+          :columns="columns"
+          class="table"
+          :scroll="{ x: 1500, y: 650 }"
+          rowKey="id"
+          :rowSelection="rowSelection"
+        >
+          <template #headerCell="{ column }"> </template>
+          <template #bodyCell="{ column, index, record }">
+            <template v-if="column.key === 'action'">
+              <a-space>
+                <a-button type="primary" @click="showDrawer(record.id)">
+                  <EditOutlined />
+                </a-button>
+                <a-button
+                  type="primary"
+                  danger
+                  @click="confirmDelete(record.id)"
+                >
+                  <DeleteOutlined />
+                </a-button>
+              </a-space>
+            </template>
+            <template v-if="column.key === 'created'">
+              <a-space>
+                {{ formattedDatetime(record.created) }}
+              </a-space>
+            </template>
+          </template>
+        </a-table>
+        <a-modal
+          v-model:visible="isModalVisible"
+          title="Delete user"
+          @ok="deleteListUserIds"
+          @cancel="handleCancel"
+        >
+          <p>Are you sure you want to delete this users ?</p>
+        </a-modal>
+        <a-pagination
+          v-model:current="pageInfo.pageIndex"
+          v-model:pageSize="pageInfo.pageSize"
+          :total="pageInfo.totalElements"
+          show-size-changer
+          :page-size-options="['10', '20', '50', '100']"
+          :locale="{ items_per_page: '/ trang' }"
+          @show-size-change="onShowSizeChange"
+          @change="updatePageSize"
+        />
+      </div>
+    </div>
+  </a-card>
+
+  <!-- A drawer create user view -->
+  <a-drawer
+    title="Create a new user"
+    :width="720"
+    :visible="visible"
+    :body-style="{ paddingBottom: '80px' }"
+    @close="onClose"
+  >
+    <a-form :model="user" :rules="rules" layout="vertical">
+      <a-row :gutter="16">
+        <a-col :span="12">
+          <a-form-item label="First Name" name="firstName">
+            <a-input
+              v-model:value="user.firstName"
+              placeholder="Please enter first name"
+            />
+          </a-form-item>
+        </a-col>
+        <a-col :span="12">
+          <a-form-item label="Last Name" name="lastName">
+            <a-input
+              v-model:value="user.lastName"
+              placeholder="Please enter last name "
+            />
+          </a-form-item>
+        </a-col>
+      </a-row>
+      <a-row :gutter="16">
+        <a-col :span="12">
+          <a-form-item label="Email" name="email">
+            <a-input
+              v-model:value="user.email"
+              placeholder="Please enter email"
+            />
+          </a-form-item>
+        </a-col>
+        <a-col :span="12">
+          <a-form-item label="Address" name="address">
+            <a-input
+              v-model:value="user.address"
+              placeholder="Please enter address"
+            />
+          </a-form-item>
+        </a-col>
+      </a-row>
+      <a-row :gutter="16">
+        <a-col :span="12">
+          <a-form-item label="Phone" name="phone">
+            <a-input
+              v-model:value="user.phone"
+              placeholder="Please enter phone"
+            />
+          </a-form-item>
+        </a-col>
+        <a-col :span="12">
+          <a-form-item label="Password" name="password">
+            <a-input
+              v-model:value="user.password"
+              placeholder="Please enter password"
+            />
+          </a-form-item>
+        </a-col>
+      </a-row>
+    </a-form>
+    <span class="text-error" v-if="errors.message">{{ errors.message }}</span>
+
+    <div
+      :style="{
+        position: 'absolute',
+        right: 0,
+        bottom: 0,
+        width: '100%',
+        borderTop: '1px solid #e9e9e9',
+        padding: '10px 16px',
+        background: '#fff',
+        textAlign: 'right',
+        zIndex: 1,
+      }"
+    >
+      <a-button style="margin-right: 8px" @click="onClose">Cancel</a-button>
+      <a-button type="primary" @click.prevent="createUser">Submit</a-button>
+    </div>
+  </a-drawer>
 </template>
-<script lang="ts" setup>
-import type { TableColumnsType } from 'ant-design-vue';
-const columns: TableColumnsType = [
-  { title: 'Full Name', width: 100, dataIndex: 'name', key: 'name', fixed: 'left' },
-  { title: 'Age', width: 100, dataIndex: 'age', key: 'age', fixed: 'left' },
-  { title: 'Column 1', dataIndex: 'address', key: '1', width: 150 },
-  { title: 'Column 2', dataIndex: 'address', key: '2', width: 150 },
-  { title: 'Column 3', dataIndex: 'address', key: '3', width: 150 },
-  { title: 'Column 4', dataIndex: 'address', key: '4', width: 150 },
-  { title: 'Column 5', dataIndex: 'address', key: '5', width: 150 },
-  { title: 'Column 6', dataIndex: 'address', key: '6', width: 150 },
-  { title: 'Column 7', dataIndex: 'address', key: '7', width: 150 },
-  { title: 'Column 8', dataIndex: 'address', key: '8' },
-  {
-    title: 'Action',
-    key: 'operation',
-    fixed: 'right',
-    width: 100,
+
+<script>
+import {
+  EditOutlined,
+  DeleteOutlined,
+  PlusOutlined,
+} from "@ant-design/icons-vue";
+import axiosInterceptor from "../../service/AxiosInteceptorToken";
+import moment from "moment";
+import { toast } from "vue3-toastify";
+import "vue3-toastify/dist/index.css";
+
+export default {
+  name: "userView",
+  components: {
+    EditOutlined,
+    DeleteOutlined,
+    PlusOutlined,
   },
-];
+  data() {
+    return {
+      isModalVisible: false,
+      userIdToDelete: null,
+      loading: false,
+      listUsers: [],
+      selectedRowKeys: [],
+      selectedYear: null,
+      years: [],
+      user: {
+        firstName: "",
+        lastName: "",
+        email: "",
+        address: "",
+        phone: "",
+        passsword: "",
+        role: ""
+      },
+      errors: {
+        message: "",
+      },
+      columns: [
+        {
+          title: "ID",
+          dataIndex: "id",
+          key: "id",
+        },
+        {
+          title: "FirstName",
+          dataIndex: "firstName",
+          key: "firstName",
+        },
+        {
+          title: "LastName",
+          dataIndex: "lastName",
+          key: "lastName",
+        },
+        {
+          title: "Email",
+          dataIndex: "email",
+          key: "email",
+        },
+        ,
+        {
+          title: "Address",
+          dataIndex: "address",
+          key: "address",
+        },
+        {
+          title: "Role",
+          dataIndex: "role",
+          key: "role",
+        },
+        {
+          title: "Action",
+          dataIndex: "action",
+          key: "action",
+        },
+      ],
+      pageInfo: {
+        content: [],
+        pageIndex: 1,
+        pageSize: 10,
+        totalElements: 0,
+        totalPages: 0,
+      },
+      rowSelection: {
+        onChange: this.onSelectChange,
+      },
+      visible: false,
+      id: "",
+      rules: {
+        firstName: {
+          required: true,
+          message: "Please enter first name",
+          trigger: "blur",
+        },
+        lastName: {
+          required: true,
+          message: "Please enter last name",
+          trigger: "blur",
+        },
+        email: {
+          required: true,
+          message: "Please enter user email",
+          trigger: "blur",
+        },
+        address: {
+          required: true,
+          message: "Please enter address",
+          trigger: "blur",
+        },
+        phone: {
+          required: true,
+          message: "Please enter phone",
+          trigger: "blur",
+        },
+        password: {
+          required: true,
+          message: "Please enter password",
+          trigger: "blur",
+        },
+      },
+    };
+  },
+  mounted() {
+    this.getUsersList();
+    this.generateYearList();
+  },
+  methods: {
+    showDrawer(id = "") {
+      this.visible = true;
+      if (id != "" && !isNaN(id)) {
+        this.id = id; 
+        this.getUser(id);
+      }
+    },
+    onClose() {
+      this.visible = false;
+      this.isSubmitting = false;
+      this.user.firstName = "";
+      this.user.lastName = "";
+      this.user.email = "";
+      this.user.address = "";
+      this.user.phone = "";
+      this.user.password = "";
+      this.errors.message = "";
+    },
+    onSelectChange(selectedRowKeys, selectedRows) {
+      console.log("Selected Row Keys: ", selectedRowKeys);
+      console.log("Selected Rows: ", selectedRows);
+      this.selectedRowKeys = selectedRowKeys;
+      const selectedIds = selectedRows.map((row) => row.id);
+      console.log("Selected user IDs: ", selectedIds);
+    },
+    formattedDatetime(date) {
+      return moment(date).format("YYYY-MM-DD HH:mm:ss");
+    },
+    onShowSizeChange() {
+      this.handleChange(this.pageInfo.pageIndex, this.pageInfo.pageSize);
+    },
+    updatePageSize() {
+      this.handleChange(this.pageInfo.pageIndex, this.pageInfo.pageSize);
+    },
+    handleChange(pageIndex, pageSize) {
+      this.pageInfo.pageIndex = pageIndex;
+      this.pageInfo.pageSize = pageSize;
 
-interface DataItem {
-  key: number;
-  name: string;
-  age: number;
-  address: string;
-}
+      this.getUsersList();
+    },
+    generateYearList() {
+      const currentYear = new Date().getFullYear();
+      const startYear = currentYear - 20; // Adjust the range as needed
 
-const data: DataItem[] = [];
-for (let i = 0; i < 100; i++) {
-  data.push({
-    key: i,
-    name: `Edrward ${i}`,
-    age: 32,
-    address: `London Park no. ${i}`,
-  });
-}
+      for (let year = currentYear; year >= startYear; year--) {
+        this.years.push(year);
+      }
+    },
+    tableScroll() {
+      return this.screenWidth > 1300 ? { x: 1300 } : {};
+    },
+    confirmDeleteIds() {
+      this.isModalVisible = true;
+    },
+    async getUsersList() {
+      this.loading = true;
+
+      let dataParams = {
+        page: this.pageInfo.pageIndex - 1,
+        size: this.pageInfo.pageSize,
+      };
+
+      try {
+        const response = await axiosInterceptor.get("/admin/users/search", {
+          params: dataParams,
+        });
+        this.listUsers = response.data.data.data;
+
+        this.pageInfo.totalElements = response.data.data.totalElements;
+        this.pageInfo.totalPages = response.data.data.totalPages;
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setTimeout(() => {
+          this.loading = false;
+        });
+      }
+    },
+    confirmDelete(id) {
+      this.selectedRowKeys = [id];
+      this.isModalVisible = true;
+    },
+    handleCancel() {
+      this.isModalVisible = false;
+    },
+    async createUser() {
+      if (this.isSubmitting) {
+        return;
+      }
+
+      this.isSubmitting = true;
+
+      console.log(this.id);
+      if (this.id == "") {
+        axiosInterceptor
+          .post("/admin/users", this.user)
+          .then((response) => {
+            // JSON responses are automatically parsed.
+
+            if (response.data.success == true) {
+              toast.success("Create users successfully!", {
+                autoClose: 1000,
+              });
+
+              setTimeout(() => {
+                this.$router.push("/users");
+                this.onClose();
+                this.getUsersList();
+              }, 2000);
+            }
+          })
+          .catch((e) => {
+            console.log(e);
+            this.errors.message = e.response.data.data;
+            this.errors.message = e.response.data.message;
+          })
+          .finally(() => {
+            setTimeout(() => {
+              this.isSubmitting = false;
+            }, 2000);
+          });
+      } else {
+        await axiosInterceptor
+          .put(`/admin/users/${this.id}`, this.user)
+          .then((response) => {
+            // JSON responses are automatically parsed.
+            console.log(response.data.data);
+            toast.success("Update user success!", {
+              autoClose: 1000,
+            });
+
+            if (response.data.success == true) {
+              setTimeout(() => {
+                this.$router.push("/users");
+                this.onClose();
+                this.getUsersList();
+              }, 2000);
+            }
+          })
+          .catch((e) => {
+            console.log(e);
+            this.errors.message = e.response.data.data;
+            this.errors.message = e.response.data.message;
+          })
+          .finally(() => {
+            
+          });
+      }
+    },
+    getUser(id) {
+      if (id != "") {
+        axiosInterceptor
+          .get(`/admin/users/${id}`)
+          .then((response) => {
+            // JSON responses are automatically parsed.
+            this.user.firstName = response.data.data.firstName;
+            this.user.lastName = response.data.data.lastName;
+            this.user.email = response.data.data.email;
+            this.user.address = response.data.data.address;
+            this.user.phone = response.data.data.phone;
+            this.user.role = response.data.data.role;
+          })
+          .catch((e) => {
+            console.log(e);
+          });
+      }
+    },
+    async deleteListUserIds() {
+      try {
+        const response = await axiosInterceptor.delete("/admin/users", {
+          data: {
+            ids: this.selectedRowKeys,
+          },
+        });
+
+        this.isModalVisible = false;
+        this.getUsersList();
+
+        toast.success(
+          `Delete list users successfully with ids{} ${this.selectedRowKeys}`,
+          {
+            autoClose: 1000,
+          }
+        );
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setTimeout(() => {
+          this.loading = false;
+        });
+      }
+    },
+  },
+};
 </script>
+
+<style scoped>
+/* Add any scoped styles here */
+.custom-scroll {
+  max-height: 800px;
+  /* set the maximum height */
+  overflow-y: auto;
+  /* enable vertical scrolling */
+  width: 200px;
+  /* set a fixed width */
+}
+
+.mb-3.me-3.button-css {
+  margin-top: 23px;
+}
+
+.mb-3.me-3.button-css-search {
+  margin-top: 30px;
+}
+span.text-error {
+  font-size: small;
+  color: red;
+  margin-left: 15px;
+}
+.mb-3.me-3.button-css.d-flex.justify-content-end {
+    margin-top: 29px;
+}
+</style>

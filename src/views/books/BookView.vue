@@ -99,7 +99,7 @@
         </a-table>
         <a-modal
           v-model:visible="isModalVisible"
-          title="Delete Category"
+          title="Delete book"
           @ok="deleteListBookIds"
           @cancel="handleCancel"
         >
@@ -370,6 +370,7 @@ export default {
     };
   },
   mounted() {
+    console.log(localStorage.getItem("profile"))
     this.getBooksList();
     this.getCategories();
     this.generateYearList();

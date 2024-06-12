@@ -87,6 +87,7 @@ export default {
           });
           // Store the token
           localStorage.setItem("token", res.data.token);
+          localStorage.setItem("profile", JSON.stringify(res.data.users));
           setTimeout(() => {
             this.$router.push("/");
           }, 2000); // Redirect to /

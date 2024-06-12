@@ -63,6 +63,7 @@ export default {
 
       setTimeout(() => {
         localStorage.removeItem("token");
+        localStorage.removeItem("profile");
         this.$router.push("/login");
       }, 2000);
     },
