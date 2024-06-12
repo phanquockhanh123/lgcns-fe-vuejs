@@ -44,7 +44,7 @@
         ></a-select>
       </div>
       <div class="mb-3 me-3 button-css-search">
-        <a-button class="btn btn-primary" @click.prevent="getBooksList"
+        <a-button class="btn btn-primary" @click.prevent="getBooksList(1)"
           >Search</a-button
         >
       </div>
@@ -73,6 +73,7 @@
           :scroll="{ x: 1500, y: 650 }"
           rowKey="id"
           :rowSelection="rowSelection"
+          size="small"
         >
           <template #headerCell="{ column }"> </template>
           <template #bodyCell="{ column, index, record }">
@@ -370,7 +371,6 @@ export default {
     };
   },
   mounted() {
-    console.log(localStorage.getItem("profile"))
     this.getBooksList();
     this.getCategories();
     this.generateYearList();
@@ -451,11 +451,11 @@ export default {
     tableScroll() {
       return this.screenWidth > 1300 ? { x: 1300 } : {};
     },
-    async getBooksList() {
+    async getBooksList(pageIndex) {
       this.loading = true;
 
       let dataParams = {
-        page: this.pageInfo.pageIndex - 1,
+        page: pageIndex ? (pageIndex - 1) : (this.pageInfo.pageIndex - 1),
         size: this.pageInfo.pageSize,
       };
 
@@ -621,14 +621,6 @@ export default {
 
 <style scoped>
 /* Add any scoped styles here */
-.custom-scroll {
-  max-height: 800px;
-  /* set the maximum height */
-  overflow-y: auto;
-  /* enable vertical scrolling */
-  width: 200px;
-  /* set a fixed width */
-}
 
 .mb-3.me-3.button-css {
   margin-top: 23px;

@@ -83,4 +83,30 @@ body {
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow: hidden;
+  height: 100%;
+  margin: 0;
+}
+/* Thay đổi kiểu cuộn */
+html {
+  scroll-behavior: smooth;
+}
+  
+/* Tùy chỉnh giao diện thanh cuộn trình duyệt Chrome */
+::-webkit-scrollbar {
+  width: 8px;
+}
+  
+::-webkit-scrollbar-thumb {
+  background-color: #ccc;
+  border-radius: 15px;
+}
+
+.ant-table {
+  max-height: 530px;
+  overflow-y: auto;
+}
+
+.ant-table-thead {
+  position: sticky;
 }
