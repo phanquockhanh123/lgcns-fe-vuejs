@@ -102,11 +102,8 @@ html {
   border-radius: 15px;
 }
 
-.ant-table {
+.ant-table-body {
   max-height: 530px;
   overflow-y: auto;
 }
 
-.ant-table-thead {
-  position: sticky;
-}

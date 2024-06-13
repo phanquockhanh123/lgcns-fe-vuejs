@@ -30,7 +30,6 @@
           :scroll="{ x: 1500, y: 650 }"
           rowKey="id"
           :rowSelection="rowSelection"
-          size="small"
         >
           <template #headerCell="{ column }"> </template>
           <template #bodyCell="{ column, index, record }">

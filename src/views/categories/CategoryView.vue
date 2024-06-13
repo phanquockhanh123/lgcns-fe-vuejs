@@ -15,7 +15,6 @@
           :pagination="false"
           :columns="columns"
           class="table"
-          size="small"
           rowKey="id"
         >
           <template #headerCell="{ column }"> </template>

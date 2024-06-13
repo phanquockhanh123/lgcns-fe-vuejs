@@ -17,7 +17,6 @@
           placeholder="Select a year"
           class="w-full d-flex"
         >
-          <a-select-option value="1975">All years</a-select-option>
           <a-select-option v-for="year in years" :key="year" :value="year">
             {{ year }}
           </a-select-option>
@@ -31,7 +30,6 @@
           placeholder="Select a year"
           class="w-full d-flex"
         >
-          <a-select-option value="2024">All years</a-select-option>
           <a-select-option v-for="year in years" :key="year" :value="year">
             {{ year }}
           </a-select-option>
@@ -82,22 +80,32 @@
           :scroll="{ x: 1500, y: 650 }"
           rowKey="id"
           :rowSelection="this.roleUser == 'USER' ? false : rowSelection"
-          size="small"
         >
-          <template #headerCell="{ column }">
-          </template>
+          <template #headerCell="{ column }"> </template>
           <template #bodyCell="{ column, index, record }">
             <template v-if="column.key === 'action'">
-              <a-space v-if="['ADMIN', 'MANAGER'].includes(this.roleUser)">
-                <a-button type="primary" @click="showDrawer(record.id)">
+              <a-space>
+                <a-button
+                  type="primary"
+                  @click="showDrawer(record.id)"
+                  v-if="['ADMIN', 'MANAGER'].includes(this.roleUser)"
+                >
                   <EditOutlined />
                 </a-button>
                 <a-button
                   type="primary"
                   danger
                   @click="confirmDelete(record.id)"
+                  v-if="['ADMIN', 'MANAGER'].includes(this.roleUser)"
                 >
                   <DeleteOutlined />
+                </a-button>
+                <a-button
+                  type="primary"
+                  @click="showBorrowDrawer(record.id)"
+                  v-if="this.roleUser === 'USER'"
+                >
+                  <VerticalAlignBottomOutlined />
                 </a-button>
               </a-space>
             </template>
@@ -238,6 +246,85 @@
       <a-button type="primary" @click.prevent="createBook">Submit</a-button>
     </div>
   </a-drawer>
+
+  <!-- A drawer borrow book view -->
+  <a-drawer
+    title="Borrow book"
+    :width="720"
+    :visible="borrowVisible"
+    :body-style="{ paddingBottom: '80px' }"
+    @close="onClose"
+  >
+    <a-form :model="book" :rules="rules" layout="vertical">
+      <a-row :gutter="16">
+        <a-col :span="12">
+          <a-form-item label="Title" name="title">
+            <a-input v-model:value="book.title" :disabled="true" />
+          </a-form-item>
+        </a-col>
+        <a-col :span="12">
+          <a-form-item label="Isbn" name="isbn">
+            <a-input v-model:value="book.isbn" :disabled="true" />
+          </a-form-item>
+        </a-col>
+      </a-row>
+      <a-row :gutter="16">
+        <a-col :span="12">
+          <a-form-item label="Author" name="Author">
+            <a-input v-model:value="book.author" :disabled="true" />
+          </a-form-item>
+        </a-col>
+        <a-col :span="12">
+          <a-form-item label="Price" name="Price">
+            <a-input v-model:value="book.price" :disabled="true" />
+          </a-form-item>
+        </a-col>
+      </a-row>
+      <a-row :gutter="16">
+        <a-col :span="12">
+          <a-form-item label="Quantity" name="Quantity">
+            <a-input-number
+              id="inputNumber"
+              v-model:value="borrowBook.quantity"
+              :min="1"
+              :max="100"
+            >
+              <template #upIcon>
+                <ArrowUpOutlined />
+              </template>
+              <template #downIcon>
+                <ArrowDownOutlined />
+              </template>
+            </a-input-number>
+          </a-form-item>
+        </a-col>
+        <a-col :span="12">
+          <a-form-item label="Date Borrow" name="Date borrow">
+            <a-range-picker v-model:value="dateRangeVal" :format="dateFormat" />
+          </a-form-item>
+        </a-col>
+      </a-row>
+    </a-form>
+    <span class="text-error" v-if="errors.message">{{ errors.message }}</span>
+
+    <div
+      :style="{
+        position: 'absolute',
+        right: 0,
+        bottom: 0,
+        width: '100%',
+        borderTop: '1px solid #e9e9e9',
+        padding: '10px 16px',
+        background: '#fff',
+        textAlign: 'right',
+        zIndex: 1,
+      }"
+    >
+      <h3 style="margin-top: 20px" class="d-flex">Amount</h3>
+      <a-button style="margin-right: 8px" @click="onClose">Cancel</a-button>
+      <a-button type="primary" @click.prevent="createBook">Submit</a-button>
+    </div>
+  </a-drawer>
 </template>
 
 <script>
@@ -245,6 +332,9 @@ import {
   EditOutlined,
   DeleteOutlined,
   PlusOutlined,
+  VerticalAlignBottomOutlined,
+  ArrowUpOutlined,
+  ArrowDownOutlined,
 } from "@ant-design/icons-vue";
 import axiosInterceptor from "../../service/AxiosInteceptorToken";
 import moment from "moment";
@@ -257,12 +347,16 @@ export default {
     EditOutlined,
     DeleteOutlined,
     PlusOutlined,
+    VerticalAlignBottomOutlined,
+    ArrowUpOutlined,
+    ArrowDownOutlined,
   },
   data() {
     return {
       isModalVisible: false,
       bookIdToDelete: null,
       loading: false,
+      dateFormat: "YYYY/MM/DD",
       listBooks: [],
       listCategory: [],
       listCategoriesTag: [],
@@ -283,6 +377,17 @@ export default {
         year: "",
         quantity: "",
       },
+      borrowBook: {
+        quantity: "",
+        startDate: "",
+        endDate: "",
+        status: 0,
+        bonus: 0,
+        amount: 0,
+        id: localStorage.getItem("userId"),
+        bookId: 0,
+      },
+      dateRangeVal: "",
       errors: {
         message: "",
       },
@@ -321,11 +426,6 @@ export default {
           key: "price",
         },
         {
-          title: "Quantity",
-          dataIndex: "quantity",
-          key: "quantity",
-        },
-        {
           title: "Quantity Avail",
           dataIndex: "quantityAvail",
           key: "quantityAvail",
@@ -352,6 +452,7 @@ export default {
         onChange: this.onSelectChange,
       },
       visible: false,
+      borrowVisible: false,
       id: "",
       rules: {
         title: {
@@ -395,8 +496,16 @@ export default {
         this.getBook(id);
       }
     },
+    showBorrowDrawer(id = "") {
+      this.borrowVisible = true;
+      if (id != "" && !isNaN(id)) {
+        this.id = id;
+        this.getBook(id);
+      }
+    },
     onClose() {
       this.visible = false;
+      this.borrowVisible = false;
       this.isSubmitting = false;
       this.book.title = "";
       this.book.author = "";
@@ -510,6 +619,10 @@ export default {
     confirmDelete(id) {
       this.selectedRowKeys = [id];
       this.isModalVisible = true;
+    },
+    borowBook(id) {
+      this.selectedRowKeys = [id];
+      this.isBorowBookModalVisible = true;
     },
     confirmDeleteIds() {
       this.isModalVisible = true;
@@ -646,5 +759,13 @@ span.text-error {
 }
 .mb-3.me-3.button-css.d-flex.justify-content-end {
   margin-top: 29px;
+}
+
+.mb-3.me-3 {
+    width: 140px;
+}
+
+.mb-3.me-3.button-css.d-flex.justify-content-end[data-v-36410294] {
+    margin-top: 29px;
 }
 </style>
