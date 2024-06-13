@@ -1,7 +1,9 @@
 <template>
   <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <div class="container-fluid">
-      <router-link to="/" class="nav-link active">DASH BOARD</router-link>
+      <router-link to="/dashboard" class="nav-link active"
+        >DASH BOARD</router-link
+      >
       <button
         class="navbar-toggler"
         type="button"
@@ -15,23 +17,15 @@
       </button>
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav">
-          <li class="nav-item">
-            <router-link to="/dashboard" class="nav-link active"
-              >Home</router-link
+          <li v-for="(item, i) in MainNavLinks" :key="i">
+            <router-link
+              class="nav-link"
+              :to="item.link"
+              v-if="isLoggedIn && item.roles.includes(role)"
+              >{{ item.name }}</router-link
             >
           </li>
-          <li class="nav-item">
-            <router-link to="/categories" class="nav-link"
-              >Categories</router-link
-            >
-          </li>
-          <li class="nav-item">
-            <router-link to="/books" class="nav-link">Books</router-link>
-          </li>
-          <li class="nav-item">
-            <router-link to="/users" class="nav-link">Users</router-link>
-          </li>
-          <li class="nav-item" v-if="isLoggedIn">
+          <li class="nav-item" v-if="!isLoggedIn">
             <router-link to="/login" class="nav-link">Login</router-link>
           </li>
           <li class="nav-item" v-else>
@@ -45,6 +39,7 @@
     <router-view></router-view>
   </div>
 </template>
+
 <script>
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
@@ -52,11 +47,28 @@ import "vue3-toastify/dist/index.css";
 export default {
   name: "NavBar",
   data() {
-    return {};
+    return {
+      role: localStorage.getItem("role"),
+      MainNavLinks: [
+        {
+          name: "Category",
+          link: "/categories",
+          roles: ["ADMIN"],
+        },{
+          name: "Books",
+          link: "/books",
+          roles: ["ADMIN", "USER", "MANAGER"],
+        },
+        {
+          name: "Users",
+          link: "/users",
+          roles: ["ADMIN", "MANAGER"],
+        }
+      ],
+    };
   },
   methods: {
     logout() {
-
       toast.success("You will logout after 3 seconds!!", {
         autoClose: 1000,
       });
@@ -70,7 +82,7 @@ export default {
   },
   computed: {
     isLoggedIn() {
-      return !localStorage.getItem("token");
+      return localStorage.getItem("token");
     },
   },
 };

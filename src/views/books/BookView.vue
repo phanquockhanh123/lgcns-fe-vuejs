@@ -12,28 +12,34 @@
       </div>
       <div class="mb-3 me-3">
         <label for="yearOfPublish" class="form-label">Year From</label>
-        <a-select v-model:value="search.yearFrom" placeholder="Select a year" class="w-full d-flex">
+        <a-select
+          v-model:value="search.yearFrom"
+          placeholder="Select a year"
+          class="w-full d-flex"
+        >
           <a-select-option value="1975">All years</a-select-option>
           <a-select-option v-for="year in years" :key="year" :value="year">
             {{ year }}
           </a-select-option>
         </a-select>
-        
       </div>
 
       <div class="mb-3 me-3">
         <label for="yearOfPublish" class="form-label">Year To</label>
-        <a-select v-model:value="search.yearTo" placeholder="Select a year" class="w-full d-flex">
+        <a-select
+          v-model:value="search.yearTo"
+          placeholder="Select a year"
+          class="w-full d-flex"
+        >
           <a-select-option value="2024">All years</a-select-option>
           <a-select-option v-for="year in years" :key="year" :value="year">
             {{ year }}
           </a-select-option>
         </a-select>
-        
       </div>
 
       <div class="mb-3 me-3">
-        <label for="categoryId" class="form-label ">Category</label>
+        <label for="categoryId" class="form-label">Category</label>
         <a-select
           v-model:value="searchCateIds"
           mode="tags"
@@ -48,7 +54,10 @@
           >Search</a-button
         >
       </div>
-      <div class="mb-3 me-3 button-css d-flex justify-content-end">
+      <div
+        class="mb-3 me-3 button-css d-flex justify-content-end"
+        v-if="['ADMIN', 'MANAGER'].includes(this.roleUser)"
+      >
         <a-button type="primary" class="me-3" @click="showDrawer">
           <PlusOutlined />
           New book
@@ -72,13 +81,14 @@
           class="table"
           :scroll="{ x: 1500, y: 650 }"
           rowKey="id"
-          :rowSelection="rowSelection"
+          :rowSelection="this.roleUser == 'USER' ? false : rowSelection"
           size="small"
         >
-          <template #headerCell="{ column }"> </template>
+          <template #headerCell="{ column }">
+          </template>
           <template #bodyCell="{ column, index, record }">
             <template v-if="column.key === 'action'">
-              <a-space>
+              <a-space v-if="['ADMIN', 'MANAGER'].includes(this.roleUser)">
                 <a-button type="primary" @click="showDrawer(record.id)">
                   <EditOutlined />
                 </a-button>
@@ -170,8 +180,10 @@
               v-model:value="book.year"
             >
               <a-select-option
-                v-for="year in years" :key="year" :value="year"
-                >{{ year}}</a-select-option
+                v-for="year in years"
+                :key="year"
+                :value="year"
+                >{{ year }}</a-select-option
               >
             </a-select>
           </a-form-item>
@@ -194,7 +206,6 @@
             />
           </a-form-item>
         </a-col>
-        
       </a-row>
       <a-row :gutter="16">
         <a-col :span="24">
@@ -270,11 +281,12 @@ export default {
         title: "",
         description: "",
         year: "",
-        quantity: ""
+        quantity: "",
       },
       errors: {
         message: "",
       },
+      roleUser: localStorage.getItem("role"),
       searchCateIds: [],
       columns: [
         {
@@ -379,7 +391,7 @@ export default {
     showDrawer(id = "") {
       this.visible = true;
       if (id != "" && !isNaN(id)) {
-        this.id = id; 
+        this.id = id;
         this.getBook(id);
       }
     },
@@ -422,7 +434,7 @@ export default {
           }
         })
         .catch((e) => {
-          console.log(e);
+          console.log(e.response.status);
         });
     },
     formattedDatetime(date) {
@@ -455,7 +467,7 @@ export default {
       this.loading = true;
 
       let dataParams = {
-        page: pageIndex ? (pageIndex - 1) : (this.pageInfo.pageIndex - 1),
+        page: pageIndex ? pageIndex - 1 : this.pageInfo.pageIndex - 1,
         size: this.pageInfo.pageSize,
       };
 
@@ -589,9 +601,7 @@ export default {
             this.errors.message = e.response.data.data;
             this.errors.message = e.response.data.message;
           })
-          .finally(() => {
-            
-          });
+          .finally(() => {});
       }
     },
     getBook(id) {
@@ -635,6 +645,6 @@ span.text-error {
   margin-left: 15px;
 }
 .mb-3.me-3.button-css.d-flex.justify-content-end {
-    margin-top: 29px;
+  margin-top: 29px;
 }
 </style>

@@ -9,8 +9,15 @@
     </div>
     <div class="row">
       <div>
-        <a-table :dataSource="listCategories" :loading="loading" :pagination="false" :columns="columns" class="table" size="small"
-           rowKey="id">
+        <a-table
+          :dataSource="listCategories"
+          :loading="loading"
+          :pagination="false"
+          :columns="columns"
+          class="table"
+          size="small"
+          rowKey="id"
+        >
           <template #headerCell="{ column }"> </template>
           <template #bodyCell="{ column, index, record }">
             <template v-if="column.key === 'action'">
@@ -18,55 +25,87 @@
                 <a-button type="primary" @click="showDrawer(record.id)">
                   <EditOutlined />
                 </a-button>
-                <a-button type="primary" danger @click.prevent="confirmDelete(record.id)">
+                <a-button
+                  type="primary"
+                  danger
+                  @click.prevent="confirmDelete(record.id)"
+                >
                   <DeleteOutlined />
                 </a-button>
               </a-space>
             </template>
           </template>
         </a-table>
-        <a-modal v-model:visible="isModalVisible" title="Delete Category" @ok="deleteCategory" @cancel="handleCancel">
+        <a-modal
+          v-model:visible="isModalVisible"
+          title="Delete Category"
+          @ok="deleteCategory"
+          @cancel="handleCancel"
+        >
           <p>Are you sure you want to delete this category?</p>
         </a-modal>
-        <a-pagination v-model:current="pageInfo.pageIndex" v-model:pageSize="pageInfo.pageSize"
-          :total="pageInfo.totalElements" show-size-changer :page-size-options="['5', '10', '20', '50']"
-          :locale="{ items_per_page: '/ trang' }" @show-size-change="onShowSizeChange" @change="updatePageSize" />
+        <a-pagination
+          v-model:current="pageInfo.pageIndex"
+          v-model:pageSize="pageInfo.pageSize"
+          :total="pageInfo.totalElements"
+          show-size-changer
+          :page-size-options="['5', '10', '20', '50']"
+          :locale="{ items_per_page: '/ trang' }"
+          @show-size-change="onShowSizeChange"
+          @change="updatePageSize"
+        />
       </div>
     </div>
   </a-card>
-  <a-drawer title="Create a new category" :width="720" :visible="visible" :body-style="{ paddingBottom: '80px' }"
-    @close="onClose">
+  <a-drawer
+    title="Create a new category"
+    :width="720"
+    :visible="visible"
+    :body-style="{ paddingBottom: '80px' }"
+    @close="onClose"
+  >
     <a-form :model="category" :rules="rules" layout="vertical">
       <a-row :gutter="16">
         <a-col :span="24">
           <a-form-item label="Name" name="name">
-            <a-input v-model:value="category.name" placeholder="Please enter category name" />
+            <a-input
+              v-model:value="category.name"
+              placeholder="Please enter category name"
+            />
           </a-form-item>
         </a-col>
       </a-row>
       <a-row :gutter="16">
         <a-col :span="24">
           <a-form-item label="Description" description="description">
-            <a-textarea v-model:value="category.description" :rows="4" placeholder="please enter url description" />
+            <a-textarea
+              v-model:value="category.description"
+              :rows="4"
+              placeholder="please enter url description"
+            />
           </a-form-item>
         </a-col>
       </a-row>
     </a-form>
     <span class="text-error" v-if="errors">{{ errors }}</span>
 
-    <div :style="{
-          position: 'absolute',
-          right: 0,
-          bottom: 0,
-          width: '100%',
-          borderTop: '1px solid #e9e9e9',
-          padding: '10px 16px',
-          background: '#fff',
-          textAlign: 'right',
-          zIndex: 1,
-        }">
+    <div
+      :style="{
+        position: 'absolute',
+        right: 0,
+        bottom: 0,
+        width: '100%',
+        borderTop: '1px solid #e9e9e9',
+        padding: '10px 16px',
+        background: '#fff',
+        textAlign: 'right',
+        zIndex: 1,
+      }"
+    >
       <a-button style="margin-right: 8px" @click="onClose">Cancel</a-button>
-      <a-button type="primary" @click="createCategory" :disabled="isSubmitting">Submit</a-button>
+      <a-button type="primary" @click="createCategory" :disabled="isSubmitting"
+        >Submit</a-button
+      >
     </div>
   </a-drawer>
 </template>
@@ -172,7 +211,7 @@ export default {
           .catch((e) => {
             console.log(e);
             this.errors = e.response.data.message;
-            console.log(this.erros);
+            console.log(this.errors);
           })
           .finally(() => {
             setTimeout(() => {
@@ -311,7 +350,7 @@ export default {
   mounted() {
     this.getCategoriesList();
   },
-  computed() { },
+  computed: {},
 };
 </script>
 
@@ -321,6 +360,4 @@ span.text-error {
   color: red;
   margin-left: 15px;
 }
-
-
 </style>
