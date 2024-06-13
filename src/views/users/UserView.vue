@@ -1,13 +1,8 @@
 <template>
   <a-card title="List users" class="w-100">
     <div class="d-flex mb-3 w-100">
-      <!-- <div class="mb-3 me-3 button-css-search">
-        <a-button class="btn btn-primary" @click.prevent="getUsersList"
-          >Search</a-button
-        >
-      </div> -->
-      <div class="mb-3 me-3 button-css d-flex justify-content-end">
-        <a-button type="primary" class="me-3" @click="showDrawer">
+      <div class="mb-3 me-3 button-css d-flex">
+        <a-button type="primary" class="me-3 " @click="showDrawer">
           <PlusOutlined />
           New users
         </a-button>
@@ -194,7 +189,7 @@ export default {
         email: "",
         address: "",
         phone: "",
-        passsword: "",
+        password: "",
         role: ""
       },
       errors: {

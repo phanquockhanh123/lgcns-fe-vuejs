@@ -23,7 +23,7 @@
         </a-select>
       </div>
 
-      <div class="mb-3 me-3">
+      <div class="mb-3 me-3 ">
         <label for="yearOfPublish" class="form-label">Year To</label>
         <a-select
           v-model:value="search.yearTo"
@@ -36,7 +36,7 @@
         </a-select>
       </div>
 
-      <div class="mb-3 me-3">
+      <div class="mb-3 me-3 category-input">
         <label for="categoryId" class="form-label">Category</label>
         <a-select
           v-model:value="searchCateIds"
@@ -79,7 +79,7 @@
           class="table"
           :scroll="{ x: 1500, y: 650 }"
           rowKey="id"
-          :rowSelection="this.roleUser == 'USER' ? false : rowSelection"
+          :rowSelection="rowSelection"
         >
           <template #headerCell="{ column }"> </template>
           <template #bodyCell="{ column, index, record }">
@@ -759,10 +759,15 @@ span.text-error {
 }
 .mb-3.me-3.button-css.d-flex.justify-content-end {
   margin-top: 29px;
+  margin-left: 200px;
 }
 
 .mb-3.me-3 {
-    width: 140px;
+    width: 150px;
+}
+
+.mb-3.me-3.category-input {
+    width: 250px;
 }
 
 .mb-3.me-3.button-css.d-flex.justify-content-end[data-v-36410294] {
