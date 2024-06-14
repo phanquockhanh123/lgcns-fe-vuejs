@@ -25,13 +25,13 @@
               >{{ item.name }}</router-link
             >
           </li>
-          <li class="nav-item" v-if="!isLoggedIn">
+          <li class="nav-item d-flex justify-content-end" v-if="!isLoggedIn">
             <router-link to="/login" class="nav-link">Login</router-link>
           </li>
-          <li class="nav-item" v-else>
+          <li class="nav-item d-flex justify-content-end" v-else>
             <a-dropdown>
               <a class="ant-dropdown-link" @click.prevent>
-                <DownOutlined /> {{ fullName }}
+                {{ fullName }}
               </a>
               <template #overlay>
                 <a-menu>
@@ -267,5 +267,56 @@ span.text-error {
   font-size: small;
   color: red;
   margin-left: 15px;
+}
+.navbar-nav {
+  align-items: center;
+}
+
+.nav-item.d-flex.justify-content-end {
+  margin-left: auto;
+}
+
+.ant-dropdown-link {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  color: #333;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.ant-dropdown-link:hover {
+  background-color: #f5f5f5;
+}
+
+.ant-dropdown {
+  position: absolute;
+  right: 0;
+  z-index: 1000;
+  padding: 0.5rem 0;
+  font-size: 0.875rem;
+  color: #333;
+  text-align: left;
+  list-style: none;
+  background-color: #fff;
+  background-clip: padding-box;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 0.25rem;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.175);
+}
+
+.ant-dropdown-menu {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.ant-dropdown-menu-item {
+  padding: 0.5rem 1rem;
+  color: #333;
+  cursor: pointer;
+}
+
+.ant-dropdown-menu-item:hover {
+  background-color: #f5f5f5;
 }
 </style>

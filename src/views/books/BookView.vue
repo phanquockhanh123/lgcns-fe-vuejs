@@ -70,6 +70,7 @@
     </div>
 
     <div class="row">
+      <span class="text-error" v-if="errors.search">{{ errors.search }}</span>
       <div class="col-12">
         <a-table
           :dataSource="listBooks"
@@ -393,6 +394,7 @@ export default {
       errors: {
         message: "",
         data: "",
+        search: "",
       },
       roleUser: localStorage.getItem("role"),
       searchCateIds: [],
@@ -604,6 +606,14 @@ export default {
         dataParams.yearTo = this.search.yearTo;
       }
 
+      if (this.search.yearTo < this.search.yearFrom) {
+        this.errors.search = "Year from less than year to";
+      }
+
+      if (this.errors.search != "") {
+        dataParams.yearFrom = "";
+        dataParams.yearTo = "";
+      }
       try {
         const response = await axiosInterceptor.get("/admin/books/search", {
           params: dataParams,
@@ -771,6 +781,6 @@ span.text-error {
 
 .mb-3.me-3.button-css.d-flex.justify-content-end[data-v-36410294] {
   margin-top: 29px;
-  margin-left: 1000px;
+  margin-left: 1500px;
 }
 </style>

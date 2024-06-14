@@ -6,7 +6,7 @@
           >Search</a-button
         >
       </div> -->
-      <div class="mb-3 me-3 button-css d-flex justify-content-end">
+      <div class="col-12 d-flex justify-content-end">
         <a-button type="primary" class="me-3" @click="showDrawer">
           <PlusOutlined />
           New users
@@ -134,6 +134,24 @@
           </a-form-item>
         </a-col>
       </a-row>
+      <a-row :gutter="16">
+        <a-col :span="12">
+          <a-form-item label="Role" name="role">
+            <a-select
+              placeholder="Please a-s an role"
+              v-model:value="user.role"
+            >
+              <a-select-option v-if="roleUser === 'ADMIN'" value="ADMIN"
+                >ADMIN</a-select-option
+              >
+              <a-select-option v-if="roleUser === 'ADMIN'" value="MANAGER"
+                >MANAGER</a-select-option
+              >
+              <a-select-option value="USER">USER</a-select-option>
+            </a-select>
+          </a-form-item>
+        </a-col>
+      </a-row>
     </a-form>
     <span class="text-error" v-if="errors.message">{{ errors.message }}</span>
     <span class="text-error" v-if="errors.data">{{ errors.data }}</span>
@@ -193,7 +211,7 @@ export default {
       },
       errors: {
         message: "",
-        data: ""
+        data: "",
       },
       columns: [
         {
@@ -211,7 +229,6 @@ export default {
           dataIndex: "email",
           key: "email",
         },
-        ,
         {
           title: "Address",
           dataIndex: "address",
@@ -275,6 +292,11 @@ export default {
         },
       },
     };
+  },
+  computed: {
+    roleUser() {
+      return localStorage.getItem("role");
+    },
   },
   mounted() {
     this.getUsersList();
