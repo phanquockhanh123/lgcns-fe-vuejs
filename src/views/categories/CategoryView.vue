@@ -4,6 +4,7 @@
       <div class="col-12 d-flex justify-content-end">
         <a-button type="primary" @click="showDrawer">
           <PlusOutlined />
+          New category
         </a-button>
       </div>
     </div>
@@ -86,7 +87,8 @@
         </a-col>
       </a-row>
     </a-form>
-    <span class="text-error" v-if="errors">{{ errors }}</span>
+    <span class="text-error" v-if="errors.message">{{ errors.message }}</span>
+     <span class="text-error" v-if="errors.data">{{ errors.data }}</span>
 
     <div
       :style="{
@@ -179,7 +181,10 @@ export default {
           trigger: "blur",
         },
       },
-      errors: "",
+      errors: {
+        message: "",
+        data: ""
+      },
     };
   },
   methods: {
@@ -209,7 +214,8 @@ export default {
           })
           .catch((e) => {
             console.log(e);
-            this.errors = e.response.data.message;
+            this.errors.message = e.response.data.message;
+             this.errors.data = e.response.data.data;
             console.log(this.errors);
           })
           .finally(() => {
@@ -236,7 +242,8 @@ export default {
           })
           .catch((e) => {
             console.log(e);
-            this.errors = e.response.data.message;
+            this.errors.message = e.response.data.message;
+             this.errors.data = e.response.data.data;
           })
           .finally(() => {
             setTimeout(() => {
@@ -272,6 +279,8 @@ export default {
       this.isSubmitting = false;
       this.category.name = "";
       this.category.description = "";
+      this.errors.message = "";
+      this.errors.data= "";
     },
     formattedDatetime(date) {
       return moment(date).format("YYYY-MM-DD HH:mm:ss");

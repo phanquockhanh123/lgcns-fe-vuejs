@@ -71,8 +71,14 @@ router.beforeEach((to, from, next) => {
   const role = JSON.parse(localStorage.getItem("profile"))?.role || "";
 
   const id = JSON.parse(localStorage.getItem("profile"))?.id || "";
+
+  const firstName = JSON.parse(localStorage.getItem("profile"))?.firstName || "";
+  const lastName = JSON.parse(localStorage.getItem("profile"))?.lastName || "";
+
   localStorage.setItem("role", role);
-  localStorage.setItem("userId", role);
+  localStorage.setItem("userId", id);
+  localStorage.setItem("fullName", firstName + " " + lastName);
+  
 
   if (to.matched.some((record) => record.meta.requiresAuth)) {
     if (!token) {

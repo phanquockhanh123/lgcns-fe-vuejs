@@ -69,18 +69,19 @@
         </div>
         <div class="input-box">
           <input
-            type="text"
+            type="password"
             class="form-control"
-            v-model="user.address"
-            placeholder="Address"
-            @blur="validateField('address')"
-            :class="['form-control', { 'is-invalid': errors.address }]"
+            v-model="user.confirmPassword"
+            placeholder="Confirm password"
+            @blur="validateField('confirmPassword')"
+            :class="['form-control', { 'is-invalid': errors.confirmPassword }]"
           />
-          <span class="text-error" v-if="errors.address">{{
-            errors.address
+          <span class="text-error" v-if="errors.confirmPassword">{{
+            errors.confirmPassword
           }}</span>
           <i class="bx bx-lock-alt"></i>
         </div>
+        <span class="text-error" v-if="errors.rsapi">{{ errors.rsapi }}</span>
         <div class="input-box">
           <input
             type="submit"
@@ -106,49 +107,53 @@ export default {
         firstName: "",
         lastName: "",
         email: "",
-        address: "",
+        confirmPassword: "",
         password: "",
       },
       errors: {
         firstName: "",
         lastName: "",
         email: "",
-        address: "",
+        confirmPassword: "",
         password: "",
+        rsapi: "",
       },
     };
   },
   methods: {
     async register() {
-      this.error = null;
       let dataRegister = {
         firstName: this.user.firstName,
         lastName: this.user.lastName,
         email: this.user.email,
-        address: this.user.address,
         password: this.user.password,
         role: "USER",
       };
-      try {
-        const res = await axiosInterceptor.post("/auth/signup", dataRegister);
+      const hasErrors = Object.values(this.errors).some(
+        (error) => error !== ""
+      );
 
-        // Handle successful login
-        if (res.data.statusCode == 200) {
-          toast.success("Login success!", {
-            autoClose: 1000,
+      if (!hasErrors) {
+        await axiosInterceptor
+          .post("/auth/signup", dataRegister)
+          .then((res) => {
+            if (res.data.statusCode == 200) {
+              toast.success("Register success!", {
+                autoClose: 1000,
+              });
+
+              console.log("Register successful:", res.data);
+              setTimeout(() => {
+                this.$router.push("/login");
+              }, 2000); // Redirect to /users
+            } else {
+              alert("Register failed!");
+            }
+          })
+          .catch((e) => {
+            console.log(e);
+            this.errors.rsapi = e.error;
           });
-
-
-          console.log("Register successful:", res.data);
-          setTimeout(() => {
-            this.$router.push("/login");
-          }, 2000); // Redirect to /users
-        } else {
-          alert("Register failed!!");
-        }
-      } catch (error) {
-        this.error = "Invalid input.";
-        console.error("An error occurred:", error);
       }
     },
     validateField(field) {
@@ -159,6 +164,15 @@ export default {
           this.errors.password = "Password must be at least 3 characters";
         } else {
           this.errors.password = "";
+        }
+      } else if (field === "confirmPassword") {
+        if (!this.user.confirmPassword) {
+          this.errors.confirmPassword = "Confirm Password is required";
+        } else if (this.user.password !== this.user.confirmPassword) {
+          this.errors.confirmPassword =
+            "Password and Confirm Password must match";
+        } else {
+          this.errors.confirmPassword = "";
         }
       } else if (field === "email") {
         const emailPattern = /^[^\s@]+@gmail\.com$/;

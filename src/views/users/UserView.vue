@@ -52,6 +52,9 @@
                 {{ formattedDatetime(record.created) }}
               </a-space>
             </template>
+            <template v-if="column.key === 'fullName'">
+              {{ record.firstName }} {{ record.lastName }}
+            </template>
           </template>
         </a-table>
         <a-modal
@@ -130,18 +133,10 @@
             />
           </a-form-item>
         </a-col>
-        <a-col :span="12">
-          <a-form-item label="Password" name="password">
-            <a-input
-              v-model:value="user.password"
-              placeholder="Please enter password"
-            />
-          </a-form-item>
-        </a-col>
       </a-row>
     </a-form>
     <span class="text-error" v-if="errors.message">{{ errors.message }}</span>
-
+    <span class="text-error" v-if="errors.data">{{ errors.data }}</span>
     <div
       :style="{
         position: 'absolute',
@@ -194,11 +189,11 @@ export default {
         email: "",
         address: "",
         phone: "",
-        passsword: "",
-        role: ""
+        role: "",
       },
       errors: {
         message: "",
+        data: ""
       },
       columns: [
         {
@@ -207,14 +202,9 @@ export default {
           key: "id",
         },
         {
-          title: "FirstName",
-          dataIndex: "firstName",
-          key: "firstName",
-        },
-        {
-          title: "LastName",
-          dataIndex: "lastName",
-          key: "lastName",
+          title: "Full Name",
+          dataIndex: "fullName",
+          key: "fullName",
         },
         {
           title: "Email",
@@ -261,11 +251,18 @@ export default {
           message: "Please enter last name",
           trigger: "blur",
         },
-        email: {
-          required: true,
-          message: "Please enter user email",
-          trigger: "blur",
-        },
+        email: [
+          {
+            required: true,
+            message: "Please enter your email",
+            trigger: "blur",
+          },
+          {
+            type: "email",
+            message: "Please enter a valid email address",
+            trigger: "blur",
+          },
+        ],
         address: {
           required: true,
           message: "Please enter address",
@@ -274,11 +271,6 @@ export default {
         phone: {
           required: true,
           message: "Please enter phone",
-          trigger: "blur",
-        },
-        password: {
-          required: true,
-          message: "Please enter password",
           trigger: "blur",
         },
       },
@@ -292,7 +284,7 @@ export default {
     showDrawer(id = "") {
       this.visible = true;
       if (id != "" && !isNaN(id)) {
-        this.id = id; 
+        this.id = id;
         this.getUser(id);
       }
     },
@@ -304,8 +296,8 @@ export default {
       this.user.email = "";
       this.user.address = "";
       this.user.phone = "";
-      this.user.password = "";
       this.errors.message = "";
+      this.errors.data = "";
     },
     onSelectChange(selectedRowKeys, selectedRows) {
       console.log("Selected Row Keys: ", selectedRowKeys);
@@ -402,8 +394,8 @@ export default {
           })
           .catch((e) => {
             console.log(e);
-            this.errors.message = e.response.data.data;
             this.errors.message = e.response.data.message;
+            this.errors.data = e.response.data.data;
           })
           .finally(() => {
             setTimeout(() => {
@@ -430,12 +422,10 @@ export default {
           })
           .catch((e) => {
             console.log(e);
-            this.errors.message = e.response.data.data;
             this.errors.message = e.response.data.message;
+            this.errors.data = e.response.data.data;
           })
-          .finally(() => {
-            
-          });
+          .finally(() => {});
       }
     },
     getUser(id) {
@@ -509,7 +499,6 @@ span.text-error {
   margin-left: 15px;
 }
 .mb-3.me-3.button-css.d-flex.justify-content-end {
-    margin-top: 29px;
+  margin-top: 29px;
 }
-
 </style>

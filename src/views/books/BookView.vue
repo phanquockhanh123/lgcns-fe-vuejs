@@ -79,7 +79,7 @@
           class="table"
           :scroll="{ x: 1500, y: 650 }"
           rowKey="id"
-          :rowSelection="this.roleUser == 'USER' ? false : rowSelection"
+          :rowSelection="this.roleUser == 'USER' ? null : rowSelection"
         >
           <template #headerCell="{ column }"> </template>
           <template #bodyCell="{ column, index, record }">
@@ -228,6 +228,7 @@
       </a-row>
     </a-form>
     <span class="text-error" v-if="errors.message">{{ errors.message }}</span>
+    <span class="text-error" v-if="errors.data">{{ errors.data }}</span>
 
     <div
       :style="{
@@ -306,6 +307,7 @@
       </a-row>
     </a-form>
     <span class="text-error" v-if="errors.message">{{ errors.message }}</span>
+    <span class="text-error" v-if="errors.data">{{ errors.data }}</span>
 
     <div
       :style="{
@@ -390,6 +392,7 @@ export default {
       dateRangeVal: "",
       errors: {
         message: "",
+        data: "",
       },
       roleUser: localStorage.getItem("role"),
       searchCateIds: [],
@@ -515,6 +518,7 @@ export default {
       this.book.year = "";
       this.book.quantity = "";
       this.errors.message = "";
+      this.errors.data = "";
     },
     onSelectChange(selectedRowKeys, selectedRows) {
       console.log("Selected Row Keys: ", selectedRowKeys);
@@ -683,7 +687,7 @@ export default {
           })
           .catch((e) => {
             console.log(e);
-            this.errors.message = e.response.data.data;
+            this.errors.data = e.response.data.data;
             this.errors.message = e.response.data.message;
           })
           .finally(() => {
@@ -711,7 +715,7 @@ export default {
           })
           .catch((e) => {
             console.log(e);
-            this.errors.message = e.response.data.data;
+            this.errors.data = e.response.data.data;
             this.errors.message = e.response.data.message;
           })
           .finally(() => {});
@@ -762,10 +766,11 @@ span.text-error {
 }
 
 .mb-3.me-3 {
-    width: 140px;
+  width: 140px;
 }
 
 .mb-3.me-3.button-css.d-flex.justify-content-end[data-v-36410294] {
-    margin-top: 29px;
+  margin-top: 29px;
+  margin-left: 1000px;
 }
 </style>
