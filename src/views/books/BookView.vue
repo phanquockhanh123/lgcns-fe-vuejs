@@ -70,6 +70,7 @@
     </div>
 
     <div class="row">
+      <span class="text-error" v-if="errors.search">{{ errors.search }}</span>
       <div class="col-12">
         <a-table
           :dataSource="listBooks"
@@ -79,7 +80,7 @@
           class="table"
           :scroll="{ x: 1500, y: 650 }"
           rowKey="id"
-          :rowSelection="rowSelection"
+          :rowSelection="this.roleUser == 'USER' ? null : rowSelection"
         >
           <template #headerCell="{ column }"> </template>
           <template #bodyCell="{ column, index, record }">
@@ -228,6 +229,7 @@
       </a-row>
     </a-form>
     <span class="text-error" v-if="errors.message">{{ errors.message }}</span>
+    <span class="text-error" v-if="errors.data">{{ errors.data }}</span>
 
     <div
       :style="{
@@ -306,6 +308,7 @@
       </a-row>
     </a-form>
     <span class="text-error" v-if="errors.message">{{ errors.message }}</span>
+    <span class="text-error" v-if="errors.data">{{ errors.data }}</span>
 
     <div
       :style="{
@@ -390,6 +393,8 @@ export default {
       dateRangeVal: "",
       errors: {
         message: "",
+        data: "",
+        search: "",
       },
       roleUser: localStorage.getItem("role"),
       searchCateIds: [],
@@ -515,6 +520,7 @@ export default {
       this.book.year = "";
       this.book.quantity = "";
       this.errors.message = "";
+      this.errors.data = "";
     },
     onSelectChange(selectedRowKeys, selectedRows) {
       console.log("Selected Row Keys: ", selectedRowKeys);
@@ -600,6 +606,14 @@ export default {
         dataParams.yearTo = this.search.yearTo;
       }
 
+      if (this.search.yearTo < this.search.yearFrom) {
+        this.errors.search = "Year from less than year to";
+      }
+
+      if (this.errors.search != "") {
+        dataParams.yearFrom = "";
+        dataParams.yearTo = "";
+      }
       try {
         const response = await axiosInterceptor.get("/admin/books/search", {
           params: dataParams,
@@ -683,7 +697,7 @@ export default {
           })
           .catch((e) => {
             console.log(e);
-            this.errors.message = e.response.data.data;
+            this.errors.data = e.response.data.data;
             this.errors.message = e.response.data.message;
           })
           .finally(() => {
@@ -711,7 +725,7 @@ export default {
           })
           .catch((e) => {
             console.log(e);
-            this.errors.message = e.response.data.data;
+            this.errors.data = e.response.data.data;
             this.errors.message = e.response.data.message;
           })
           .finally(() => {});
@@ -763,14 +777,11 @@ span.text-error {
 }
 
 .mb-3.me-3 {
-    width: 150px;
-}
-
-.mb-3.me-3.category-input {
-    width: 250px;
+  width: 140px;
 }
 
 .mb-3.me-3.button-css.d-flex.justify-content-end[data-v-36410294] {
-    margin-top: 29px;
+  margin-top: 29px;
+  margin-left: 1500px;
 }
 </style>

@@ -1,8 +1,13 @@
 <template>
   <a-card title="List users" class="w-100">
     <div class="d-flex mb-3 w-100">
-      <div class="mb-3 me-3 button-css d-flex">
-        <a-button type="primary" class="me-3 " @click="showDrawer">
+      <!-- <div class="mb-3 me-3 button-css-search">
+        <a-button class="btn btn-primary" @click.prevent="getUsersList"
+          >Search</a-button
+        >
+      </div> -->
+      <div class="col-12 d-flex justify-content-end">
+        <a-button type="primary" class="me-3" @click="showDrawer">
           <PlusOutlined />
           New users
         </a-button>
@@ -46,6 +51,9 @@
               <a-space>
                 {{ formattedDatetime(record.created) }}
               </a-space>
+            </template>
+            <template v-if="column.key === 'fullName'">
+              {{ record.firstName }} {{ record.lastName }}
             </template>
           </template>
         </a-table>
@@ -125,18 +133,28 @@
             />
           </a-form-item>
         </a-col>
+      </a-row>
+      <a-row :gutter="16">
         <a-col :span="12">
-          <a-form-item label="Password" name="password">
-            <a-input
-              v-model:value="user.password"
-              placeholder="Please enter password"
-            />
+          <a-form-item label="Role" name="role">
+            <a-select
+              placeholder="Please a-s an role"
+              v-model:value="user.role"
+            >
+              <a-select-option v-if="roleUser === 'ADMIN'" value="ADMIN"
+                >ADMIN</a-select-option
+              >
+              <a-select-option v-if="roleUser === 'ADMIN'" value="MANAGER"
+                >MANAGER</a-select-option
+              >
+              <a-select-option value="USER">USER</a-select-option>
+            </a-select>
           </a-form-item>
         </a-col>
       </a-row>
     </a-form>
     <span class="text-error" v-if="errors.message">{{ errors.message }}</span>
-
+    <span class="text-error" v-if="errors.data">{{ errors.data }}</span>
     <div
       :style="{
         position: 'absolute',
@@ -189,11 +207,11 @@ export default {
         email: "",
         address: "",
         phone: "",
-        password: "",
-        role: ""
+        role: "",
       },
       errors: {
         message: "",
+        data: "",
       },
       columns: [
         {
@@ -202,21 +220,15 @@ export default {
           key: "id",
         },
         {
-          title: "FirstName",
-          dataIndex: "firstName",
-          key: "firstName",
-        },
-        {
-          title: "LastName",
-          dataIndex: "lastName",
-          key: "lastName",
+          title: "Full Name",
+          dataIndex: "fullName",
+          key: "fullName",
         },
         {
           title: "Email",
           dataIndex: "email",
           key: "email",
         },
-        ,
         {
           title: "Address",
           dataIndex: "address",
@@ -256,11 +268,18 @@ export default {
           message: "Please enter last name",
           trigger: "blur",
         },
-        email: {
-          required: true,
-          message: "Please enter user email",
-          trigger: "blur",
-        },
+        email: [
+          {
+            required: true,
+            message: "Please enter your email",
+            trigger: "blur",
+          },
+          {
+            type: "email",
+            message: "Please enter a valid email address",
+            trigger: "blur",
+          },
+        ],
         address: {
           required: true,
           message: "Please enter address",
@@ -271,13 +290,13 @@ export default {
           message: "Please enter phone",
           trigger: "blur",
         },
-        password: {
-          required: true,
-          message: "Please enter password",
-          trigger: "blur",
-        },
       },
     };
+  },
+  computed: {
+    roleUser() {
+      return localStorage.getItem("role");
+    },
   },
   mounted() {
     this.getUsersList();
@@ -287,7 +306,7 @@ export default {
     showDrawer(id = "") {
       this.visible = true;
       if (id != "" && !isNaN(id)) {
-        this.id = id; 
+        this.id = id;
         this.getUser(id);
       }
     },
@@ -299,8 +318,8 @@ export default {
       this.user.email = "";
       this.user.address = "";
       this.user.phone = "";
-      this.user.password = "";
       this.errors.message = "";
+      this.errors.data = "";
     },
     onSelectChange(selectedRowKeys, selectedRows) {
       console.log("Selected Row Keys: ", selectedRowKeys);
@@ -397,8 +416,8 @@ export default {
           })
           .catch((e) => {
             console.log(e);
-            this.errors.message = e.response.data.data;
             this.errors.message = e.response.data.message;
+            this.errors.data = e.response.data.data;
           })
           .finally(() => {
             setTimeout(() => {
@@ -425,12 +444,10 @@ export default {
           })
           .catch((e) => {
             console.log(e);
-            this.errors.message = e.response.data.data;
             this.errors.message = e.response.data.message;
+            this.errors.data = e.response.data.data;
           })
-          .finally(() => {
-            
-          });
+          .finally(() => {});
       }
     },
     getUser(id) {
@@ -504,7 +521,6 @@ span.text-error {
   margin-left: 15px;
 }
 .mb-3.me-3.button-css.d-flex.justify-content-end {
-    margin-top: 29px;
+  margin-top: 29px;
 }
-
 </style>
