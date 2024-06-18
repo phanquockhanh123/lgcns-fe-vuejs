@@ -54,7 +54,7 @@
       </div>
       <div
         class="mb-3 me-3 button-css d-flex justify-content-end"
-        v-if="['ADMIN', 'MANAGER'].includes(this.roleUser)"
+        v-if="['ADMIN', 'MANAGER'].includes(roleUser)"
       >
         <a-button type="primary" class="me-3" @click="showDrawer">
           <PlusOutlined />
@@ -80,7 +80,7 @@
           class="table"
           :scroll="{ x: 1500, y: 650 }"
           rowKey="id"
-          :rowSelection="this.roleUser == 'USER' ? null : rowSelection"
+          :rowSelection="roleUser == 'USER' ? null : rowSelection"
         >
           <template #headerCell="{ column }"> </template>
           <template #bodyCell="{ column, index, record }">
@@ -89,7 +89,7 @@
                 <a-button
                   type="primary"
                   @click="showDrawer(record.id)"
-                  v-if="['ADMIN', 'MANAGER'].includes(this.roleUser)"
+                  v-if="['ADMIN', 'MANAGER'].includes(roleUser)"
                 >
                   <EditOutlined />
                 </a-button>
@@ -97,14 +97,14 @@
                   type="primary"
                   danger
                   @click="confirmDelete(record.id)"
-                  v-if="['ADMIN', 'MANAGER'].includes(this.roleUser)"
+                  v-if="['ADMIN', 'MANAGER'].includes(roleUser)"
                 >
                   <DeleteOutlined />
                 </a-button>
                 <a-button
                   type="primary"
                   @click="showBorrowDrawer(record.id)"
-                  v-if="this.roleUser === 'USER'"
+                  v-if="roleUser === 'USER'"
                 >
                   <VerticalAlignBottomOutlined />
                 </a-button>
@@ -170,16 +170,13 @@
         <a-col :span="12">
           <a-form-item label="Category Id" name="categoryId">
             <a-select
-              placeholder="Please a-s an category"
-              v-model:value="book.categoryId"
-            >
-              <a-select-option
-                v-for="item in listCategory"
-                :key="item.id"
-                :value="item.id"
-                >{{ item.name }}</a-select-option
-              >
-            </a-select>
+              v-model:value="saveBookCateIds"
+              mode="tags"
+              style="width: 100%; margin-right: 30px"
+              placeholder="Tags Category"
+              :options="listCategoriesTag"
+              :max-tag-count="1"
+            ></a-select>
           </a-form-item>
         </a-col>
         <a-col :span="12">
@@ -272,24 +269,25 @@
       </a-row>
       <a-row :gutter="16">
         <a-col :span="12">
-          <a-form-item label="Author" name="Author">
+          <a-form-item label="Author" name="author">
             <a-input v-model:value="book.author" :disabled="true" />
           </a-form-item>
         </a-col>
         <a-col :span="12">
-          <a-form-item label="Price" name="Price">
+          <a-form-item label="Price" name="price">
             <a-input v-model:value="book.price" :disabled="true" />
           </a-form-item>
         </a-col>
       </a-row>
       <a-row :gutter="16">
         <a-col :span="12">
-          <a-form-item label="Quantity" name="Quantity">
+          <a-form-item label="Quantity" name="quantity">
             <a-input-number
               id="inputNumber"
-              v-model:value="borrowBook.quantity"
+              v-model:value="borrowBookData.quantity"
               :min="1"
-              :max="100"
+              :max="book.quantityAvail"
+              :default="1"
             >
               <template #upIcon>
                 <ArrowUpOutlined />
@@ -302,7 +300,12 @@
         </a-col>
         <a-col :span="12">
           <a-form-item label="Date Borrow" name="Date borrow">
-            <a-range-picker v-model:value="dateRangeVal" :format="dateFormat" />
+            <a-range-picker
+              v-model:value="dateRangeVal"
+              :format="dateFormat"
+              :default-value="dateRangeValDefault"
+               :disabledDate="disabledDate"
+            />
           </a-form-item>
         </a-col>
       </a-row>
@@ -325,7 +328,7 @@
     >
       <h3 style="margin-top: 20px" class="d-flex">Amount</h3>
       <a-button style="margin-right: 8px" @click="onClose">Cancel</a-button>
-      <a-button type="primary" @click.prevent="createBook">Submit</a-button>
+      <a-button type="primary" @click.prevent="borrowBook">Submit</a-button>
     </div>
   </a-drawer>
 </template>
@@ -340,9 +343,9 @@ import {
   ArrowDownOutlined,
 } from "@ant-design/icons-vue";
 import axiosInterceptor from "../../service/AxiosInteceptorToken";
-import moment from "moment";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
+import moment from "moment";
 
 export default {
   name: "BookView",
@@ -356,10 +359,11 @@ export default {
   },
   data() {
     return {
+      selectedDate: null,
       isModalVisible: false,
       bookIdToDelete: null,
       loading: false,
-      dateFormat: "YYYY/MM/DD",
+      dateFormat: "YYYY/MM/DD HH:mm:ss",
       listBooks: [],
       listCategory: [],
       listCategoriesTag: [],
@@ -379,25 +383,27 @@ export default {
         description: "",
         year: "",
         quantity: "",
+        quantityAvail: "",
+        cateIds: "",
       },
-      borrowBook: {
+      borrowBookData: {
         quantity: "",
         startDate: "",
         endDate: "",
-        status: 0,
-        bonus: 0,
-        amount: 0,
-        id: localStorage.getItem("userId"),
-        bookId: 0,
+        bookId: "",
       },
-      dateRangeVal: "",
+      dateRangeValDefault: [
+        moment().startOf("day").format("YYYY/MM/DD HH:mm:ss"),
+        moment().endOf("day").format("YYYY/MM/DD HH:mm:ss"),
+      ],
+      dateRangeVal: [],
       errors: {
         message: "",
         data: "",
         search: "",
       },
-      roleUser: localStorage.getItem("role"),
       searchCateIds: [],
+      saveBookCateIds: [],
       columns: [
         {
           title: "ID",
@@ -488,12 +494,22 @@ export default {
       },
     };
   },
+  computed: {
+    roleUser() {
+      return localStorage.getItem("role");
+    },
+  },
   mounted() {
     this.getBooksList();
     this.getCategories();
     this.generateYearList();
   },
   methods: {
+    disabledDate(current) {
+      // Disable dates before yesterday
+      const yesterday = new Date(new Date().setDate(new Date().getDate() - 1));
+      return current && current < yesterday;
+    },
     showDrawer(id = "") {
       this.visible = true;
       if (id != "" && !isNaN(id)) {
@@ -508,6 +524,9 @@ export default {
         this.getBook(id);
       }
     },
+    moment() {
+      return moment;
+    },
     onClose() {
       this.visible = false;
       this.borrowVisible = false;
@@ -521,6 +540,9 @@ export default {
       this.book.quantity = "";
       this.errors.message = "";
       this.errors.data = "";
+      // borrow book
+      this.borrowBookData = "";
+      this.dateRangeVal = null;
     },
     onSelectChange(selectedRowKeys, selectedRows) {
       console.log("Selected Row Keys: ", selectedRowKeys);
@@ -582,8 +604,9 @@ export default {
       this.loading = true;
 
       let dataParams = {
-        page: pageIndex ? pageIndex - 1 : this.pageInfo.pageIndex - 1,
-        size: this.pageInfo.pageSize,
+        page: pageIndex ? pageIndex : this.pageInfo.pageIndex,
+        limit: this.pageInfo.pageSize,
+        get_total_count: 1,
       };
 
       if (this.search.title != "" && this.search.title != null) {
@@ -594,9 +617,9 @@ export default {
         dataParams.author = this.search.author.trim();
       }
 
-      if (this.searchCateIds != "" && this.searchCateIds.length > 0) {
-        dataParams.cateIds = this.searchCateIds.join(",");
-      }
+      // if (this.searchCateIds != "" && this.searchCateIds.length > 0) {
+      //   dataParams.cateIds = this.searchCateIds.join(",");
+      // }
 
       if (this.search.yearFrom != "" && this.search.yearFrom != null) {
         dataParams.yearFrom = this.search.yearFrom;
@@ -615,13 +638,15 @@ export default {
         dataParams.yearTo = "";
       }
       try {
-        const response = await axiosInterceptor.get("/admin/books/search", {
+        const response = await axiosInterceptor.get("/admin/books", {
           params: dataParams,
         });
+
         this.listBooks = response.data.data.data;
 
-        this.pageInfo.totalElements = response.data.data.totalElements;
-        this.pageInfo.totalPages = response.data.data.totalPages;
+        this.pageInfo.totalElements =
+          response.data.data.pagination.total_record;
+        this.pageInfo.totalPages = response.data.data.pagination.total_page;
       } catch (error) {
         console.error(error);
       } finally {
@@ -633,10 +658,6 @@ export default {
     confirmDelete(id) {
       this.selectedRowKeys = [id];
       this.isModalVisible = true;
-    },
-    borowBook(id) {
-      this.selectedRowKeys = [id];
-      this.isBorowBookModalVisible = true;
     },
     confirmDeleteIds() {
       this.isModalVisible = true;
@@ -675,8 +696,7 @@ export default {
       }
 
       this.isSubmitting = true;
-
-      console.log(this.id);
+      this.book.cateIds = this.saveBookCateIds;
       if (this.id == "") {
         axiosInterceptor
           .post("/admin/books", this.book)
@@ -692,6 +712,7 @@ export default {
                 this.$router.push("/books");
                 this.onClose();
                 this.getBooksList();
+                this.searchCateIds = [];
               }, 2000);
             }
           })
@@ -720,6 +741,7 @@ export default {
                 this.$router.push("/books");
                 this.onClose();
                 this.getBooksList();
+                this.saveBookCateIds = [];
               }, 2000);
             }
           })
@@ -731,11 +753,47 @@ export default {
           .finally(() => {});
       }
     },
+    async borrowBook() {
+      if (this.isSubmitting) {
+        return;
+      }
+
+      this.isSubmitting = true;
+      this.borrowBookData.startDate = new Date(this.dateRangeVal[0]).getTime();
+      this.borrowBookData.endDate = new Date(this.dateRangeVal[1]).getTime();
+      this.borrowBookData.bookId = this.id ?? "";
+      this.borrowBookData.quantity = this.borrowBookData.quantity;
+
+      await axiosInterceptor
+        .post("/admin/book_transactions", this.borrowBookData)
+        .then((response) => {
+          // JSON responses are automatically parsed.
+          console.log(response.data.data);
+          toast.success("Borrow book success!", {
+            autoClose: 1000,
+          });
+
+          if (response.data.success == true) {
+            setTimeout(() => {
+              this.$router.push("/books");
+              this.onClose();
+              this.getBooksList();
+            }, 2000);
+          }
+        })
+        .catch((e) => {
+          console.log(e);
+          this.errors.data = e.response.data.data;
+          this.errors.message = e.response.data.message;
+        })
+        .finally(() => {});
+    },
     getBook(id) {
       if (id != "") {
         axiosInterceptor
           .get(`/admin/books/${id}`)
           .then((response) => {
+            console.log(response.data.data)
             // JSON responses are automatically parsed.
             this.book.title = response.data.data.title;
             this.book.author = response.data.data.author;
@@ -745,6 +803,7 @@ export default {
             this.book.categoryId = response.data.data.categoryId;
             this.book.description = response.data.data.description;
             this.book.quantity = response.data.data.quantity;
+            this.book.quantityAvail = response.data.data.quantityAvail;
             this.book.year = response.data.data.yearOfPublish;
           })
           .catch((e) => {
