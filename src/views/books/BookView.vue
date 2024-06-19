@@ -23,7 +23,7 @@
         </a-select>
       </div>
 
-      <div class="mb-3 me-3">
+      <div class="mb-3 me-3 ">
         <label for="yearOfPublish" class="form-label">Year To</label>
         <a-select
           v-model:value="search.yearTo"
@@ -36,7 +36,7 @@
         </a-select>
       </div>
 
-      <div class="mb-3 me-3">
+      <div class="mb-3 me-3 category-input">
         <label for="categoryId" class="form-label">Category</label>
         <a-select
           v-model:value="searchCateIds"
@@ -832,6 +832,7 @@ span.text-error {
 }
 .mb-3.me-3.button-css.d-flex.justify-content-end {
   margin-top: 29px;
+  margin-left: 200px;
 }
 
 .mb-3.me-3 {
