@@ -149,6 +149,11 @@ export default {
           roles: ["ADMIN", "USER", "MANAGER"],
         },
         {
+          name: "BookTransaction",
+          link: "/book_transactions",
+          roles: ["ADMIN", "USER", "MANAGER"],
+        },
+        {
           name: "Users",
           link: "/users",
           roles: ["ADMIN", "MANAGER"],

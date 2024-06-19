@@ -16,6 +16,7 @@
           v-model:value="search.yearFrom"
           placeholder="Select a year"
           class="w-full d-flex"
+          :allowClear="true"
         >
           <a-select-option v-for="year in years" :key="year" :value="year">
             {{ year }}
@@ -23,12 +24,13 @@
         </a-select>
       </div>
 
-      <div class="mb-3 me-3 ">
+      <div class="mb-3 me-3">
         <label for="yearOfPublish" class="form-label">Year To</label>
         <a-select
           v-model:value="search.yearTo"
           placeholder="Select a year"
           class="w-full d-flex"
+          :allowClear="true"
         >
           <a-select-option v-for="year in years" :key="year" :value="year">
             {{ year }}
@@ -84,6 +86,17 @@
         >
           <template #headerCell="{ column }"> </template>
           <template #bodyCell="{ column, index, record }">
+            <template v-if="column.key === 'cateNames'">
+              <span>
+                <a-tag
+                  v-for="cateName in convertToArray(record.cateNames)"
+                  :key="cateName"
+                  :color="getRandomColor()"
+                >
+                  {{ cateName.toUpperCase() }}
+                </a-tag>
+              </span>
+            </template>
             <template v-if="column.key === 'action'">
               <a-space>
                 <a-button
@@ -304,7 +317,7 @@
               v-model:value="dateRangeVal"
               :format="dateFormat"
               :default-value="dateRangeValDefault"
-               :disabledDate="disabledDate"
+              :disabledDate="disabledDate"
             />
           </a-form-item>
         </a-col>
@@ -422,8 +435,8 @@ export default {
         },
         {
           title: "Category",
-          dataIndex: "categoryName",
-          key: "categoryName",
+          dataIndex: "cateNames",
+          key: "cateNames",
         },
         ,
         {
@@ -505,6 +518,9 @@ export default {
     this.generateYearList();
   },
   methods: {
+    convertToArray(data) {
+      return data.split(",").map((name) => name.trim());
+    },
     disabledDate(current) {
       // Disable dates before yesterday
       const yesterday = new Date(new Date().setDate(new Date().getDate() - 1));
@@ -537,7 +553,7 @@ export default {
       this.book.price = "";
       this.book.description = "";
       this.book.year = "";
-      this.book.quantity = "";
+      this.book.quantity = 0;
       this.errors.message = "";
       this.errors.data = "";
       // borrow book
@@ -664,6 +680,14 @@ export default {
     },
     handleCancel() {
       this.isModalVisible = false;
+    },
+    getRandomColor() {
+      const letters = "0123456789ABCDEF";
+      let color = "#";
+      for (let i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
+      }
+      return color;
     },
     async deleteListBookIds() {
       try {
@@ -793,7 +817,7 @@ export default {
         axiosInterceptor
           .get(`/admin/books/${id}`)
           .then((response) => {
-            console.log(response.data.data)
+            console.log(response.data.data);
             // JSON responses are automatically parsed.
             this.book.title = response.data.data.title;
             this.book.author = response.data.data.author;

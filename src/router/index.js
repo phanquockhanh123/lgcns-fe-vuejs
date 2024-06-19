@@ -7,6 +7,8 @@ import CategoryView from "../views/categories/CategoryView.vue";
 import Layout from "../layouts/Layout.vue";
 import UserView from "../views/users/UserView.vue";
 import ForbiddenPage from "../views/pageStatus/403.vue"
+import BookTransactionView from "../views/book_transactions/BookTransactionView.vue";
+
 const routes = [
   {
     path: "/",
@@ -40,6 +42,12 @@ const routes = [
         component: CategoryView,
         meta: { requiresAuth: true, roles: ["ADMIN"] },
       },
+      {
+        path: "/book_transactions",
+        name: "book_transactions",
+        component: BookTransactionView,
+        meta: { requiresAuth: true, roles: ["USER", "ADMIN", "MANAGER"] },
+      }
     ],
   },
   {

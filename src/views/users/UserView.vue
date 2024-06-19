@@ -1,11 +1,31 @@
 <template>
   <a-card title="List users" class="w-100">
     <div class="d-flex mb-3 w-100">
-      <!-- <div class="mb-3 me-3 button-css-search">
-        <a-button class="btn btn-primary" @click.prevent="getUsersList"
+      <div class="mb-3 me-3">
+        <label for="email" class="form-label">Email</label>
+        <a-input
+          v-model:value="search.email"
+          placeholder="Email"
+          style="width: 200px"
+        />
+      </div>
+      <div class="mb-3 me-3">
+        <label for="Role" class="form-label">Role</label>
+        <a-select
+          v-model:value="search.role"
+          style="width: 200px"
+          :allowClear="true"
+        >
+          <a-select-option :value="'ADMIN'">ADMIN</a-select-option>
+          <a-select-option :value="'MANAGER'">MANAGER</a-select-option>
+          <a-select-option :value="'USER'">USER</a-select-option>
+        </a-select>
+      </div>
+      <div class="mb-3 me-3 button-css-search">
+        <a-button class="btn btn-primary" @click.prevent="getUsersList(1)"
           >Search</a-button
         >
-      </div> -->
+      </div>
       <div class="col-12 d-flex justify-content-end">
         <a-button type="primary" class="me-3" @click="showDrawer">
           <PlusOutlined />
@@ -194,6 +214,10 @@ export default {
   },
   data() {
     return {
+      search: {
+        status: "",
+        role: "",
+      },
       isModalVisible: false,
       userIdToDelete: null,
       loading: false,
@@ -248,7 +272,7 @@ export default {
       pageInfo: {
         content: [],
         pageIndex: 1,
-        pageSize: 10,
+        pageSize: 20,
         totalElements: 0,
         totalPages: 0,
       },
@@ -357,11 +381,11 @@ export default {
     confirmDeleteIds() {
       this.isModalVisible = true;
     },
-    async getUsersList() {
+    async getUsersList(pageIndex) {
       this.loading = true;
 
       let dataParams = {
-        page: this.pageInfo.pageIndex - 1,
+        page: pageIndex ? (pageIndex - 1) : (this.pageInfo.pageIndex - 1),
         size: this.pageInfo.pageSize,
       };
 
