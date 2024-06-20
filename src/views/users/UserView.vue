@@ -21,12 +21,12 @@
           <a-select-option :value="'USER'">USER</a-select-option>
         </a-select>
       </div>
-      <div class="mb-3 me-3 button-css-search">
+      <div class="me-3 button-css-search">
         <a-button class="btn btn-primary" @click.prevent="getUsersList(1)"
           >Search</a-button
         >
       </div>
-      <div class="col-12 d-flex justify-content-end">
+      <div class="col-9 d-flex justify-content-end">
         <a-button type="primary" class="me-3" @click="showDrawer">
           <PlusOutlined />
           New users
@@ -153,8 +153,6 @@
             />
           </a-form-item>
         </a-col>
-      </a-row>
-      <a-row :gutter="16">
         <a-col :span="12">
           <a-form-item label="Role" name="role">
             <a-select
@@ -189,7 +187,7 @@
       }"
     >
       <a-button style="margin-right: 8px" @click="onClose">Cancel</a-button>
-      <a-button type="primary" @click.prevent="createUser">Submit</a-button>
+      <a-button type="primary" @click="createUser">Submit</a-button>
     </div>
   </a-drawer>
 </template>
@@ -385,7 +383,7 @@ export default {
       this.loading = true;
 
       let dataParams = {
-        page: pageIndex ? (pageIndex - 1) : (this.pageInfo.pageIndex - 1),
+        page: pageIndex ? pageIndex - 1 : this.pageInfo.pageIndex - 1,
         size: this.pageInfo.pageSize,
       };
 
@@ -418,8 +416,8 @@ export default {
       }
 
       this.isSubmitting = true;
+      console.log(this.isSubmitting);
 
-      console.log(this.id);
       if (this.id == "") {
         axiosInterceptor
           .post("/admin/users", this.user)
@@ -471,7 +469,11 @@ export default {
             this.errors.message = e.response.data.message;
             this.errors.data = e.response.data.data;
           })
-          .finally(() => {});
+          .finally(() => {
+            setTimeout(() => {
+              this.isSubmitting = false;
+            }, 2000);
+          });
       }
     },
     getUser(id) {
@@ -544,7 +546,7 @@ span.text-error {
   color: red;
   margin-left: 15px;
 }
-.mb-3.me-3.button-css.d-flex.justify-content-end {
+/* .mb-3.me-3.button-css.d-flex.justify-content-end {
   margin-top: 29px;
-}
+} */
 </style>

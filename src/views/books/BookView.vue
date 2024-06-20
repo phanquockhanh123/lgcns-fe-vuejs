@@ -181,7 +181,7 @@
       </a-row>
       <a-row :gutter="16">
         <a-col :span="12">
-          <a-form-item label="Category Id" name="categoryId">
+          <a-form-item label="Category" name="categoryId">
             <a-select
               v-model:value="saveBookCateIds"
               mode="tags"
@@ -193,7 +193,7 @@
           </a-form-item>
         </a-col>
         <a-col :span="12">
-          <a-form-item label="yearOfPublish" name="year">
+          <a-form-item label="BearOfPublish" name="year">
             <a-select
               placeholder="Please a-s an year of publish"
               v-model:value="book.year"
@@ -209,18 +209,34 @@
         </a-col>
       </a-row>
       <a-row :gutter="16">
-        <a-col :span="12">
-          <a-form-item label="price" name="price">
+        <a-col :span="6">
+          <a-form-item label="Price" name="price">
             <a-input
               v-model:value="book.price"
               placeholder="Please enter price"
             />
           </a-form-item>
         </a-col>
-        <a-col :span="12">
-          <a-form-item label="quantity" name="quantity">
+         <a-col :span="6">
+          <a-form-item label="Quantity" name="quantity">
             <a-input
-              v-model:value="book.quantity"
+              :value="book.quantity"
+              :disabled="true"
+            />
+          </a-form-item>
+        </a-col>
+        <a-col :span="6">
+          <a-form-item label="QuantityAvail" name="quantityAvail">
+            <a-input
+              v-model:value="book.quantityAvail"
+              :disabled="true"
+            />
+          </a-form-item>
+        </a-col>
+        <a-col :span="6">
+          <a-form-item label="Quantity bonus" name="quantity">
+            <a-input
+              v-model:value="book.quantityBonus"
               placeholder="Please enter quantity"
             />
           </a-form-item>
@@ -395,7 +411,7 @@ export default {
         title: "",
         description: "",
         year: "",
-        quantity: "",
+        quantityBonus: "",
         quantityAvail: "",
         cateIds: "",
       },
@@ -519,7 +535,7 @@ export default {
   },
   methods: {
     convertToArray(data) {
-      return data.split(",").map((name) => name.trim());
+      return data == null ? "" :  data.split(",").map((name) => name.trim());
     },
     disabledDate(current) {
       // Disable dates before yesterday
@@ -547,18 +563,22 @@ export default {
       this.visible = false;
       this.borrowVisible = false;
       this.isSubmitting = false;
+      // book
       this.book.title = "";
       this.book.author = "";
       this.book.categoryId = "";
       this.book.price = "";
       this.book.description = "";
       this.book.year = "";
-      this.book.quantity = 0;
+      this.book.quantityBonus = 0;
       this.errors.message = "";
       this.errors.data = "";
       // borrow book
-      this.borrowBookData = "";
+      this.borrowBookData.quantity = "";
+      this.borrowBookData.startDate = "";
+      this.borrowBookData.endDate = "";
       this.dateRangeVal = null;
+      this.id = "";
     },
     onSelectChange(selectedRowKeys, selectedRows) {
       console.log("Selected Row Keys: ", selectedRowKeys);
@@ -737,6 +757,7 @@ export default {
                 this.onClose();
                 this.getBooksList();
                 this.searchCateIds = [];
+                this.saveBookCateIds = [];
               }, 2000);
             }
           })
@@ -774,7 +795,11 @@ export default {
             this.errors.data = e.response.data.data;
             this.errors.message = e.response.data.message;
           })
-          .finally(() => {});
+          .finally(() => {
+             setTimeout(() => {
+              this.isSubmitting = false;
+            }, 2000);
+          });
       }
     },
     async borrowBook() {
@@ -824,11 +849,12 @@ export default {
             this.book.price = response.data.data.price;
             this.book.isbn = response.data.data.isbn;
             this.book.price = response.data.data.price;
-            this.book.categoryId = response.data.data.categoryId;
+            this.book.categoryId = "";
             this.book.description = response.data.data.description;
             this.book.quantity = response.data.data.quantity;
             this.book.quantityAvail = response.data.data.quantityAvail;
             this.book.year = response.data.data.yearOfPublish;
+          this.saveBookCateIds = [];
           })
           .catch((e) => {
             console.log(e);
