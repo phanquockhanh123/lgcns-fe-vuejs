@@ -50,8 +50,8 @@
               <a-space>
                 <a-button
                   type="primary"
-                  @click="showCheckoutDrawer(record.id)"
-                  v-if="roleUser === 'USER'"
+                  @click="showCheckout(record.id)"
+                  v-if="roleUser === 'USER' && record.status != 1 "
                 >
                   <VerticalAlignBottomOutlined />
                 </a-button>
@@ -64,7 +64,14 @@
             </template>
           </template>
         </a-table>
-
+        <a-modal
+          v-model:visible="isModalVisible"
+          title="Returned book"
+          @ok="returnBook"
+          @cancel="handleCancel"
+        >
+          <p>Are you sure you want to returned books ?</p>
+        </a-modal>
         <a-pagination
           v-model:current="pageInfo.pageIndex"
           v-model:pageSize="pageInfo.pageSize"
@@ -108,6 +115,7 @@ export default {
     return {
       selectedDate: null,
       bookIdToDelete: null,
+      isModalVisible: false,
       loading: false,
       dateFormat: "YYYY/MM/DD HH:mm:ss",
       listBookTrans: [],
@@ -234,6 +242,7 @@ export default {
         onChange: this.onSelectChange,
       },
       id: "",
+      bookTransId: ""
     };
   },
   computed: {
@@ -300,7 +309,7 @@ export default {
       if (localStorage.getItem("role") === "USER") {
         dataParams.userId = 1;
       }
-      if (this.search.status != "" && this.search.status != null) {
+      if ( this.search.status != null) {
         dataParams.status = this.search.status;
       }
 
@@ -325,6 +334,40 @@ export default {
           this.loading = false;
         });
       }
+    },
+    handleCancel() {
+      this.isModalVisible = false;
+      this.bookTransId = "";
+    },
+    async returnBook() {
+      try {
+        if (this.bookTransId != "") {
+          const response = await axiosInterceptor.post(`/admin/book_transactions/return-book/${this.bookTransId}`);
+
+          this.isModalVisible = false;
+          this.getBookTransList();
+
+          toast.success(
+            "Returned book successfully",
+            {
+              autoClose: 1000,
+            }
+          );
+        } else {
+          alert("id not exists");
+        }
+       
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setTimeout(() => {
+          this.loading = false;
+        });
+      }
+    },
+    showCheckout(id) {
+      this.bookTransId = id;
+      this.isModalVisible = true;
     }
   },
 };

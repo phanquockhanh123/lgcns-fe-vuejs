@@ -808,8 +808,8 @@ export default {
       }
 
       this.isSubmitting = true;
-      this.borrowBookData.startDate = new Date(this.dateRangeVal[0]).getTime();
-      this.borrowBookData.endDate = new Date(this.dateRangeVal[1]).getTime();
+      this.borrowBookData.startDate = this.dateRangeVal[0].format("YYYY-MM-DD HH:mm:ss");
+      this.borrowBookData.endDate = this.dateRangeVal[1].format("YYYY-MM-DD HH:mm:ss");
       this.borrowBookData.bookId = this.id ?? "";
       this.borrowBookData.quantity = this.borrowBookData.quantity;
 
@@ -835,7 +835,11 @@ export default {
           this.errors.data = e.response.data.data;
           this.errors.message = e.response.data.message;
         })
-        .finally(() => {});
+        .finally(() => {
+          setTimeout(() => {
+              this.isSubmitting = false;
+            }, 2000);
+        });
     },
     getBook(id) {
       if (id != "") {

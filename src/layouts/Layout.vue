@@ -220,6 +220,10 @@ export default {
     },
     onClose() {
       this.visible = false;
+      this.form.curPass = "";
+      this.form.newPass = "";
+      this.form.confirmPass =  "";
+
     },
     changePassword() {
       if (this.isSubmitting) {
@@ -238,7 +242,6 @@ export default {
             });
 
             setTimeout(() => {
-              this.$router.push("/users");
               this.onClose();
             }, 2000);
           }
