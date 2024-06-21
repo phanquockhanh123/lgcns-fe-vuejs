@@ -387,6 +387,14 @@ export default {
         size: this.pageInfo.pageSize,
       };
 
+      if ( this.search.role != null && this.search.role != "" ) {
+        dataParams.role = this.search.role;
+      }
+
+      if ( this.search.email != null && this.search.email != "") {
+        dataParams.email = this.search.email;
+      }
+
       try {
         const response = await axiosInterceptor.get("/admin/users/search", {
           params: dataParams,

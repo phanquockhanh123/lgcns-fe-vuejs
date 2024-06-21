@@ -119,7 +119,7 @@
                   @click="showBorrowDrawer(record.id)"
                   v-if="roleUser === 'USER'"
                 >
-                  <VerticalAlignBottomOutlined />
+                  <CopyOutlined />
                 </a-button>
               </a-space>
             </template>
@@ -154,7 +154,7 @@
 
   <!-- A drawer create book view -->
   <a-drawer
-    title="Create a new book"
+    title="Book"
     :width="720"
     :visible="visible"
     :body-style="{ paddingBottom: '80px' }"
@@ -193,7 +193,7 @@
           </a-form-item>
         </a-col>
         <a-col :span="12">
-          <a-form-item label="BearOfPublish" name="year">
+          <a-form-item label="YearOfPublish" name="year">
             <a-select
               placeholder="Please a-s an year of publish"
               v-model:value="book.year"
@@ -209,7 +209,7 @@
         </a-col>
       </a-row>
       <a-row :gutter="16">
-        <a-col :span="6">
+        <a-col :span="12">
           <a-form-item label="Price" name="price">
             <a-input
               v-model:value="book.price"
@@ -217,15 +217,14 @@
             />
           </a-form-item>
         </a-col>
-         <a-col :span="6">
+         <a-col :span="12">
           <a-form-item label="Quantity" name="quantity">
-            <a-input
+            <a-input v-model:value="book.quantity"
               :value="book.quantity"
-              :disabled="true"
             />
           </a-form-item>
         </a-col>
-        <a-col :span="6">
+        <!-- <a-col :span="6">
           <a-form-item label="QuantityAvail" name="quantityAvail">
             <a-input
               v-model:value="book.quantityAvail"
@@ -240,7 +239,7 @@
               placeholder="Please enter quantity"
             />
           </a-form-item>
-        </a-col>
+        </a-col> -->
       </a-row>
       <a-row :gutter="16">
         <a-col :span="24">
@@ -355,7 +354,6 @@
         zIndex: 1,
       }"
     >
-      <h3 style="margin-top: 20px" class="d-flex">Amount</h3>
       <a-button style="margin-right: 8px" @click="onClose">Cancel</a-button>
       <a-button type="primary" @click.prevent="borrowBook">Submit</a-button>
     </div>
@@ -370,6 +368,8 @@ import {
   VerticalAlignBottomOutlined,
   ArrowUpOutlined,
   ArrowDownOutlined,
+  CopyOutlined,
+
 } from "@ant-design/icons-vue";
 import axiosInterceptor from "../../service/AxiosInteceptorToken";
 import { toast } from "vue3-toastify";
@@ -385,6 +385,7 @@ export default {
     VerticalAlignBottomOutlined,
     ArrowUpOutlined,
     ArrowDownOutlined,
+    CopyOutlined
   },
   data() {
     return {
@@ -411,8 +412,7 @@ export default {
         title: "",
         description: "",
         year: "",
-        quantityBonus: "",
-        quantityAvail: "",
+        quantity: "",
         cateIds: "",
       },
       borrowBookData: {
@@ -570,7 +570,6 @@ export default {
       this.book.price = "";
       this.book.description = "";
       this.book.year = "";
-      this.book.quantityBonus = 0;
       this.errors.message = "";
       this.errors.data = "";
       // borrow book

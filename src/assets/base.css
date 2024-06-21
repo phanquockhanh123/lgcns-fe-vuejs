@@ -103,7 +103,7 @@ html {
 }
 
 .ant-table-body {
-  max-height: 530px;
+  min-height: 1100px;
   overflow-y: auto;
 }
 

@@ -31,7 +31,7 @@
           class="table"
           :scroll="{ x: 1500, y: 650 }"
           rowKey="id"
-          :rowSelection="roleUser == 'USER' ? null : rowSelection"
+          :rowSelection="null"
         >
           <template #headerCell="{ column }"> </template>
           <template #bodyCell="{ column, index, record }">
@@ -53,7 +53,14 @@
                   @click="showCheckout(record.id)"
                   v-if="roleUser === 'USER' && record.status != 1 "
                 >
-                  <VerticalAlignBottomOutlined />
+                  <UndoOutlined />
+                </a-button>
+                <a-button
+                  type="primary"
+                  @click="sendMailNotice(record.id)"
+                  v-if="roleUser === 'MANAGER' || roleUser === 'ADMIN' && record.status != 1 "
+                >
+                  <SendOutlined title="Send mail notice"/>
                 </a-button>
               </a-space>
             </template>
@@ -71,6 +78,14 @@
           @cancel="handleCancel"
         >
           <p>Are you sure you want to returned books ?</p>
+        </a-modal>
+        <a-modal
+          v-model:visible="isModalVisibleSendNotice"
+          title="Send mail notice"
+          @ok="sendMail"
+          @cancel="handleCancel"
+        >
+          <p>Are you sure you want to send mail notice transactions ?</p>
         </a-modal>
         <a-pagination
           v-model:current="pageInfo.pageIndex"
@@ -95,6 +110,8 @@ import {
   VerticalAlignBottomOutlined,
   ArrowUpOutlined,
   ArrowDownOutlined,
+  UndoOutlined,
+  SendOutlined
 } from "@ant-design/icons-vue";
 import axiosInterceptor from "../../service/AxiosInteceptorToken";
 import { toast } from "vue3-toastify";
@@ -110,12 +127,15 @@ export default {
     VerticalAlignBottomOutlined,
     ArrowUpOutlined,
     ArrowDownOutlined,
+    UndoOutlined,
+    SendOutlined
   },
   data() {
     return {
       selectedDate: null,
       bookIdToDelete: null,
       isModalVisible: false,
+      isModalVisibleSendNotice: false,
       loading: false,
       dateFormat: "YYYY/MM/DD HH:mm:ss",
       listBookTrans: [],
@@ -302,7 +322,7 @@ export default {
 
       let dataParams = {
         page: pageIndex ? pageIndex : this.pageInfo.pageIndex,
-        size: this.pageInfo.pageSize,
+        limit: this.pageInfo.pageSize,
         get_total_count: 1,
       };
 
@@ -326,7 +346,6 @@ export default {
         this.pageInfo.totalElements =
           response.data.data.pagination.total_record;
         this.pageInfo.totalPages = response.data.data.pagination.total_page;
-        console.log(this.pageInfo)
       } catch (error) {
         console.error(error);
       } finally {
@@ -337,6 +356,7 @@ export default {
     },
     handleCancel() {
       this.isModalVisible = false;
+      this.isModalVisibleSendNotice = false;
       this.bookTransId = "";
     },
     async returnBook() {
@@ -368,6 +388,13 @@ export default {
     showCheckout(id) {
       this.bookTransId = id;
       this.isModalVisible = true;
+    },
+    sendMailNotice(id) {
+      this.bookTransId = id;
+      this.isModalVisibleSendNotice = true;
+    },
+    sendMail(id) {
+      alert("Send mail success");
     }
   },
 };

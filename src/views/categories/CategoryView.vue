@@ -17,6 +17,7 @@
           :columns="columns"
           class="table"
           rowKey="id"
+          :scroll="{ x: 1500, y: 650 }"
         >
           <template #headerCell="{ column }"> </template>
           <template #bodyCell="{ column, index, record }">
@@ -170,7 +171,7 @@ export default {
       pageInfo: {
         content: [],
         pageIndex: 1,
-        pageSize: 10,
+        pageSize: 20,
         totalElements: 0,
         totalPages: 0,
       },
