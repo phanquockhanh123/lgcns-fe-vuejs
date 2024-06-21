@@ -46,21 +46,29 @@
                 OVERDATED
               </a-tag>
             </template>
+            <template v-if="column.key === 'total'">
+              <span>
+                {{ record.amount + record.bonus }}
+              </span>
+            </template>
             <template v-if="column.key === 'action'">
               <a-space>
                 <a-button
                   type="primary"
                   @click="showCheckout(record.id)"
-                  v-if="roleUser === 'USER' && record.status != 1 "
+                  v-if="roleUser === 'USER' && record.status != 1"
                 >
                   <UndoOutlined />
                 </a-button>
                 <a-button
                   type="primary"
                   @click="sendMailNotice(record.id)"
-                  v-if="roleUser === 'MANAGER' || roleUser === 'ADMIN' && record.status != 1 "
+                  v-if="
+                    roleUser === 'MANAGER' ||
+                    (roleUser === 'ADMIN' && record.status != 1)
+                  "
                 >
-                  <SendOutlined title="Send mail notice"/>
+                  <SendOutlined title="Send mail notice" />
                 </a-button>
               </a-space>
             </template>
@@ -111,7 +119,7 @@ import {
   ArrowUpOutlined,
   ArrowDownOutlined,
   UndoOutlined,
-  SendOutlined
+  SendOutlined,
 } from "@ant-design/icons-vue";
 import axiosInterceptor from "../../service/AxiosInteceptorToken";
 import { toast } from "vue3-toastify";
@@ -128,7 +136,7 @@ export default {
     ArrowUpOutlined,
     ArrowDownOutlined,
     UndoOutlined,
-    SendOutlined
+    SendOutlined,
   },
   data() {
     return {
@@ -236,6 +244,11 @@ export default {
           key: "endDate",
         },
         {
+          title: "ReturnDate",
+          dataIndex: "returnDate",
+          key: "returnDate",
+        },
+        {
           title: "Bonus",
           dataIndex: "bonus",
           key: "bonus",
@@ -244,6 +257,11 @@ export default {
           title: "Amount",
           dataIndex: "amount",
           key: "amount",
+        },
+        {
+          title: "Total",
+          dataIndex: "total",
+          key: "total",
         },
         {
           title: "Action",
@@ -262,7 +280,7 @@ export default {
         onChange: this.onSelectChange,
       },
       id: "",
-      bookTransId: ""
+      bookTransId: "",
     };
   },
   computed: {
@@ -329,7 +347,7 @@ export default {
       if (localStorage.getItem("role") === "USER") {
         dataParams.userId = 1;
       }
-      if ( this.search.status != null) {
+      if (this.search.status != null) {
         dataParams.status = this.search.status;
       }
 
@@ -362,21 +380,19 @@ export default {
     async returnBook() {
       try {
         if (this.bookTransId != "") {
-          const response = await axiosInterceptor.post(`/admin/book_transactions/return-book/${this.bookTransId}`);
+          const response = await axiosInterceptor.post(
+            `/admin/book_transactions/return-book/${this.bookTransId}`
+          );
 
           this.isModalVisible = false;
           this.getBookTransList();
 
-          toast.success(
-            "Returned book successfully",
-            {
-              autoClose: 1000,
-            }
-          );
+          toast.success("Returned book successfully", {
+            autoClose: 1000,
+          });
         } else {
           alert("id not exists");
         }
-       
       } catch (error) {
         console.error(error);
       } finally {
@@ -395,7 +411,7 @@ export default {
     },
     sendMail(id) {
       alert("Send mail success");
-    }
+    },
   },
 };
 </script>

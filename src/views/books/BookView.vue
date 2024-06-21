@@ -38,7 +38,7 @@
         </a-select>
       </div>
 
-      <div class="mb-3 me-3 category-input">
+      <!-- <div class="mb-3 me-3 category-input">
         <label for="categoryId" class="form-label">Category</label>
         <a-select
           v-model:value="searchCateIds"
@@ -48,7 +48,7 @@
           :options="listCategoriesTag"
           :max-tag-count="1"
         ></a-select>
-      </div>
+      </div> -->
       <div class="mb-3 me-3 button-css-search">
         <a-button class="btn btn-primary" @click.prevent="getBooksList(1)"
           >Search</a-button
@@ -327,12 +327,19 @@
           </a-form-item>
         </a-col>
         <a-col :span="12">
-          <a-form-item label="Date Borrow" name="Date borrow">
+          <!-- <a-form-item label="Date Borrow" name="Date borrow">
             <a-range-picker
               v-model:value="dateRangeVal"
               :format="dateFormat"
               :default-value="dateRangeValDefault"
               :disabledDate="disabledDate"
+            />
+          </a-form-item> -->
+          <a-form-item label="Date Borrow" name="Date borrow">
+            <a-range-picker
+              v-model:value="dateRangeVal"
+              :format="dateFormat"
+              :default-value="dateRangeValDefault"
             />
           </a-form-item>
         </a-col>
@@ -396,6 +403,7 @@ export default {
       dateFormat: "YYYY/MM/DD HH:mm:ss",
       listBooks: [],
       listCategory: [],
+      listCategoriesByBookId: [],
       listCategoriesTag: [],
       selectedRowKeys: [],
       selectedYear: null,
@@ -547,6 +555,7 @@ export default {
       if (id != "" && !isNaN(id)) {
         this.id = id;
         this.getBook(id);
+        this.getCategoriesByBookId(id);
       }
     },
     showBorrowDrawer(id = "") {
@@ -600,6 +609,24 @@ export default {
             }));
 
             this.listCategoriesTag = rs.map((item) => ({
+              value: item.id,
+              label: item.name,
+            }));
+          }
+        })
+        .catch((e) => {
+          console.log(e.response.status);
+        });
+    },
+    async getCategoriesByBookId(id) {
+      await axiosInterceptor
+        .get(`/admin/books/cates/${id}`)
+        .then((response) => {
+          console.log(response.data.data)
+          // JSON responses are automatically parsed.
+          if (response.data.success) {
+            const rs = response.data.data;
+            this.saveBookCateIds = rs.map((item) => ({
               value: item.id,
               label: item.name,
             }));
@@ -857,7 +884,6 @@ export default {
             this.book.quantity = response.data.data.quantity;
             this.book.quantityAvail = response.data.data.quantityAvail;
             this.book.year = response.data.data.yearOfPublish;
-          this.saveBookCateIds = [];
           })
           .catch((e) => {
             console.log(e);
