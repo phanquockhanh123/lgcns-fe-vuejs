@@ -152,6 +152,7 @@ export default {
       selectedRowKeys: [],
       selectedYear: null,
       years: [],
+      isSubmitting: false,
       search: {
         status: "",
       },
@@ -398,6 +399,7 @@ export default {
       } finally {
         setTimeout(() => {
           this.loading = false;
+          this.bookTransId = "";
         });
       }
     },
@@ -409,8 +411,36 @@ export default {
       this.bookTransId = id;
       this.isModalVisibleSendNotice = true;
     },
-    sendMail(id) {
-      alert("Send mail success");
+    async sendMail() {
+      if (this.isSubmitting) {
+        return;
+      }
+
+      this.isSubmitting = true;
+      try {
+        if (this.bookTransId != "") {
+          const response = await axiosInterceptor.post(
+            `/admin/book_transactions/send-mail-notice/${this.bookTransId}`
+          );
+
+          this.isModalVisibleSendNotice = false;
+          this.getBookTransList();
+
+          toast.success("Send mail notice book transaction successfully", {
+            autoClose: 1000,
+          });
+        } else {
+          alert("id not exists");
+        }
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setTimeout(() => {
+          this.loading = false;
+          this.bookTransId = "";
+          this.isSubmitting = false;
+        }, 1000);
+      }
     },
   },
 };
