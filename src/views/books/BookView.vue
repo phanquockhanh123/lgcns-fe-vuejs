@@ -161,7 +161,7 @@
     :body-style="{ paddingBottom: '80px' }"
     @close="onClose"
   >
-    <a-form :model="book" :rules="rules" layout="vertical">
+    <a-form :model="book" :rules="rules" layout="vertical" enctype="multipart/form-data">
       <a-row :gutter="16">
         <a-col :span="12">
           <a-form-item label="Title" name="title">
@@ -233,6 +233,15 @@
               placeholder="please enter description"
             />
           </a-form-item>
+        </a-col>
+      </a-row>
+      <a-row :gutter="16">
+        <a-col :span="24">
+          <a-form-item label="Image" name="image">
+            <img :src="previewImage" class="uploading-image" width="300px" height="300px" />
+            <input type="file" accept="image/jpeg" @change=uploadImage>
+          </a-form-item>
+          
         </a-col>
       </a-row>
     </a-form>
@@ -370,6 +379,7 @@ export default {
   },
   data() {
     return {
+      previewImage:null,
       selectedDate: null,
       isModalVisible: false,
       bookIdToDelete: null,
@@ -396,6 +406,7 @@ export default {
         year: "",
         quantity: "",
         cateIds: "",
+        filePath: null
       },
       borrowBookData: {
         quantity: "",
@@ -890,6 +901,17 @@ export default {
           });
       }
     },
+    uploadImage(e) {
+      const image = e.target.files[0];
+
+      this.book.filePath = image;
+      const reader = new FileReader();
+      reader.readAsDataURL(image);
+      reader.onload = e =>{
+          this.previewImage = e.target.result;
+          console.log(this.previewImage);
+      }
+  }
   },
 };
 </script>
