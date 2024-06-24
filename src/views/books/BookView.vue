@@ -83,6 +83,7 @@
           :scroll="{ x: 1500, y: 650 }"
           rowKey="id"
           :rowSelection="roleUser == 'USER' ? null : rowSelection"
+          size="small"
         >
           <template #headerCell="{ column }"> </template>
           <template #bodyCell="{ column, index, record }">
@@ -143,7 +144,7 @@
           v-model:pageSize="pageInfo.pageSize"
           :total="pageInfo.totalElements"
           show-size-changer
-          :page-size-options="['10', '20', '50', '100']"
+          :page-size-options="['#', '20', '50', '100']"
           :locale="{ items_per_page: '/ trang' }"
           @show-size-change="onShowSizeChange"
           @change="updatePageSize"
@@ -217,29 +218,11 @@
             />
           </a-form-item>
         </a-col>
-         <a-col :span="12">
+        <a-col :span="12">
           <a-form-item label="Quantity" name="quantity">
-            <a-input v-model:value="book.quantity"
-              :value="book.quantity"
-            />
+            <a-input v-model:value="book.quantity" :value="book.quantity" />
           </a-form-item>
         </a-col>
-        <!-- <a-col :span="6">
-          <a-form-item label="QuantityAvail" name="quantityAvail">
-            <a-input
-              v-model:value="book.quantityAvail"
-              :disabled="true"
-            />
-          </a-form-item>
-        </a-col>
-        <a-col :span="6">
-          <a-form-item label="Quantity bonus" name="quantity">
-            <a-input
-              v-model:value="book.quantityBonus"
-              placeholder="Please enter quantity"
-            />
-          </a-form-item>
-        </a-col> -->
       </a-row>
       <a-row :gutter="16">
         <a-col :span="24">
@@ -327,14 +310,6 @@
           </a-form-item>
         </a-col>
         <a-col :span="12">
-          <!-- <a-form-item label="Date Borrow" name="Date borrow">
-            <a-range-picker
-              v-model:value="dateRangeVal"
-              :format="dateFormat"
-              :default-value="dateRangeValDefault"
-              :disabledDate="disabledDate"
-            />
-          </a-form-item> -->
           <a-form-item label="Date Borrow" name="Date borrow">
             <a-range-picker
               v-model:value="dateRangeVal"
@@ -376,7 +351,6 @@ import {
   ArrowUpOutlined,
   ArrowDownOutlined,
   CopyOutlined,
-
 } from "@ant-design/icons-vue";
 import axiosInterceptor from "../../service/AxiosInteceptorToken";
 import { toast } from "vue3-toastify";
@@ -392,7 +366,7 @@ export default {
     VerticalAlignBottomOutlined,
     ArrowUpOutlined,
     ArrowDownOutlined,
-    CopyOutlined
+    CopyOutlined,
   },
   data() {
     return {
@@ -492,10 +466,11 @@ export default {
       pageInfo: {
         content: [],
         pageIndex: 1,
-        pageSize: 10,
+        pageSize: 20,
         totalElements: 0,
         totalPages: 0,
       },
+      rs: [],
       rowSelection: {
         onChange: this.onSelectChange,
       },
@@ -529,6 +504,16 @@ export default {
           trigger: "blur",
         },
       },
+      previewVisible: false,
+      previewImage: '',
+      fileList: [
+        {
+          uid: '-1',
+          name: 'image.png',
+          status: 'done',
+          url: 'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png',
+        },
+      ],
     };
   },
   computed: {
@@ -543,7 +528,7 @@ export default {
   },
   methods: {
     convertToArray(data) {
-      return data == null ? "" :  data.split(",").map((name) => name.trim());
+      return data == null ? "" : data.split(",").map((name) => name.trim());
     },
     disabledDate(current) {
       // Disable dates before yesterday
@@ -622,7 +607,7 @@ export default {
       await axiosInterceptor
         .get(`/admin/books/cates/${id}`)
         .then((response) => {
-          console.log(response.data.data)
+          console.log(response.data.data);
           // JSON responses are automatically parsed.
           if (response.data.success) {
             const rs = response.data.data;
@@ -698,6 +683,8 @@ export default {
       if (this.errors.search != "") {
         dataParams.yearFrom = "";
         dataParams.yearTo = "";
+        dataParams.title = "";
+        dataParams.author = "";
       }
       try {
         const response = await axiosInterceptor.get("/admin/books", {
@@ -712,9 +699,10 @@ export default {
       } catch (error) {
         console.error(error);
       } finally {
+        this.loading = false;
         setTimeout(() => {
-          this.loading = false;
-        });
+          this.errors.search = "";
+        }, 10000);
       }
     },
     confirmDelete(id) {
@@ -728,11 +716,16 @@ export default {
       this.isModalVisible = false;
     },
     getRandomColor() {
-      const letters = "0123456789ABCDEF";
-      let color = "#";
-      for (let i = 0; i < 6; i++) {
-        color += letters[Math.floor(Math.random() * 16)];
-      }
+      const minHex = 0xcc0000; // Minimum hex value for a "hot" color
+      const maxHex = 0xffcc00; // Maximum hex value for a "hot" color
+      let color;
+
+      do {
+        const randomHex =
+          Math.floor(Math.random() * (maxHex - minHex + 1)) + minHex;
+        color = "#" + randomHex.toString(16).padStart(6, "0");
+      } while (color === "#FFFFFF");
+
       return color;
     },
     async deleteListBookIds() {
@@ -766,6 +759,9 @@ export default {
       }
 
       this.isSubmitting = true;
+      // console.log(this.saveBookCateIds)
+      //this.rs = this.saveBookCateIds.map(item => item.value);
+      // console.log(this.rs)
       this.book.cateIds = this.saveBookCateIds;
       if (this.id == "") {
         axiosInterceptor
@@ -822,7 +818,7 @@ export default {
             this.errors.message = e.response.data.message;
           })
           .finally(() => {
-             setTimeout(() => {
+            setTimeout(() => {
               this.isSubmitting = false;
             }, 2000);
           });
@@ -834,8 +830,12 @@ export default {
       }
 
       this.isSubmitting = true;
-      this.borrowBookData.startDate = this.dateRangeVal[0].format("YYYY-MM-DD HH:mm:ss");
-      this.borrowBookData.endDate = this.dateRangeVal[1].format("YYYY-MM-DD HH:mm:ss");
+      this.borrowBookData.startDate = this.dateRangeVal[0].format(
+        "YYYY-MM-DD HH:mm:ss"
+      );
+      this.borrowBookData.endDate = this.dateRangeVal[1].format(
+        "YYYY-MM-DD HH:mm:ss"
+      );
       this.borrowBookData.bookId = this.id ?? "";
       this.borrowBookData.quantity = this.borrowBookData.quantity;
 
@@ -863,8 +863,8 @@ export default {
         })
         .finally(() => {
           setTimeout(() => {
-              this.isSubmitting = false;
-            }, 2000);
+            this.isSubmitting = false;
+          }, 2000);
         });
     },
     getBook(id) {
@@ -921,5 +921,14 @@ span.text-error {
 .mb-3.me-3.button-css.d-flex.justify-content-end[data-v-36410294] {
   margin-top: 29px;
   margin-left: 1500px;
+}
+.ant-upload-select-picture-card i {
+  font-size: 32px;
+  color: #999;
+}
+
+.ant-upload-select-picture-card .ant-upload-text {
+  margin-top: 8px;
+  color: #666;
 }
 </style>

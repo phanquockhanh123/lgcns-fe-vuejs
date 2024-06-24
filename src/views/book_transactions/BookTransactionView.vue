@@ -60,6 +60,7 @@
                 >
                   <UndoOutlined />
                 </a-button>
+                <p  v-if="roleUser === 'USER' && record.status == 1" > <CheckCircleTwoTone /></p>
                 <a-button
                   type="primary"
                   @click="sendMailNotice(record.id)"
@@ -120,6 +121,7 @@ import {
   ArrowDownOutlined,
   UndoOutlined,
   SendOutlined,
+  CheckCircleTwoTone
 } from "@ant-design/icons-vue";
 import axiosInterceptor from "../../service/AxiosInteceptorToken";
 import { toast } from "vue3-toastify";
@@ -137,6 +139,7 @@ export default {
     ArrowDownOutlined,
     UndoOutlined,
     SendOutlined,
+    CheckCircleTwoTone
   },
   data() {
     return {

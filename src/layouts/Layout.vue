@@ -119,6 +119,7 @@
   <div class="col-sm-12 p-2">
     <router-view></router-view>
   </div>
+  
 </template>
 
 <script>
@@ -222,8 +223,7 @@ export default {
       this.visible = false;
       this.form.curPass = "";
       this.form.newPass = "";
-      this.form.confirmPass =  "";
-
+      this.form.confirmPass = "";
     },
     changePassword() {
       if (this.isSubmitting) {
@@ -262,7 +262,7 @@ export default {
     isLoggedIn() {
       return localStorage.getItem("token");
     },
-  },
+  }
 };
 </script>
 <style scoped>
@@ -327,4 +327,6 @@ span.text-error {
 .ant-dropdown-menu-item:hover {
   background-color: #f5f5f5;
 }
+
+
 </style>
