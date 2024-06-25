@@ -28,7 +28,7 @@ const routes = [
         path: "/books",
         name: "books",
         component: BookView,
-        meta: { requiresAuth: true, roles: ["USER", "ADMIN", "MANAGER"] },
+        meta: { requiresAuth: true, roles: ["ADMIN", "MANAGER"] },
       },
       {
         path: "/users",
