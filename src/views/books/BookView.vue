@@ -161,7 +161,12 @@
     :body-style="{ paddingBottom: '80px' }"
     @close="onClose"
   >
-    <a-form :model="book" :rules="rules" layout="vertical" enctype="multipart/form-data">
+    <a-form
+      :model="book"
+      :rules="rules"
+      layout="vertical"
+      enctype="multipart/form-data"
+    >
       <a-row :gutter="16">
         <a-col :span="12">
           <a-form-item label="Title" name="title">
@@ -238,10 +243,14 @@
       <a-row :gutter="16">
         <a-col :span="24">
           <a-form-item label="Image" name="image">
-            <img :src="previewImage" class="uploading-image" width="300px" height="300px" />
-            <input type="file" accept="image/jpeg" @change=uploadImage>
+            <img
+              :src="previewImage"
+              class="uploading-image"
+              width="300px"
+              height="300px"
+            />
+            <input type="file" accept="image/jpeg" @change="uploadImage" />
           </a-form-item>
-          
         </a-col>
       </a-row>
     </a-form>
@@ -379,7 +388,7 @@ export default {
   },
   data() {
     return {
-      previewImage:null,
+      previewImage: null,
       selectedDate: null,
       isModalVisible: false,
       bookIdToDelete: null,
@@ -406,7 +415,7 @@ export default {
         year: "",
         quantity: "",
         cateIds: "",
-        filePath: null
+        filePath: "",
       },
       borrowBookData: {
         quantity: "",
@@ -516,15 +525,16 @@ export default {
         },
       },
       previewVisible: false,
-      previewImage: '',
+      previewImage: "",
       fileList: [
         {
-          uid: '-1',
-          name: 'image.png',
-          status: 'done',
-          url: 'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png',
+          uid: "-1",
+          name: "image.png",
+          status: "done",
+          url: "https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png",
         },
       ],
+      filePath: "",
     };
   },
   computed: {
@@ -575,6 +585,7 @@ export default {
       this.book.price = "";
       this.book.description = "";
       this.book.year = "";
+      this.previewImage = "";
       this.errors.message = "";
       this.errors.data = "";
       // borrow book
@@ -675,10 +686,6 @@ export default {
         dataParams.author = this.search.author.trim();
       }
 
-      // if (this.searchCateIds != "" && this.searchCateIds.length > 0) {
-      //   dataParams.cateIds = this.searchCateIds.join(",");
-      // }
-
       if (this.search.yearFrom != "" && this.search.yearFrom != null) {
         dataParams.yearFrom = this.search.yearFrom;
       }
@@ -770,13 +777,32 @@ export default {
       }
 
       this.isSubmitting = true;
-      // console.log(this.saveBookCateIds)
-      //this.rs = this.saveBookCateIds.map(item => item.value);
-      // console.log(this.rs)
-      this.book.cateIds = this.saveBookCateIds;
+      this.book.filePath = this.filePath;
+
+      const formData = new FormData();
+
+      if (this.id == "") {
+        this.book.cateIds = this.saveBookCateIds;
+      } else {
+        this.book.cateIds = this.saveBookCateIds.map((item) => item.value);
+      }
+
+      formData.append("title", this.book.title);
+      formData.append("author", this.book.author);
+      formData.append("cateIds", this.book.cateIds);
+      formData.append("price", this.book.price);
+      formData.append("quantity", this.book.quantity);
+      formData.append("year", this.book.year);
+      formData.append("filePath", this.book.filePath);
+      formData.append("description", this.book.description);
+
       if (this.id == "") {
         axiosInterceptor
-          .post("/admin/books", this.book)
+          .post("/admin/books", formData, {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          })
           .then((response) => {
             // JSON responses are automatically parsed.
 
@@ -796,7 +822,7 @@ export default {
           })
           .catch((e) => {
             console.log(e);
-            this.errors.data = e.response.data.data;
+            //this.errors.data = e.response.data.data;
             this.errors.message = e.response.data.message;
           })
           .finally(() => {
@@ -806,7 +832,11 @@ export default {
           });
       } else {
         await axiosInterceptor
-          .put(`/admin/books/${this.id}`, this.book)
+          .put(`/admin/books/${this.id}`, formData, {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          })
           .then((response) => {
             // JSON responses are automatically parsed.
             console.log(response.data.data);
@@ -903,15 +933,14 @@ export default {
     },
     uploadImage(e) {
       const image = e.target.files[0];
-
-      this.book.filePath = image;
       const reader = new FileReader();
       reader.readAsDataURL(image);
-      reader.onload = e =>{
-          this.previewImage = e.target.result;
-          console.log(this.previewImage);
-      }
-  }
+      reader.onload = (e) => {
+        this.previewImage = e.target.result;
+        this.filePath = image;
+        console.log(this.filePath);
+      };
+    },
   },
 };
 </script>
