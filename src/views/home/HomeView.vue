@@ -64,7 +64,7 @@
               <div>by {{ card.author }}</div>
             </template>
             <template #description>
-              <div>Price: {{ card.price }}</div>
+              <div>Price: {{ formatPrice(card.price) }}</div>
               <div>Quantity: {{ card.quantityAvail }}</div>
               <a-button
                 type="primary"
@@ -147,6 +147,7 @@
               v-model:value="dateRangeVal"
               :format="dateFormat"
               :default-value="dateRangeValDefault"
+              :disabled-date="disabledDate"
             />
           </a-form-item>
         </a-col>
@@ -451,6 +452,15 @@ export default {
       this.dateRangeVal = null;
       this.id = "";
     },
+    disabledDate(current) {
+      // Disable dates before yesterday
+      const yesterday = new Date(new Date().setDate(new Date().getDate() - 1));
+      return current && current < yesterday;
+    },
+    formatPrice(value) {
+        let val = (value/1).toFixed(2).replace('.', ',')
+        return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+    }
   },
   mounted() {
     this.getBooksList();

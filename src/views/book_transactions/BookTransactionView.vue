@@ -46,9 +46,19 @@
                 OVERDATED
               </a-tag>
             </template>
+            <template v-if="column.key === 'bonus'">
+              <span>
+                {{ formatPrice(record.bonus) }}
+              </span>
+            </template>
+            <template v-if="column.key === 'amount'">
+              <span>
+                {{ formatPrice(record.amount) }}
+              </span>
+            </template>
             <template v-if="column.key === 'total'">
               <span>
-                {{ record.amount + record.bonus }}
+                {{ formatPrice(record.amount + record.bonus) }}
               </span>
             </template>
             <template v-if="column.key === 'action'">
@@ -444,6 +454,10 @@ export default {
           this.isSubmitting = false;
         }, 1000);
       }
+    },
+    formatPrice(value) {
+        let val = (value/1).toFixed(2).replace('.', ',')
+        return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")
     },
   },
 };

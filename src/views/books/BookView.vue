@@ -333,6 +333,7 @@
               v-model:value="dateRangeVal"
               :format="dateFormat"
               :default-value="dateRangeValDefault"
+              :disabled-date="disabledDate"
             />
           </a-form-item>
         </a-col>
@@ -556,6 +557,7 @@ export default {
       const yesterday = new Date(new Date().setDate(new Date().getDate() - 1));
       return current && current < yesterday;
     },
+    
     showDrawer(id = "") {
       this.visible = true;
       if (id != "" && !isNaN(id)) {
@@ -822,7 +824,7 @@ export default {
           })
           .catch((e) => {
             console.log(e);
-            //this.errors.data = e.response.data.data;
+            this.errors.data = e.response.data.data;
             this.errors.message = e.response.data.message;
           })
           .finally(() => {
@@ -840,7 +842,7 @@ export default {
           .then((response) => {
             // JSON responses are automatically parsed.
             console.log(response.data.data);
-            toast.success("Update book success!", {
+            toast.success(`Update book success with id ${this.id}` , {
               autoClose: 1000,
             });
 
