@@ -591,6 +591,7 @@ export default {
       this.book.title = "";
       this.book.author = "";
       this.book.price = "";
+      this.book.quantity = "";
       this.book.description = "";
       this.book.year = "";
       this.saveBookCateIds = [];
