@@ -53,6 +53,17 @@
         >
           <template #headerCell="{ column }"> </template>
           <template #bodyCell="{ column, index, record }">
+            <template v-if="column.key === 'role'">
+              <a-tag v-if="record.role == 'ADMIN'" :color="'volcano'">
+                ADMIN
+              </a-tag>
+              <a-tag v-if="record.role == 'MANAGER'" :color="'green'">
+                MANAGER
+              </a-tag>
+              <a-tag v-if="record.role == 'USER'" :color="'geekblue'">
+                USER
+              </a-tag>
+            </template>
             <template v-if="column.key === 'action'">
               <a-space>
                 <a-button type="primary" @click="showDrawer(record.id)">

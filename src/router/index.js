@@ -8,6 +8,7 @@ import Layout from "../layouts/Layout.vue";
 import UserView from "../views/users/UserView.vue";
 import ForbiddenPage from "../views/pageStatus/403.vue"
 import BookTransactionView from "../views/book_transactions/BookTransactionView.vue";
+import ReportView from "../views/home/ReportView.vue"
 
 const routes = [
   {
@@ -22,6 +23,15 @@ const routes = [
         meta: {
           requiresAuth: true,
           roles: ["USER", "ADMIN", "MANAGER"],
+        },
+      },
+      {
+        path: "/reports",
+        name: "report",
+        component: ReportView,
+        meta: {
+          requiresAuth: true,
+          roles: ["ADMIN"],
         },
       },
       {

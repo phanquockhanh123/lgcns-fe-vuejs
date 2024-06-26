@@ -199,11 +199,13 @@ export default {
           title: "ID",
           dataIndex: "id",
           key: "id",
+          width: '100px',
         },
         {
           title: "TransactionId",
           dataIndex: "transactionId",
           key: "transactionId",
+          width: '200px',
         },
         {
           title: "BookIsbn",

@@ -159,6 +159,11 @@ export default {
           link: "/users",
           roles: ["ADMIN", "MANAGER"],
         },
+        {
+          name: "Reports",
+          link: "/reports",
+          roles: ["ADMIN"],
+        },
       ],
       fullName: localStorage.getItem("fullName"),
       form: {

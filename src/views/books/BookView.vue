@@ -144,7 +144,7 @@
           v-model:pageSize="pageInfo.pageSize"
           :total="pageInfo.totalElements"
           show-size-changer
-          :page-size-options="['#', '20', '50', '100']"
+          :page-size-options="['10', '20', '50', '100']"
           :locale="{ items_per_page: '/ trang' }"
           @show-size-change="onShowSizeChange"
           @change="updatePageSize"
@@ -248,6 +248,7 @@
               class="uploading-image"
               width="300px"
               height="300px"
+              v-if="previewImage"
             />
             <input type="file" accept="image/jpeg" @change="uploadImage" />
           </a-form-item>
@@ -389,7 +390,6 @@ export default {
   },
   data() {
     return {
-      previewImage: null,
       selectedDate: null,
       isModalVisible: false,
       bookIdToDelete: null,
@@ -415,7 +415,7 @@ export default {
         description: "",
         year: "",
         quantity: "",
-        cateIds: "",
+        cateIds: [],
         filePath: "",
       },
       borrowBookData: {
@@ -441,11 +441,13 @@ export default {
           title: "ID",
           dataIndex: "id",
           key: "id",
+          width: "150px",
         },
         {
           title: "Isbn",
           dataIndex: "isbn",
           key: "isbn",
+          width: "300px",
         },
         {
           title: "Title",
@@ -462,26 +464,31 @@ export default {
           title: "Author",
           dataIndex: "author",
           key: "author",
+          width: "300px",
         },
         {
           title: "Price",
           dataIndex: "price",
           key: "price",
+          width: "200px",
         },
         {
           title: "Quantity Avail",
           dataIndex: "quantityAvail",
           key: "quantityAvail",
+          width: "200px",
         },
         {
           title: "Created",
           dataIndex: "created",
           key: "created",
+          width: "300px",
         },
         {
           title: "Action",
           dataIndex: "action",
           key: "action",
+          width: "300px",
         },
       ],
       pageInfo: {
@@ -557,7 +564,7 @@ export default {
       const yesterday = new Date(new Date().setDate(new Date().getDate() - 1));
       return current && current < yesterday;
     },
-    
+
     showDrawer(id = "") {
       this.visible = true;
       if (id != "" && !isNaN(id)) {
@@ -583,10 +590,12 @@ export default {
       // book
       this.book.title = "";
       this.book.author = "";
-      this.book.categoryId = "";
       this.book.price = "";
       this.book.description = "";
       this.book.year = "";
+      this.saveBookCateIds = [];
+      this.filePath = "";
+
       this.previewImage = "";
       this.errors.message = "";
       this.errors.data = "";
@@ -631,7 +640,6 @@ export default {
       await axiosInterceptor
         .get(`/admin/books/cates/${id}`)
         .then((response) => {
-          console.log(response.data.data);
           // JSON responses are automatically parsed.
           if (response.data.success) {
             const rs = response.data.data;
@@ -783,12 +791,14 @@ export default {
 
       const formData = new FormData();
 
-      if (this.id == "") {
+      if (
+        Array.isArray(this.saveBookCateIds) &&
+        this.saveBookCateIds.every((cate) => typeof cate === "number")
+      ) {
         this.book.cateIds = this.saveBookCateIds;
       } else {
         this.book.cateIds = this.saveBookCateIds.map((item) => item.value);
       }
-
       formData.append("title", this.book.title);
       formData.append("author", this.book.author);
       formData.append("cateIds", this.book.cateIds);
@@ -842,7 +852,7 @@ export default {
           .then((response) => {
             // JSON responses are automatically parsed.
             console.log(response.data.data);
-            toast.success(`Update book success with id ${this.id}` , {
+            toast.success(`Update book success with id ${this.id}`, {
               autoClose: 1000,
             });
 
@@ -915,7 +925,6 @@ export default {
         axiosInterceptor
           .get(`/admin/books/${id}`)
           .then((response) => {
-            console.log(response.data.data);
             // JSON responses are automatically parsed.
             this.book.title = response.data.data.title;
             this.book.author = response.data.data.author;
@@ -927,6 +936,7 @@ export default {
             this.book.quantity = response.data.data.quantity;
             this.book.quantityAvail = response.data.data.quantityAvail;
             this.book.year = response.data.data.yearOfPublish;
+            this.previewImage = `http://localhost:8081/static/public/book-images/${id}/${response.data.data.filePath}`;
           })
           .catch((e) => {
             console.log(e);
@@ -934,14 +944,23 @@ export default {
       }
     },
     uploadImage(e) {
-      const image = e.target.files[0];
-      const reader = new FileReader();
-      reader.readAsDataURL(image);
-      reader.onload = (e) => {
-        this.previewImage = e.target.result;
-        this.filePath = image;
-        console.log(this.filePath);
-      };
+      if (e.target.files[0] != null) {
+        const image = e.target.files[0];
+        try {
+          const reader = new FileReader();
+          reader.readAsDataURL(image);
+          reader.onload = (e) => {
+            this.previewImage = e.target.result;
+            this.filePath = image;
+          };
+        } catch (error) {
+          console.error("Error creating preview image:", error);
+          return null;
+        }
+      } else {
+        this.previewImage = "";
+        this.filePath = "";
+      }
     },
   },
 };

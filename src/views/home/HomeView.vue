@@ -76,17 +76,19 @@
           </a-card-meta>
         </a-card>
       </div>
+      <div class="pagination">
+        <a-pagination
+          v-model:current="pageInfo.pageIndex"
+          v-model:pageSize="pageInfo.pageSize"
+          :total="pageInfo.totalElements"
+          show-size-changer
+          :page-size-options="['5', '10', '15']"
+          :locale="{ items_per_page: '/ trang' }"
+          @show-size-change="onShowSizeChange"
+          @change="updatePageSize"
+        />
+      </div>
     </div>
-    <a-pagination
-      v-model:current="pageInfo.pageIndex"
-      v-model:pageSize="pageInfo.pageSize"
-      :total="pageInfo.totalElements"
-      show-size-changer
-      :page-size-options="['#', '20', '50', '100']"
-      :locale="{ items_per_page: '/ trang' }"
-      @show-size-change="onShowSizeChange"
-      @change="updatePageSize"
-    />
   </div>
 
   <!-- A drawer borrow book view -->
@@ -218,7 +220,7 @@ export default {
       pageInfo: {
         content: [],
         pageIndex: 1,
-        pageSize: 10,
+        pageSize: 15,
         totalElements: 0,
         totalPages: 0,
       },
@@ -458,9 +460,9 @@ export default {
       return current && current < yesterday;
     },
     formatPrice(value) {
-        let val = (value/1).toFixed(2).replace('.', ',')
-        return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")
-    }
+      let val = (value / 1).toFixed(2).replace(".", ",");
+      return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    },
   },
   mounted() {
     this.getBooksList();
@@ -509,5 +511,20 @@ span.text-error {
 .mb-3.me-3.button-css.d-flex.justify-content-end[data-v-36410294] {
   margin-top: 29px;
   margin-left: 1500px;
+}
+
+.pagination {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #fff;
+  padding: 10px 0;
+  width: 100%;
+  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+  margin-bottom: 30px;
 }
 </style>
