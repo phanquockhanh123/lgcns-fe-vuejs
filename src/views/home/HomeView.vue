@@ -64,6 +64,7 @@
               <div>by {{ card.author }}</div>
             </template>
             <template #description>
+              <div>Year of publish: {{ card.yearOfPublish }}</div>
               <div>Price: {{ formatPrice(card.price) }}</div>
               <div>Quantity: {{ card.quantityAvail }}</div>
               <a-button
