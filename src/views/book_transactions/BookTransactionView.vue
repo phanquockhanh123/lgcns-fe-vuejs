@@ -70,7 +70,9 @@
                 >
                   <UndoOutlined />
                 </a-button>
-                <p  v-if="roleUser === 'USER' && record.status == 1" > <CheckCircleTwoTone /></p>
+                <p v-if="roleUser === 'USER' && record.status == 1">
+                  <CheckCircleTwoTone />
+                </p>
                 <a-button
                   type="primary"
                   @click="sendMailNotice(record.id)"
@@ -131,12 +133,14 @@ import {
   ArrowDownOutlined,
   UndoOutlined,
   SendOutlined,
-  CheckCircleTwoTone
+  CheckCircleTwoTone,
 } from "@ant-design/icons-vue";
 import axiosInterceptor from "../../service/AxiosInteceptorToken";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 import moment from "moment";
+import SockJS from "sockjs-client";
+import Stomp from "webstomp-client";
 
 export default {
   name: "BookTransactionView",
@@ -149,13 +153,16 @@ export default {
     ArrowDownOutlined,
     UndoOutlined,
     SendOutlined,
-    CheckCircleTwoTone
+    CheckCircleTwoTone,
   },
   data() {
     return {
       selectedDate: null,
       bookIdToDelete: null,
       isModalVisible: false,
+      stompClient: null,
+      socket: null,
+      connected: false,
       isModalVisibleSendNotice: false,
       loading: false,
       dateFormat: "YYYY/MM/DD HH:mm:ss",
@@ -199,13 +206,13 @@ export default {
           title: "ID",
           dataIndex: "id",
           key: "id",
-          width: '100px',
+          width: "100px",
         },
         {
           title: "TransactionId",
           dataIndex: "transactionId",
           key: "transactionId",
-          width: '200px',
+          width: "200px",
         },
         {
           title: "BookIsbn",
@@ -309,8 +316,45 @@ export default {
   },
   mounted() {
     this.getBookTransList();
+    this.connect();
   },
+  // created: function () {
+  //   this.stompClient = Stomp.over(new SockJS("/gs-guide-websocket"));
+  //   this.stompClient.connect();
+  //   this.stompClient.subscribe("/topic/greetings", function (greeting) {
+  //     console.log(JSON.parse(greeting.body).content);
+  //   });
+  // },
   methods: {
+    connect() {
+      this.socket = new SockJS("http://localhost:8081/gs-guide-websocket");
+      this.stompClient = Stomp.over(this.socket);
+      console.log(this.stompClient)
+      this.stompClient.connect(
+        {},
+        (frame) => {
+          this.connected = true;
+
+          this.stompClient.subscribe("/topic/greetings", (tick) => {
+            console.log(tick);
+            //this.received_messages.push(JSON.parse(tick.body).content);
+          });
+        },
+        (error) => {
+          console.log(error);
+          this.connected = false;
+        }
+      );
+    },
+    disconnect() {
+      if (this.stompClient) {
+        this.stompClient.disconnect();
+      }
+      this.connected = false;
+    },
+    tickleConnection() {
+      this.connected ? this.disconnect() : this.connect();
+    },
     disabledDate(current) {
       // Disable dates before yesterday
       const yesterday = new Date(new Date().setDate(new Date().getDate() - 1));
@@ -458,8 +502,8 @@ export default {
       }
     },
     formatPrice(value) {
-        let val = (value/1).toFixed(2).replace('.', ',')
-        return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+      let val = (value / 1).toFixed(2).replace(".", ",");
+      return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
     },
   },
 };

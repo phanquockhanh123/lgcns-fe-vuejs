@@ -114,17 +114,19 @@ export default {
         {
           title: "Price",
           dataIndex: "price",
-          key: "price",
+          key: "price"
         },
         {
           title: "Total sale",
           dataIndex: "totalSale",
           key: "totalSale",
+          sorter: true,
         },
         {
           title: "Total money",
           dataIndex: "totalMoney",
           key: "totalMoney",
+          sorter: true,
         },
       ],
       columnsCustomer: [
@@ -173,8 +175,7 @@ export default {
         if (response.data.success) {
           this.listBookSeller = response.data.data;
         }
-      } catch (error) {
-        console.error(error);
+      } catch (error) { 
       } finally {
         this.loading = false;
       }
