@@ -394,8 +394,9 @@ export default {
       this.loading = true;
 
       let dataParams = {
-        page: pageIndex ? pageIndex - 1 : this.pageInfo.pageIndex - 1,
-        size: this.pageInfo.pageSize,
+        page: pageIndex ? pageIndex : this.pageInfo.pageIndex,
+        limit: this.pageInfo.pageSize,
+        get_total_count: 1,
       };
 
       if ( this.search.role != null && this.search.role != "" ) {
@@ -412,8 +413,9 @@ export default {
         });
         this.listUsers = response.data.data.data;
 
-        this.pageInfo.totalElements = response.data.data.totalElements;
-        this.pageInfo.totalPages = response.data.data.totalPages;
+        this.pageInfo.totalElements =
+          response.data.data.pagination.total_record;
+        this.pageInfo.totalPages = response.data.data.pagination.total_page;
       } catch (error) {
         console.error(error);
       } finally {

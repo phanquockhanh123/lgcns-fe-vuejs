@@ -2,6 +2,19 @@
   <a-card title="List book transactions" class="w-100">
     <!-- Form search -->
     <div class="d-flex mb-3 w-100">
+      <div class="mb-3 me-3" v-if="roleUser !== 'USER'">
+        <label for="userName" class="form-label">User name</label>
+        <a-select
+          v-model:value="search.userId"
+          placeholder="Select a username"
+          class="w-full d-flex"
+          :allowClear="true"
+        >
+          <a-select-option v-for="user in listUsers" :key="user.id" :value="user.id">
+            {{ user.firstName }}  {{ user.lastName }}
+          </a-select-option>
+        </a-select>
+      </div>
       <div class="mb-3 me-3">
         <label for="Status" class="form-label">Status</label>
         <a-select
@@ -175,6 +188,7 @@ export default {
       isSubmitting: false,
       search: {
         status: "",
+        userId: ""
       },
       book: {
         price: "",
@@ -304,6 +318,7 @@ export default {
       },
       id: "",
       bookTransId: "",
+      listUsers: [],
     };
   },
   computed: {
@@ -317,6 +332,7 @@ export default {
   mounted() {
     this.getBookTransList();
     this.connect();
+    this.getUsersList();
   },
   // created: function () {
   //   this.stompClient = Stomp.over(new SockJS("/gs-guide-websocket"));
@@ -403,14 +419,18 @@ export default {
         limit: this.pageInfo.pageSize,
         get_total_count: 1,
       };
-
-      if (localStorage.getItem("role") === "USER") {
-        dataParams.userId = 1;
-      }
-      if (this.search.status != null) {
+      if (this.search.status != "") {
         dataParams.status = this.search.status;
       }
 
+
+      if (this.search.userId != "") {
+        dataParams.userId = this.search.userId;
+      } else {
+        dataParams.userId = localStorage.getItem("role") === "USER" ? localStorage.getItem("userId") : "";
+        console.log(dataParams);
+      }
+      console.log(dataParams);
       try {
         const response = await axiosInterceptor.get(
           "/admin/book_transactions",
@@ -504,6 +524,83 @@ export default {
     formatPrice(value) {
       let val = (value / 1).toFixed(2).replace(".", ",");
       return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    },
+    async getBooksList(pageIndex) {
+      this.loading = true;
+
+      let dataParams = {
+        page: pageIndex ? pageIndex : this.pageInfo.pageIndex,
+        limit: this.pageInfo.pageSize,
+        get_total_count: 1,
+      };
+
+      if (this.search.title != "" && this.search.title != null) {
+        dataParams.title = this.search.title.trim();
+      }
+
+      if (this.search.author != "" && this.search.author != null) {
+        dataParams.author = this.search.author.trim();
+      }
+
+      if (this.search.yearFrom != "" && this.search.yearFrom != null) {
+        dataParams.yearFrom = this.search.yearFrom;
+      }
+
+      if (this.search.yearTo != "" && this.search.yearTo != null) {
+        dataParams.yearTo = this.search.yearTo;
+      }
+
+      if (this.search.yearTo < this.search.yearFrom) {
+        this.errors.search = "Year from less than year to";
+      }
+
+      if (this.errors.search != "") {
+        dataParams.yearFrom = "";
+        dataParams.yearTo = "";
+        dataParams.title = "";
+        dataParams.author = "";
+      }
+      try {
+        const response = await axiosInterceptor.get("/admin/books", {
+          params: dataParams,
+        });
+
+        this.cardData = response.data.data.data;
+
+        this.pageInfo.totalElements =
+          response.data.data.pagination.total_record;
+        this.pageInfo.totalPages = response.data.data.pagination.total_page;
+      } catch (error) {
+        console.error(error);
+      } finally {
+        this.loading = false;
+        setTimeout(() => {
+          this.errors.search = "";
+        }, 10000);
+      }
+    },
+    async getUsersList(pageIndex) {
+      this.loading = true;
+
+      let dataParams = {
+        page: pageIndex ? pageIndex : this.pageInfo.pageIndex,
+        limit: this.pageInfo.pageSize,
+        get_total_count: 0
+      };
+
+      try {
+        const response = await axiosInterceptor.get("/admin/users/search", {
+          params: dataParams,
+        });
+        this.listUsers = response.data.data.data;
+
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setTimeout(() => {
+          this.loading = false;
+        });
+      }
     },
   },
 };
