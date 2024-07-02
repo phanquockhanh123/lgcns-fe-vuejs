@@ -127,7 +127,7 @@ import "vue3-toastify/dist/index.css";
 import { DownOutlined } from "@ant-design/icons-vue";
 import axiosInterceptor from "../service/AxiosInteceptorToken";
 import SockJS from "sockjs-client";
-import Stomp from "stompjs";
+import Stomp from 'webstomp-client';
 
 export default {
   name: "NavBar",
