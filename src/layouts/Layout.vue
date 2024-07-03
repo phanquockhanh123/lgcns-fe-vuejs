@@ -126,8 +126,6 @@ import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 import { DownOutlined } from "@ant-design/icons-vue";
 import axiosInterceptor from "../service/AxiosInteceptorToken";
-import SockJS from "sockjs-client";
-import Stomp from 'stompjs';
 
 export default {
   name: "NavBar",
@@ -269,34 +267,11 @@ export default {
           }, 2000);
         });
     },
-    connect() {
-      this.socket = new SockJS("http://localhost:8081/ws");
-
-      this.stompClient = Stomp.over(this.socket);
-      this.stompClient.connect(
-        {},
-        (frame) => {
-          console.log('Connected: ' + frame);
-          this.connected = true;
-          this.stompClient.subscribe("/topic/book", (message) => {
-            this.received_messages.push(JSON.parse(message.body).content);
-          });
-        },
-        (error) => {
-          console.log(error);
-          this.connected = false;
-        }
-      );
-    },
   },
   computed: {
     isLoggedIn() {
       return localStorage.getItem("token");
     },
-  },
-  mounted() {
-    this.connect();
-    console.log(this.received_messages);
   },
 };
 </script>

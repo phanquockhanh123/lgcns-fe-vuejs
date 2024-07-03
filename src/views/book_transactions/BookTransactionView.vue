@@ -331,46 +331,9 @@ export default {
   },
   mounted() {
     this.getBookTransList();
-    this.connect();
     this.getUsersList();
   },
-  // created: function () {
-  //   this.stompClient = Stomp.over(new SockJS("/gs-guide-websocket"));
-  //   this.stompClient.connect();
-  //   this.stompClient.subscribe("/topic/greetings", function (greeting) {
-  //     console.log(JSON.parse(greeting.body).content);
-  //   });
-  // },
   methods: {
-    connect() {
-      this.socket = new SockJS("http://localhost:8081/gs-guide-websocket");
-      this.stompClient = Stomp.over(this.socket);
-      console.log(this.stompClient)
-      this.stompClient.connect(
-        {},
-        (frame) => {
-          this.connected = true;
-
-          this.stompClient.subscribe("/topic/greetings", (tick) => {
-            console.log(tick);
-            //this.received_messages.push(JSON.parse(tick.body).content);
-          });
-        },
-        (error) => {
-          console.log(error);
-          this.connected = false;
-        }
-      );
-    },
-    disconnect() {
-      if (this.stompClient) {
-        this.stompClient.disconnect();
-      }
-      this.connected = false;
-    },
-    tickleConnection() {
-      this.connected ? this.disconnect() : this.connect();
-    },
     disabledDate(current) {
       // Disable dates before yesterday
       const yesterday = new Date(new Date().setDate(new Date().getDate() - 1));
