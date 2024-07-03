@@ -127,7 +127,7 @@ import "vue3-toastify/dist/index.css";
 import { DownOutlined } from "@ant-design/icons-vue";
 import axiosInterceptor from "../service/AxiosInteceptorToken";
 import SockJS from "sockjs-client";
-import Stomp from 'webstomp-client';
+import Stomp from 'stompjs';
 
 export default {
   name: "NavBar",
@@ -270,7 +270,7 @@ export default {
         });
     },
     connect() {
-      this.socket = new SockJS("http://localhost:8081/our-websocket");
+      this.socket = new SockJS("http://localhost:8081/ws");
 
       this.stompClient = Stomp.over(this.socket);
       this.stompClient.connect(
@@ -278,7 +278,7 @@ export default {
         (frame) => {
           console.log('Connected: ' + frame);
           this.connected = true;
-          this.stompClient.subscribe("/topic/messages", (message) => {
+          this.stompClient.subscribe("/topic/book", (message) => {
             this.received_messages.push(JSON.parse(message.body).content);
           });
         },
@@ -296,6 +296,7 @@ export default {
   },
   mounted() {
     this.connect();
+    console.log(this.received_messages);
   },
 };
 </script>

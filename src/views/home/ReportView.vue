@@ -54,15 +54,13 @@
           :pagination="false"
           :columns="columns"
           class="table"
-          :scroll="{ x: 1500, y: 400 }"
           rowKey="id"
           :rowSelection="null"
           size="small"
           @change="onChange"
         >
           <template #headerCell="{ column }"> </template>
-          <template #bodyCell="{ column, index, record }">
-          </template>
+          <template #bodyCell="{ column, index, record }"> </template>
         </a-table>
         <a-pagination
           v-model:current="pageInfo.pageIndex"
@@ -78,6 +76,55 @@
     </div>
   </a-card>
 
+  <!-- table user reports and pagination -->
+  <a-card title="List users" class="w-100">
+    <div class="d-flex mb-3 w-100">
+      <div class="mb-3 me-3">
+        <label for="email" class="form-label">Email</label>
+        <a-input
+          v-model:value="search.email"
+          placeholder="Email"
+          style="width: 200px"
+        />
+      </div>
+      <div class="me-3 button-css-search-report">
+        <a-button class="btn btn-primary" @click.prevent="getUsersList(1)"
+          >Search</a-button
+        >
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-12">
+        <a-table
+          :dataSource="sortedUsers"
+          :loading="loadingReport"
+          :pagination="false"
+          :columns="columnReports"
+          class="table"
+          rowKey="id"
+          @change="onChangeReport"
+          size="small"
+        >
+          <template #headerCell="{ column }"> </template>
+          <template #bodyCell="{ column, index, record }">
+            <template v-if="column.key === 'fullName'">
+              {{ record.firstName }} {{ record.lastName }}
+            </template>
+          </template>
+        </a-table>
+        <a-pagination
+          v-model:current="pageReportInfo.pageIndex"
+          v-model:pageSize="pageReportInfo.pageSize"
+          :total="pageReportInfo.totalElements"
+          show-size-changer
+          :page-size-options="['10', '20', '50', '100']"
+          :locale="{ items_per_page: '/ trang' }"
+          @show-size-change="onShowSizeChangeReport"
+          @change="updatePageSizeReport"
+        />
+      </div>
+    </div>
+  </a-card>
 </template>
 
 <script>
@@ -114,11 +161,13 @@ export default {
       loading: false,
       dateFormat: "YYYY/MM/DD HH:mm:ss",
       listBooks: [],
+      listUsers: [],
       listCategory: [],
       listCategoriesByBookId: [],
       listCategoriesTag: [],
       selectedRowKeys: [],
       selectedYear: null,
+      loadingReport: false,
       years: [],
       search: {
         title: "",
@@ -189,26 +238,69 @@ export default {
           title: "Total Sale",
           dataIndex: "totalSale",
           key: "totalSale",
-          sorter: true
+          sorter: true,
         },
         {
           title: "Total Money",
           dataIndex: "totalMoney",
           key: "totalMoney",
+          sorter: true,
+        },
+      ],
+      columnReports: [
+        {
+          title: "ID",
+          dataIndex: "id",
+          key: "id",
+        },
+        {
+          title: "Full Name",
+          dataIndex: "fullName",
+          key: "fullName",
+        },
+        {
+          title: "Email",
+          dataIndex: "email",
+          key: "email",
+        },
+        {
+          title: "Address",
+          dataIndex: "address",
+          key: "address",
+        },
+        {
+          title: "Phone",
+          dataIndex: "phone",
+          key: "phone",
+        },
+        {
+          title: "TotalBookBuy",
+          dataIndex: "totalBookBuy",
+          key: "totalBookBuy",
+          sorter: true
+        },
+        {
+          title: "TotalMoneyBuy",
+          dataIndex: "totalMoneyBuy",
+          key: "totalMoneyBuy",
           sorter: true
         },
       ],
       pageInfo: {
         content: [],
         pageIndex: 1,
-        pageSize: 5,
+        pageSize: 10,
+        totalElements: 0,
+        totalPages: 0,
+      },
+      pageReportInfo: {
+        content: [],
+        pageIndex: 1,
+        pageSize: 10,
         totalElements: 0,
         totalPages: 0,
       },
       rs: [],
-      rowSelection: {
-        onChange: this.onSelectChange,
-      },
       visible: false,
       borrowVisible: false,
       id: "",
@@ -218,6 +310,7 @@ export default {
       sortOrder: null,
       sortField: null,
       sortedBooks: [],
+      sortedUsers: []
     };
   },
   computed: {
@@ -227,7 +320,7 @@ export default {
   },
   mounted() {
     this.getBooksList();
-    this.getCategories();
+    this.getUsersList();
     this.generateYearList();
   },
   methods: {
@@ -253,53 +346,6 @@ export default {
       this.dateRangeVal = null;
       this.id = "";
     },
-    onSelectChange(selectedRowKeys, selectedRows) {
-      console.log("Selected Row Keys: ", selectedRowKeys);
-      console.log("Selected Rows: ", selectedRows);
-      this.selectedRowKeys = selectedRowKeys;
-      const selectedIds = selectedRows.map((row) => row.id);
-      console.log("Selected Book IDs: ", selectedIds);
-    },
-    async getCategories() {
-      await axiosInterceptor
-        .get("/admin/categories")
-        .then((response) => {
-          // JSON responses are automatically parsed.
-          if (response.data.data != "") {
-            const rs = response.data.data.data;
-
-            this.listCategory = rs.map((item) => ({
-              id: item.id,
-              name: item.name,
-            }));
-
-            this.listCategoriesTag = rs.map((item) => ({
-              value: item.id,
-              label: item.name,
-            }));
-          }
-        })
-        .catch((e) => {
-          console.log(e.response.status);
-        });
-    },
-    async getCategoriesByBookId(id) {
-      await axiosInterceptor
-        .get(`/admin/books/cates/${id}`)
-        .then((response) => {
-          // JSON responses are automatically parsed.
-          if (response.data.success) {
-            const rs = response.data.data;
-            this.saveBookCateIds = rs.map((item) => ({
-              value: item.id,
-              label: item.name,
-            }));
-          }
-        })
-        .catch((e) => {
-          console.log(e.response.status);
-        });
-    },
     formattedDatetime(date) {
       return moment(date).format("YYYY-MM-DD HH:mm:ss");
     },
@@ -314,6 +360,24 @@ export default {
       this.pageInfo.pageSize = pageSize;
 
       this.getBooksList();
+    },
+    onShowSizeChangeReport() {
+      this.handleChangeReport(
+        this.pageReportInfo.pageIndex,
+        this.pageReportInfo.pageSize
+      );
+    },
+    updatePageSizeReport() {
+      this.handleChangeReport(
+        this.pageReportInfo.pageIndex,
+        this.pageReportInfo.pageSize
+      );
+    },
+    handleChangeReport(pageIndex, pageSize) {
+      this.pageReportInfo.pageIndex = pageIndex;
+      this.pageReportInfo.pageSize = pageSize;
+
+      this.getUsersList();
     },
     generateYearList() {
       const currentYear = new Date().getFullYear();
@@ -362,9 +426,12 @@ export default {
         dataParams.author = "";
       }
       try {
-        const response = await axiosInterceptor.get("/admin/books/book-reports", {
-          params: dataParams,
-        });
+        const response = await axiosInterceptor.get(
+          "/admin/books/book-reports",
+          {
+            params: dataParams,
+          }
+        );
 
         this.listBooks = response.data.data.data;
 
@@ -392,7 +459,7 @@ export default {
           const fieldA = a[this.sortField];
           const fieldB = b[this.sortField];
 
-          if (this.sortOrder === 'ascend') {
+          if (this.sortOrder === "ascend") {
             return fieldA > fieldB ? 1 : -1;
           } else {
             return fieldA < fieldB ? 1 : -1;
@@ -400,6 +467,57 @@ export default {
         });
       } else {
         this.sortedBooks = [...this.listBooks];
+      }
+    },
+    onChangeReport(pagination, filters, sorter) {
+      this.sortOrder = sorter.order;
+      this.sortField = sorter.field;
+
+      if (this.sortOrder && this.sortField) {
+        this.sortedUsers = [...this.listUsers].sort((a, b) => {
+          const fieldA = a[this.sortField];
+          const fieldB = b[this.sortField];
+
+          if (this.sortOrder === "ascend") {
+            return fieldA > fieldB ? 1 : -1;
+          } else {
+            return fieldA < fieldB ? 1 : -1;
+          }
+        });
+      } else {
+        this.sortedUsers = [...this.listUsers];
+      }
+    },
+    async getUsersList(pageIndex) {
+      this.loadingReport = true;
+
+      let dataParams = {
+        page: pageIndex ? pageIndex : this.pageReportInfo.pageIndex,
+        limit: this.pageReportInfo.pageSize,
+        get_total_count: 1,
+      };
+
+      if (this.search.email != null && this.search.email != "") {
+        dataParams.email = this.search.email;
+      }
+
+      try {
+        const response = await axiosInterceptor.get("/admin/users/reports", {
+          params: dataParams,
+        });
+        this.listUsers = response.data.data.data;
+
+        this.pageReportInfo.totalElements =
+          response.data.data.pagination.total_record;
+        this.pageReportInfo.totalPages =
+          response.data.data.pagination.total_page;
+
+          // sorted
+        this.sortedUsers = [...this.listUsers];
+      } catch (error) {
+        console.error(error);
+      } finally {
+        this.loadingReport = false;
       }
     },
   },
@@ -442,5 +560,10 @@ span.text-error {
 .ant-upload-select-picture-card .ant-upload-text {
   margin-top: 8px;
   color: #666;
+}
+.me-3.button-css-search-report {
+    /* display: flex; */
+    margin-left: 64px;
+    margin-top: 30px;
 }
 </style>

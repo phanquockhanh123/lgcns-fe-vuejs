@@ -38,17 +38,6 @@
         </a-select>
       </div>
 
-      <!-- <div class="mb-3 me-3 category-input">
-        <label for="categoryId" class="form-label">Category</label>
-        <a-select
-          v-model:value="searchCateIds"
-          mode="tags"
-          style="width: 100%; margin-right: 30px"
-          placeholder="Tags Category"
-          :options="listCategoriesTag"
-          :max-tag-count="1"
-        ></a-select>
-      </div> -->
       <div class="mb-3 me-3 button-css-search">
         <a-button class="btn btn-primary" @click.prevent="getBooksList(1)"
           >Search</a-button
