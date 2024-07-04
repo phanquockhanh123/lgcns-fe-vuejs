@@ -1,7 +1,9 @@
 import SockJS from "sockjs-client";
-import { Stomp } from "@stomp/stompjs";
+import Stomp from "webstomp-client";
 
 var stompClient = null;
+
+var handlers = [];
 
 export function connect() {
   const socket = new SockJS("http://localhost:8081/ws");
@@ -12,7 +14,7 @@ export function connect() {
     {},
     (frame) => {
       console.log("Connected: " + frame);
-      stompClient.subscribe("/topic/book", (message) => {
+      stompClient.subscribe("/topic/books", (message) => {
         console.log(123);
       });
     },
@@ -22,9 +24,17 @@ export function connect() {
   );
 }
 
+export function addHandler(handler) {
+  handlers.push(handler)
+}
+
 export function disconnect() {
-    if (stompClient !== null){
-        stompClient.disconnect();
-    }
-    console.log("Disconnected");
+  if (stompClient !== null) {
+      stompClient.disconnect()
+  }
+  console.log("Disconnected")
+}
+
+export function sendMessage(message) {
+  stompClient.send("/app/books", {}, JSON.stringify(message))
 }

@@ -10,8 +10,12 @@
           class="w-full d-flex"
           :allowClear="true"
         >
-          <a-select-option v-for="user in listUsers" :key="user.id" :value="user.id">
-            {{ user.firstName }}  {{ user.lastName }}
+          <a-select-option
+            v-for="user in listUsers"
+            :key="user.id"
+            :value="user.id"
+          >
+            {{ user.firstName }} {{ user.lastName }}
           </a-select-option>
         </a-select>
       </div>
@@ -152,8 +156,6 @@ import axiosInterceptor from "../../service/AxiosInteceptorToken";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 import moment from "moment";
-import SockJS from "sockjs-client";
-import Stomp from "webstomp-client";
 
 export default {
   name: "BookTransactionView",
@@ -188,7 +190,7 @@ export default {
       isSubmitting: false,
       search: {
         status: "",
-        userId: ""
+        userId: "",
       },
       book: {
         price: "",
@@ -386,14 +388,15 @@ export default {
         dataParams.status = this.search.status;
       }
 
-
       if (this.search.userId != "") {
         dataParams.userId = this.search.userId;
       } else {
-        dataParams.userId = localStorage.getItem("role") === "USER" ? localStorage.getItem("userId") : "";
-        console.log(dataParams);
+        dataParams.userId =
+          localStorage.getItem("role") === "USER"
+            ? localStorage.getItem("userId")
+            : "";
       }
-      console.log(dataParams);
+
       try {
         const response = await axiosInterceptor.get(
           "/admin/book_transactions",
@@ -548,7 +551,7 @@ export default {
       let dataParams = {
         page: pageIndex ? pageIndex : this.pageInfo.pageIndex,
         limit: this.pageInfo.pageSize,
-        get_total_count: 0
+        get_total_count: 0,
       };
 
       try {
@@ -556,7 +559,6 @@ export default {
           params: dataParams,
         });
         this.listUsers = response.data.data.data;
-
       } catch (error) {
         console.error(error);
       } finally {
