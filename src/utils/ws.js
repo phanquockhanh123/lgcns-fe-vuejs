@@ -1,40 +1,14 @@
-import SockJS from "sockjs-client";
-import Stomp from "webstomp-client";
+const connection = new WebSocket("ws://localhost:8081/ws");
 
-var stompClient = null;
+connection.onmessage = function (event) {
+  console.log(event)
+  let notification = JSON.parse(event.data);
 
-var handlers = [];
+  this.notifications.push(notification);
+  console.log(this.notifications)
+};
 
-export function connect() {
-  const socket = new SockJS("http://localhost:8081/ws");
-
-  stompClient = Stomp.over(socket);
-
-  stompClient.connect(
-    {},
-    (frame) => {
-      console.log("Connected: " + frame);
-      stompClient.subscribe("/topic/books", (message) => {
-        console.log(123);
-      });
-    },
-    (error) => {
-      console.log(error);
-    }
-  );
-}
-
-export function addHandler(handler) {
-  handlers.push(handler)
-}
-
-export function disconnect() {
-  if (stompClient !== null) {
-      stompClient.disconnect()
-  }
-  console.log("Disconnected")
-}
-
-export function sendMessage(message) {
-  stompClient.send("/app/books", {}, JSON.stringify(message))
-}
+connection.onopen = function (event) {
+  console.log(event);
+  console.log("Successfully connected to the echo websocket server...");
+};

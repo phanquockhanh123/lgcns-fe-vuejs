@@ -1,9 +1,11 @@
 <template>
   <div class="wrapper">
-    <div>
-    <input v-model="messageWS" placeholder="Enter your message" />
-    <button @click="sendMessage">Send</button>
-  </div>
+    <ul>
+      <h1>Notifications</h1>
+      <li v-for="notification in notifications" :key="notification.bookId">
+        Book {{ notification.bookId }} borrowed at {{ notification.timestamp }}
+      </li>
+    </ul>
     <div class="d-flex mb-3 w-100">
       <div class="mb-3 me-3">
         <label for="title" class="form-label">Title</label>
@@ -195,9 +197,23 @@ import axiosInterceptor from "../../service/AxiosInteceptorToken";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 import moment from "moment";
-
 import SockJS from "sockjs-client";
 import Stomp from "webstomp-client";
+
+let connection = new WebSocket("ws://localhost:8081/ws");
+
+connection.onmessage = function (event) {
+  console.log(event)
+  let notification = JSON.parse(event.data);
+
+  this.notifications.push(notification);
+  console.log(this.notifications)
+};
+
+connection.onopen = function (event) {
+  console.log(event);
+  console.log("Successfully connected to the echo websocket server...");
+};
 
 export default {
   name: "HomeView",
@@ -267,7 +283,9 @@ export default {
       connected: false,
       socket: null,
       connection: null,
-      messageWS: ""
+      messageWS: "",
+      stompClient: "",
+      notifications: [],
     };
   },
   computed: {
@@ -430,6 +448,8 @@ export default {
           });
 
           if (response.data.success == true) {
+            this.connection.send(JSON.stringify({ action: "borrow-book", bookId: this.borrowBookData.bookId }));
+
             setTimeout(() => {
               this.$router.push("/dashboard");
               this.onClose();
@@ -478,48 +498,50 @@ export default {
       let val = (value / 1).toFixed(2).replace(".", ",");
       return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
     },
-    sendMessage: function (message) {
-       if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-        this.connection.send(this.message);
-        this.message = '';
-      }
-    },
     // connect() {
-    //   this.socket = new WebSocket("http://localhost:8081/ws");
-    //   this.socket.onopen = function () {
-    //     console.log("open");
-    //     // this.socket.send("test");
+    //   this.socket = SockJS("http://localhost:8081/ws");
+    //   this.stompClient = Stomp.over(this.socket);
+    //   const wsUri =
+    //     (window.location.protocol === "https:" ? "wss://" : "ws://") +
+    //     window.location.host +
+    //     "/ws/websocket";
+
+    //   console.log(wsUri);
+
+    //   const xsrf = this.getCookie("XSRF-TOKEN");
+    //   const connectionOption = {
+    //     brokerURL: wsUri,
+    //     connectHeaders: {
+    //       "X-XSRF-TOKEN": xsrf,
+    //     },
+    //     debug: function (str) {
+    //       console.log(str);
+    //     },
+    //     reconnectDelay: 10000,
+    //     heartbeatIncoming: 4000,
+    //     heartbeatOutgoing: 4000,
     //   };
 
-    //   this.socket.onmessage = function (e) {
-    //     console.log("message", e.data);
-    //     // this.socket.close();
-    //   };
-
-    //   this.socket.onclose = function (e) {
-    //     console.log("close", e);
-    //   };
-      // this.stompClient = Stomp.over(this.socket);
-      // console.log(this.stompClient, "connect");
-      // this.stompClient.connect(
-      //   {
-      //     headers: {
-      //       Authorization: "Bearer " + localStorage.getItem("token"),
-      //     },
-      //   },
-      //   (frame) => {
-      //     this.connected = true;
-      //     console.log(frame, "frame ");
-      //     this.stompClient.subscribe("/topic/books", (tick) => {
-      //       console.log(tick);
-      //       this.received_messages.push(JSON.parse(tick.body).content);
-      //     });
-      //   },
-      //   (error) => {
-      //     console.log(error, "ERROR");
-      //     this.connected = false;
-      //   }
-      // );
+    //   console.log(this.stompClient, "connect");
+    //   this.stompClient.connect(
+    //     {
+    //       headers: {
+    //         Authorization: "Bearer " + localStorage.getItem("token"),
+    //       },
+    //     },
+    //     (frame) => {
+    //       this.connected = true;
+    //       console.log(frame, "frame ");
+    //       this.stompClient.subscribe("/topic/books", (tick) => {
+    //         console.log(tick);
+    //         this.received_messages.push(JSON.parse(tick.body).content);
+    //       });
+    //     },
+    //     (error) => {
+    //       console.log(error, "ERROR");
+    //       this.connected = false;
+    //     }
+    //   );
     // },
     // disconnect() {
     //   if (this.stompClient) {
@@ -532,17 +554,7 @@ export default {
     // },
   },
   created() {
-    console.log("Starting connection to WebSocket Server");
-    this.connection = new WebSocket("ws://localhost:8081/ws");
-
-    this.connection.onmessage = function (event) {
-      console.log(event);
-    };
-
-    this.connection.onopen = function (event) {
-      console.log(event);
-      console.log("Successfully connected to the echo websocket server...");
-    };
+    
   },
   mounted() {
     this.getBooksList();
