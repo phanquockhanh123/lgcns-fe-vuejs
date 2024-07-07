@@ -1,9 +1,9 @@
 <template>
   <div class="wrapper">
+    <h1>Notifications</h1>
     <ul>
-      <h1>Notifications</h1>
-      <li v-for="notification in notifications" :key="notification.bookId">
-        Book {{ notification.bookId }} borrowed at {{ notification.timestamp }}
+      <li v-for="message in messages" :key="message">
+        {{  message }}
       </li>
     </ul>
     <div class="d-flex mb-3 w-100">
@@ -17,12 +17,7 @@
       </div>
       <div class="mb-3 me-3">
         <label for="yearOfPublish" class="form-label">Year From</label>
-        <a-select
-          v-model:value="search.yearFrom"
-          placeholder="Select a year"
-          class="w-full d-flex"
-          :allowClear="true"
-        >
+        <a-select v-model:value="search.yearFrom" placeholder="Select a year" class="w-full d-flex" :allowClear="true">
           <a-select-option v-for="year in years" :key="year" :value="year">
             {{ year }}
           </a-select-option>
@@ -31,37 +26,21 @@
 
       <div class="mb-3 me-3">
         <label for="yearOfPublish" class="form-label">Year To</label>
-        <a-select
-          v-model:value="search.yearTo"
-          placeholder="Select a year"
-          class="w-full d-flex"
-          :allowClear="true"
-        >
+        <a-select v-model:value="search.yearTo" placeholder="Select a year" class="w-full d-flex" :allowClear="true">
           <a-select-option v-for="year in years" :key="year" :value="year">
             {{ year }}
           </a-select-option>
         </a-select>
       </div>
       <div class="mb-3 me-3 button-css-search">
-        <a-button class="btn btn-primary" @click.prevent="getBooksList(1)"
-          >Search</a-button
-        >
+        <a-button class="btn btn-primary" @click.prevent="getBooksList(1)">Search</a-button>
       </div>
     </div>
     <div>
       <div v-for="(chunk, index) in cardChunks" :key="index" class="card-list">
-        <a-card
-          v-for="card in chunk"
-          :key="card.title"
-          hoverable
-          style="width: 240px"
-        >
+        <a-card v-for="card in chunk" :key="card.title" hoverable style="width: 240px">
           <template #cover>
-            <img
-              :alt="card.title"
-              :src="getImageUrl(card.id, card.filePath)"
-              height="200px"
-            />
+            <img :alt="card.title" :src="getImageUrl(card.id, card.filePath)" height="200px" />
           </template>
           <a-card-meta>
             <template #title>
@@ -72,39 +51,23 @@
               <div>Year of publish: {{ card.yearOfPublish }}</div>
               <div>Price: {{ formatPrice(card.price) }}</div>
               <div>Quantity: {{ card.quantityAvail }}</div>
-              <a-button
-                type="primary"
-                @click="showBorrowDrawer(card.id)"
-                v-if="roleUser === 'USER'"
-                >Borrow Book</a-button
-              >
+              <a-button type="primary" @click="showBorrowDrawer(card.id)" v-if="roleUser === 'USER'">Borrow
+                Book</a-button>
             </template>
           </a-card-meta>
         </a-card>
       </div>
       <div class="pagination">
-        <a-pagination
-          v-model:current="pageInfo.pageIndex"
-          v-model:pageSize="pageInfo.pageSize"
-          :total="pageInfo.totalElements"
-          show-size-changer
-          :page-size-options="['5', '10', '15']"
-          :locale="{ items_per_page: '/ trang' }"
-          @show-size-change="onShowSizeChange"
-          @change="updatePageSize"
-        />
+        <a-pagination v-model:current="pageInfo.pageIndex" v-model:pageSize="pageInfo.pageSize"
+          :total="pageInfo.totalElements" show-size-changer :page-size-options="['5', '10', '15']"
+          :locale="{ items_per_page: '/ trang' }" @show-size-change="onShowSizeChange" @change="updatePageSize" />
       </div>
     </div>
   </div>
 
   <!-- A drawer borrow book view -->
-  <a-drawer
-    title="Borrow book"
-    :width="720"
-    :visible="borrowVisible"
-    :body-style="{ paddingBottom: '80px' }"
-    @close="onClose"
-  >
+  <a-drawer title="Borrow book" :width="720" :visible="borrowVisible" :body-style="{ paddingBottom: '80px' }"
+    @close="onClose">
     <a-form :model="book" :rules="rules" layout="vertical">
       <a-row :gutter="16">
         <a-col :span="12">
@@ -133,13 +96,8 @@
       <a-row :gutter="16">
         <a-col :span="12">
           <a-form-item label="Quantity" name="quantity">
-            <a-input-number
-              id="inputNumber"
-              v-model:value="borrowBookData.quantity"
-              :min="1"
-              :max="book.quantityAvail"
-              :default="1"
-            >
+            <a-input-number id="inputNumber" v-model:value="borrowBookData.quantity" :min="1" :max="book.quantityAvail"
+              :default="1">
               <template #upIcon>
                 <ArrowUpOutlined />
               </template>
@@ -151,12 +109,8 @@
         </a-col>
         <a-col :span="12">
           <a-form-item label="Date Borrow" name="Date borrow">
-            <a-range-picker
-              v-model:value="dateRangeVal"
-              :format="dateFormat"
-              :default-value="dateRangeValDefault"
-              :disabled-date="disabledDate"
-            />
+            <a-range-picker v-model:value="dateRangeVal" :format="dateFormat" :default-value="dateRangeValDefault"
+              :disabled-date="disabledDate" />
           </a-form-item>
         </a-col>
       </a-row>
@@ -164,19 +118,17 @@
     <span class="text-error" v-if="errors.message">{{ errors.message }}</span>
     <span class="text-error" v-if="errors.data">{{ errors.data }}</span>
 
-    <div
-      :style="{
-        position: 'absolute',
-        right: 0,
-        bottom: 0,
-        width: '100%',
-        borderTop: '1px solid #e9e9e9',
-        padding: '10px 16px',
-        background: '#fff',
-        textAlign: 'right',
-        zIndex: 1,
-      }"
-    >
+    <div :style="{
+          position: 'absolute',
+          right: 0,
+          bottom: 0,
+          width: '100%',
+          borderTop: '1px solid #e9e9e9',
+          padding: '10px 16px',
+          background: '#fff',
+          textAlign: 'right',
+          zIndex: 1,
+        }">
       <a-button style="margin-right: 8px" @click="onClose">Cancel</a-button>
       <a-button type="primary" @click.prevent="borrowBook">Submit</a-button>
     </div>
@@ -198,22 +150,7 @@ import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 import moment from "moment";
 import SockJS from "sockjs-client";
-import Stomp from "webstomp-client";
-
-let connection = new WebSocket("ws://localhost:8081/ws");
-
-connection.onmessage = function (event) {
-  console.log(event)
-  let notification = JSON.parse(event.data);
-
-  this.notifications.push(notification);
-  console.log(this.notifications)
-};
-
-connection.onopen = function (event) {
-  console.log(event);
-  console.log("Successfully connected to the echo websocket server...");
-};
+import Stomp from "webstomp-client"
 
 export default {
   name: "HomeView",
@@ -285,7 +222,7 @@ export default {
       connection: null,
       messageWS: "",
       stompClient: "",
-      notifications: [],
+      messages: []
     };
   },
   computed: {
@@ -448,8 +385,6 @@ export default {
           });
 
           if (response.data.success == true) {
-            this.connection.send(JSON.stringify({ action: "borrow-book", bookId: this.borrowBookData.bookId }));
-
             setTimeout(() => {
               this.$router.push("/dashboard");
               this.onClose();
@@ -498,65 +433,45 @@ export default {
       let val = (value / 1).toFixed(2).replace(".", ",");
       return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
     },
-    // connect() {
-    //   this.socket = SockJS("http://localhost:8081/ws");
-    //   this.stompClient = Stomp.over(this.socket);
-    //   const wsUri =
-    //     (window.location.protocol === "https:" ? "wss://" : "ws://") +
-    //     window.location.host +
-    //     "/ws/websocket";
+    connect() {
+      const ws = new WebSocket("ws://localhost:8081/ws");
 
-    //   console.log(wsUri);
+      ws.onmessage = (event) => {
+        const receivedMessage = event.data;
+        this.updateMessages(receivedMessage);
+      };
 
-    //   const xsrf = this.getCookie("XSRF-TOKEN");
-    //   const connectionOption = {
-    //     brokerURL: wsUri,
-    //     connectHeaders: {
-    //       "X-XSRF-TOKEN": xsrf,
-    //     },
-    //     debug: function (str) {
-    //       console.log(str);
-    //     },
-    //     reconnectDelay: 10000,
-    //     heartbeatIncoming: 4000,
-    //     heartbeatOutgoing: 4000,
-    //   };
+      ws.onopen = () => {
+        console.log('WebSocket connection established');
+      };
 
-    //   console.log(this.stompClient, "connect");
-    //   this.stompClient.connect(
-    //     {
-    //       headers: {
-    //         Authorization: "Bearer " + localStorage.getItem("token"),
-    //       },
-    //     },
-    //     (frame) => {
-    //       this.connected = true;
-    //       console.log(frame, "frame ");
-    //       this.stompClient.subscribe("/topic/books", (tick) => {
-    //         console.log(tick);
-    //         this.received_messages.push(JSON.parse(tick.body).content);
-    //       });
-    //     },
-    //     (error) => {
-    //       console.log(error, "ERROR");
-    //       this.connected = false;
-    //     }
-    //   );
-    // },
-    // disconnect() {
-    //   if (this.stompClient) {
-    //     this.stompClient.disconnect();
-    //   }
-    //   this.connected = false;
-    // },
-    // tickleConnection() {
-    //   this.connected ? this.disconnect() : this.connect();
-    // },
-  },
-  created() {
-    
+      ws.onclose = () => {
+        console.log('WebSocket connection closed');
+      };
+
+      ws.onerror = (error) => {
+        console.error('WebSocket error:', error);
+      };
+    },
+    loadMessagesFromLocalStorage() {
+      const messages = localStorage.getItem('notifications');
+      this.messages = messages ? JSON.parse(messages) : [];
+    },
+    saveMessagesToLocalStorage() {
+      localStorage.setItem('notifications', JSON.stringify(this.messages));
+    },
+    updateMessages(newMessage) {
+      this.messages.push(newMessage);
+      // Ensure only the 5 newest messages are kept
+      if (this.messages.length > 5) {
+        this.messages = this.messages.slice(-5);
+      }
+      this.saveMessagesToLocalStorage();
+    },
   },
   mounted() {
+    this.connect();
+    this.loadMessagesFromLocalStorage();
     this.getBooksList();
     this.generateYearList();
   },
@@ -571,7 +486,7 @@ export default {
   margin-bottom: 16px;
 }
 
-.card-list > * {
+.card-list>* {
   flex: 0 0 calc(15% - 100px);
 }
 
@@ -586,11 +501,13 @@ export default {
 .mb-3.me-3.button-css-search {
   margin-top: 30px;
 }
+
 span.text-error {
   font-size: small;
   color: red;
   margin-left: 15px;
 }
+
 .mb-3.me-3.button-css.d-flex.justify-content-end {
   margin-top: 29px;
   margin-left: 200px;
