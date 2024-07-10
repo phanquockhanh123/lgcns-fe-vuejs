@@ -49,7 +49,7 @@
       <span class="text-error" v-if="errors.search">{{ errors.search }}</span>
       <div class="col-12">
         <a-table
-          :dataSource="sortedBooks"
+          :dataSource="listBooks"
           :loading="loading"
           :pagination="false"
           :columns="columns"
@@ -415,6 +415,12 @@ export default {
         dataParams.yearTo = this.search.yearTo;
       }
 
+      if (this.sortOrder != "" && this.sortField != null) {
+        this.sortOrder = this.sortOrder == "ascend" ? "ASC" : "DESC";
+        dataParams.sortOrder = this.sortOrder;
+        dataParams.sortField = this.sortField.trim();
+      }
+
       if (this.search.yearTo < this.search.yearFrom) {
         this.errors.search = "Year from less than year to";
       }
@@ -424,6 +430,8 @@ export default {
         dataParams.yearTo = "";
         dataParams.title = "";
         dataParams.author = "";
+        dataParams.sortField = "";
+        dataParams.sortOrder = "";
       }
       try {
         const response = await axiosInterceptor.get(
@@ -439,8 +447,6 @@ export default {
           response.data.data.pagination.total_record;
         this.pageInfo.totalPages = response.data.data.pagination.total_page;
 
-        // sorted
-        this.sortedBooks = [...this.listBooks];
       } catch (error) {
         console.error(error);
       } finally {
@@ -453,40 +459,14 @@ export default {
     onChange(pagination, filters, sorter) {
       this.sortOrder = sorter.order;
       this.sortField = sorter.field;
-
-      if (this.sortOrder && this.sortField) {
-        this.sortedBooks = [...this.listBooks].sort((a, b) => {
-          const fieldA = a[this.sortField];
-          const fieldB = b[this.sortField];
-
-          if (this.sortOrder === "ascend") {
-            return fieldA > fieldB ? 1 : -1;
-          } else {
-            return fieldA < fieldB ? 1 : -1;
-          }
-        });
-      } else {
-        this.sortedBooks = [...this.listBooks];
-      }
+      console.log(this.sortOrder, this.sortField);
+      this.getBooksList();
     },
     onChangeReport(pagination, filters, sorter) {
       this.sortOrder = sorter.order;
       this.sortField = sorter.field;
 
-      if (this.sortOrder && this.sortField) {
-        this.sortedUsers = [...this.listUsers].sort((a, b) => {
-          const fieldA = a[this.sortField];
-          const fieldB = b[this.sortField];
-
-          if (this.sortOrder === "ascend") {
-            return fieldA > fieldB ? 1 : -1;
-          } else {
-            return fieldA < fieldB ? 1 : -1;
-          }
-        });
-      } else {
-        this.sortedUsers = [...this.listUsers];
-      }
+      this.getUsersList();
     },
     async getUsersList(pageIndex) {
       this.loadingReport = true;
@@ -499,6 +479,12 @@ export default {
 
       if (this.search.email != null && this.search.email != "") {
         dataParams.email = this.search.email;
+      }
+
+      if (this.sortOrder != "" && this.sortField != null) {
+        this.sortOrder = this.sortOrder == "ascend" ? "ASC" : "DESC";
+        dataParams.sortOrder = this.sortOrder;
+        dataParams.sortField = this.sortField.trim();
       }
 
       try {

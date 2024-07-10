@@ -6,18 +6,15 @@
         <label for="userName" class="form-label">User name</label>
         <a-select
           v-model:value="search.userId"
-          placeholder="Select a username"
-          class="w-full d-flex"
-          :allowClear="true"
-        >
-          <a-select-option
-            v-for="user in listUsers"
-            :key="user.id"
-            :value="user.id"
-          >
-            {{ user.firstName }} {{ user.lastName }}
-          </a-select-option>
-        </a-select>
+          show-search
+          placeholder="Select a users"
+          style="width: 150px"
+          :options="listUsers"
+          :filter-option="filterOption"
+          @focus="handleFocus"
+          @blur="handleBlur"
+          @change="handleChange"
+        ></a-select>
       </div>
       <div class="mb-3 me-3">
         <label for="Status" class="form-label">Status</label>
@@ -558,7 +555,11 @@ export default {
         const response = await axiosInterceptor.get("/admin/users/search", {
           params: dataParams,
         });
-        this.listUsers = response.data.data.data;
+        let rs = response.data.data.data;
+         this.listUsers = rs.map((item) => ({
+              value: item.id,
+              label: item.firstName + " " + item.lastName,
+            }));
       } catch (error) {
         console.error(error);
       } finally {
@@ -566,6 +567,18 @@ export default {
           this.loading = false;
         });
       }
+    },
+    handleBlur() {
+      console.log('blur');
+    },
+    handleFocus() {
+      console.log('focus');
+    },
+    handleChange(value) {
+      console.log(value);
+    },
+    filterOption(input, option) {
+      return option.label.toLowerCase().indexOf(input.toLowerCase()) >= 0;
     },
   },
 };
