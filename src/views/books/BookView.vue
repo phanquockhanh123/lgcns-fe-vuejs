@@ -78,8 +78,12 @@
           <template #bodyCell="{ column, index, record }">
             <template v-if="column.key === 'cateNames'">
               <span>
+                <a-tag :color="getRandomColor()">{{convertToArray(record.cateNames)[0]}}</a-tag>
+                <a-tag :color="getRandomColor()" v-if="convertToArray(record.cateNames).length > 1"  @click="displayCates(record.id)">{{ convertToArray(record.cateNames).length - 1 }} ++</a-tag>
+              </span>
+              <span v-if="visibleCates[record.id]">
                 <a-tag
-                  v-for="cateName in convertToArray(record.cateNames)"
+                  v-for="cateName in convertToArray(record.cateNames).splice(1,2)"
                   :key="cateName"
                   :color="getRandomColor()"
                 >
@@ -139,7 +143,6 @@
           @change="updatePageSize"
         />
       </div>
-      
     </div>
   </a-card>
 
@@ -392,12 +395,14 @@ export default {
       selectedRowKeys: [],
       selectedYear: null,
       years: [],
+      display: [],
       search: {
         title: "",
         author: "",
         yearFrom: "",
         yearTo: "",
       },
+      visibleCates: {},
       book: {
         price: "",
         author: "",
@@ -449,7 +454,11 @@ export default {
           dataIndex: "cateNames",
           key: "cateNames",
         },
-        ,
+        {
+          title: "Year",
+          dataIndex: "yearOfPublish",
+          key: "yearOfPublish",
+        },
         {
           title: "Author",
           dataIndex: "author",
@@ -546,6 +555,12 @@ export default {
     this.generateYearList();
   },
   methods: {
+    displayCates(id) {
+      this.visibleCates = {
+        ...this.visibleCates,
+        [id]: !this.visibleCates[id]
+      };
+    },
     convertToArray(data) {
       return data == null ? "" : data.split(",").map((name) => name.trim());
     },
@@ -687,16 +702,18 @@ export default {
         dataParams.author = this.search.author.trim();
       }
 
-      if (this.search.yearFrom != "" && this.search.yearFrom != null) {
+      if (this.search.yearFrom && this.search.yearTo) {
         dataParams.yearFrom = this.search.yearFrom;
-      }
-
-      if (this.search.yearTo != "" && this.search.yearTo != null) {
         dataParams.yearTo = this.search.yearTo;
-      }
-
-      if (this.search.yearTo < this.search.yearFrom) {
-        this.errors.search = "Year from less than year to";
+        if (this.search.yearTo < this.search.yearFrom) {
+          this.errors.search = "Year from less than year to";
+        }
+      } else if (this.search.yearFrom) {
+        this.errors.search =
+          "Year to cannot be empty or null when year from is provided";
+      } else if (this.search.yearTo) {
+        this.errors.search =
+          "Year from cannot be empty or null when year to is provided";
       }
 
       if (this.errors.search != "") {
