@@ -50,77 +50,144 @@
     </div>
   </div>
 </template>
-<script>
+<script lang="ts" setup>
 import axios from "axios";
 import axiosInterceptor from "../../service/AxiosInteceptorToken";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
+import { reactive } from "vue";
+import { useRouter, useRoute } from "vue-router";
 
-export default {
-  name: "FormLogin",
-  data() {
-    return {
-      form: {
-        email: "",
-        password: "",
-      },
-      errors: {
-        email: "",
-        password: "",
-      },
-    };
-  },
-  methods: {
-    async signIn() {
-      try {
-        const res = await axiosInterceptor.post("/auth/login", {
-          email: this.form.email,
-          password: this.form.password,
-        });
+const router = useRouter();
 
-        if (res.data.statusCode == 200) {
-          // Handle successful login
-          console.log("Login successful:", res.data);
+const form = reactive({
+  email: "",
+  password: "",
+});
 
-          toast.success("Login success!", {
-            autoClose: 1000,
-          });
-          // Store the token
-          localStorage.setItem("token", res.data.token);
-          localStorage.setItem("profile", JSON.stringify(res.data.users));
-          setTimeout(() => {
-            this.$router.push("/");
-          }, 2000); // Redirect to /
-        } else {
-          alert("Login failed!!");
-        }
-      } catch (error) {
-        this.error = "Invalid email or password.";
-        console.error("An error occurred:", error);
-      }
-    },
-    validateField(field) {
-      if (field === "password") {
-        if (!this.form.password) {
-          this.errors.password = "Password is required";
-        } else if (this.form.password.length < 3) {
-          this.errors.password = "Password must be at least 3 characters";
-        } else {
-          this.errors.password = "";
-        }
-      } else if (field === "email") {
-        const emailPattern = /^[^\s@]+@gmail\.com$/;
-        if (!this.form.email) {
-          this.errors.email = "Email is required";
-        } else if (!emailPattern.test(this.form.email)) {
-          this.errors.email = "Email is not valid";
-        } else {
-          this.errors.email = "";
-        }
-      }
-    },
-  },
+const errors = reactive({
+  email: "",
+  password: "",
+});
+
+const validateField = (field) => {
+  if (field === "password") {
+    if (!form.password) {
+      errors.password = "Password is required";
+    } else if (form.password.length < 3) {
+      errors.password = "Password must be at least 3 characters";
+    } else {
+      errors.password = "";
+    }
+  } else if (field === "email") {
+    const emailPattern = /^[^\s@]+@gmail\.com$/;
+    if (!form.email) {
+      errors.email = "Email is required";
+    } else if (!emailPattern.test(form.email)) {
+      errors.email = "Email is not valid";
+    } else {
+      errors.email = "";
+    }
+  }
 };
+
+const signIn = async () => {
+  try {
+    const res = await axiosInterceptor.post("/auth/login", {
+      email: form.email,
+      password: form.password,
+    });
+
+    if (res.data.statusCode == 200) {
+      // Handle successful login
+      console.log("Login successful:", res.data);
+
+      // notice when login success
+      toast.success("Login success!", {
+        autoClose: 1000,
+      });
+
+      // Store the token, profile
+      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("profile", JSON.stringify(res.data.users));
+
+      // router redirect to dashboard
+      setTimeout(() => {
+        router.push("/");
+      }, 2000); // Redirect to /
+    } else {
+      alert("Login failed!!");
+    }
+  } catch (error) {
+    error = "Invalid email or password.";
+    console.error("An error occurred:", error);
+  }
+};
+// export default {
+//   name: "FormLogin",
+//   data() {
+//     return {
+//       form: {
+//         email: "",
+//         password: "",
+//       },
+//       errors: {
+//         email: "",
+//         password: "",
+//       },
+//     };
+//   },
+//   methods: {
+//     async signIn() {
+//       try {
+//         const res = await axiosInterceptor.post("/auth/login", {
+//           email: this.form.email,
+//           password: this.form.password,
+//         });
+
+//         if (res.data.statusCode == 200) {
+//           // Handle successful login
+//           console.log("Login successful:", res.data);
+
+//           toast.success("Login success!", {
+//             autoClose: 1000,
+//           });
+//           // Store the token
+//           localStorage.setItem("token", res.data.token);
+//           localStorage.setItem("profile", JSON.stringify(res.data.users));
+//           setTimeout(() => {
+//             this.$router.push("/");
+//           }, 2000); // Redirect to /
+//         } else {
+//           alert("Login failed!!");
+//         }
+//       } catch (error) {
+//         this.error = "Invalid email or password.";
+//         console.error("An error occurred:", error);
+//       }
+//     },
+//     validateField(field) {
+//       if (field === "password") {
+//         if (!this.form.password) {
+//           this.errors.password = "Password is required";
+//         } else if (this.form.password.length < 3) {
+//           this.errors.password = "Password must be at least 3 characters";
+//         } else {
+//           this.errors.password = "";
+//         }
+//       } else if (field === "email") {
+//         const emailPattern = /^[^\s@]+@gmail\.com$/;
+//         if (!this.form.email) {
+//           this.errors.email = "Email is required";
+//         } else if (!emailPattern.test(this.form.email)) {
+//           this.errors.email = "Email is not valid";
+//         } else {
+//           this.errors.email = "";
+//         }
+//       }
+//     },
+//   },
+// };
 </script>
 
 <style scoped>

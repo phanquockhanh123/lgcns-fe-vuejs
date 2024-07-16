@@ -28,8 +28,13 @@
     "webstomp-client": "^1.2.6"
   },
   "devDependencies": {
+    "@types/jsdom": "^21.1.7",
+    "@types/node": "^20.14.10",
     "@vitejs/plugin-vue": "^5.0.4",
+    "@vue/eslint-config-typescript": "^13.0.0",
+    "@vue/tsconfig": "^0.5.1",
     "sass": "^1.77.4",
+    "typescript": "^5.5.3",
     "vite": "^5.2.8"
   }
 }

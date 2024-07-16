@@ -94,116 +94,109 @@
     </div>
   </div>
 </template>
-<script>
-import axiosInterceptor from "../../service/AxiosInteceptorToken";
+<script lang="ts" setup>
+import axiosInterceptor from "@/service/AxiosInteceptorToken";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
+import { defineComponent, reactive } from "vue";
+import { useRouter, useRoute } from "vue-router";
 
-export default {
-  name: "FormRegister",
-  data() {
-    return {
-      user: {
-        firstName: "",
-        lastName: "",
-        email: "",
-        confirmPassword: "",
-        password: "",
-      },
-      errors: {
-        firstName: "",
-        lastName: "",
-        email: "",
-        confirmPassword: "",
-        password: "",
-        rsapi: "",
-      },
-    };
-  },
-  methods: {
-    async register() {
-      let dataRegister = {
-        firstName: this.user.firstName,
-        lastName: this.user.lastName,
-        email: this.user.email,
-        password: this.user.password,
-        role: "USER",
-      };
-      const hasErrors = Object.values(this.errors).some(
+const router = useRouter();
+
+const user = reactive({
+  firstName: "",
+  lastName: "",
+  email: "",
+  confirmPassword: "",
+  password: "",
+  address: "",
+});
+
+const errors = reactive({
+  firstName: "",
+  lastName: "",
+  email: "",
+  confirmPassword: "",
+  password: "",
+  rsapi: "",
+  address: "",
+});
+
+const hasErrors = () => {
+  return Object.values(errors).some((error) => error !== "");
+};
+
+
+const register = async () => {
+  const dataRegister = {
+    firstName: user.firstName,
+    lastName: user.lastName,
+    email: user.email,
+    password: user.password,
+    role: "USER",
+  };
+
+  const hasErrors = Object.values(errors).some(
         (error) => error !== ""
       );
 
-      if (!hasErrors) {
-        await axiosInterceptor
-          .post("/auth/signup", dataRegister)
-          .then((res) => {
-            if (res.data.statusCode == 200) {
-              toast.success("Register success!", {
-                autoClose: 1000,
-              });
+  if (!hasErrors) {
+    try {
+      const res = await axiosInterceptor.post("/auth/signup", dataRegister);
+      if (res.data.statusCode === 200) {
+        toast.success("Register success!", {
+          autoClose: 1000,
+        });
+        console.log("Register successful:", res.data);
+        setTimeout(() => {
+          router.push("/login");
+        }, 2000);
+      } else {
+        alert("Register failed!");
+      }
+    } catch (e: any) {
+      console.log(e);
+      errors.rsapi = e.error;
+    }
+  }
+};
 
-              console.log("Register successful:", res.data);
-              setTimeout(() => {
-                this.$router.push("/login");
-              }, 2000); // Redirect to /users
-            } else {
-              alert("Register failed!");
-            }
-          })
-          .catch((e) => {
-            console.log(e);
-            this.errors.rsapi = e.error;
-          });
-      }
-    },
-    validateField(field) {
-      if (field === "password") {
-        if (!this.user.password) {
-          this.errors.password = "Password is required";
-        } else if (this.user.password.length < 3) {
-          this.errors.password = "Password must be at least 3 characters";
-        } else {
-          this.errors.password = "";
-        }
-      } else if (field === "confirmPassword") {
-        if (!this.user.confirmPassword) {
-          this.errors.confirmPassword = "Confirm Password is required";
-        } else if (this.user.password !== this.user.confirmPassword) {
-          this.errors.confirmPassword =
-            "Password and Confirm Password must match";
-        } else {
-          this.errors.confirmPassword = "";
-        }
-      } else if (field === "email") {
-        const emailPattern = /^[^\s@]+@gmail\.com$/;
-        if (!this.user.email) {
-          this.errors.email = "Email is required";
-        } else if (!emailPattern.test(this.user.email)) {
-          this.errors.email = "Email is not valid";
-        } else {
-          this.errors.email = "";
-        }
-      } else if (field === "firstName") {
-        if (!this.user.firstName) {
-          this.errors.firstName = "First name is required";
-        } else {
-          this.errors.firstName = "";
-        }
-      } else if (field === "lastName") {
-        if (!this.user.lastName) {
-          this.errors.lastName = "Last name is required";
-        } else {
-          this.errors.lastName = "";
-        }
-      } else if (field === "address") {
-        if (!this.user.address) {
-          this.errors.address = "Address is required";
-        } else {
-          this.errors.address = "";
-        }
-      }
-    },
-  },
+const validateField = (field) => {
+  switch (field) {
+    case "password":
+      errors.password = user.password
+        ? user.password.length < 3
+          ? "Password must be at least 3 characters"
+          : ""
+        : "Password is required";
+      break;
+    case "confirmPassword":
+      errors.confirmPassword = user.confirmPassword
+        ? user.password !== user.confirmPassword
+          ? "Password and Confirm Password must match"
+          : ""
+        : "Confirm Password is required";
+      break;
+    case "email":
+      const emailPattern = /^[^\s@]+@gmail\.com$/;
+      errors.email = user.email
+        ? !emailPattern.test(user.email)
+          ? "Email is not valid"
+          : ""
+        : "Email is required";
+      break;
+    case "firstName":
+      errors.firstName = user.firstName ? "" : "First name is required";
+      break;
+    case "lastName":
+      errors.lastName = user.lastName ? "" : "Last name is required";
+      break;
+    case "address":
+      errors.address = user.address ? "" : "Address is required";
+      break;
+    default:
+      break;
+  }
 };
 </script>
 
