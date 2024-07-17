@@ -559,7 +559,7 @@ export default {
       this.visibleCates = {
         ...this.visibleCates,
         [id]: !this.visibleCates[id]
-      };
+      }; 
     },
     convertToArray(data) {
       return data == null ? "" : data.split(",").map((name) => name.trim());

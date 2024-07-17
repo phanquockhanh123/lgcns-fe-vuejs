@@ -64,7 +64,6 @@
     :visible="visible"
     :body-style="{ paddingBottom: '80px' }"
     @close="onClose"
-
   >
     <a-form :model="category" :rules="rules" layout="vertical">
       <a-row :gutter="16">
@@ -209,7 +208,6 @@ const createCategory = async () => {
   isSubmitting.value = true;
 
   if (id.value !== 0) {
-
     try {
       const response = await axiosInterceptor.put(
         `/admin/categories/${id.value}`,
@@ -237,7 +235,6 @@ const createCategory = async () => {
       }, 2000);
     }
   } else {
-
     try {
       const response = await axiosInterceptor.post(
         "/admin/categories",
@@ -266,22 +263,22 @@ const createCategory = async () => {
   }
 };
 
-const getCategory = (id: number) => {
+const getCategory = (id: any) => {
   if (id !== "") {
     axiosInterceptor
       .get(`/admin/categories/${id}`)
-      .then((response) => {
+      .then((response: any) => {
         console.log(response.data);
         category.value.name = response.data.data.name;
         category.value.description = response.data.data.description;
       })
-      .catch((e) => {
+      .catch((e: any) => {
         console.log(e);
       });
   }
 };
 
-const showDrawer = (cateId: number) => {
+const showDrawer = (cateId: any) => {
   visible.value = true;
 
   if (cateId !== "" && !isNaN(cateId)) {
